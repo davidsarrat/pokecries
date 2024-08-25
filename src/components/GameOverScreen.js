@@ -66,6 +66,12 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
       <button className="play-again-button" onClick={onPlayAgain}>
         Back to Main Menu
       </button>
+
+      <footer className="game-over-footer">
+        <a href="https://davidsarratgonzalez.github.io" target="_blank" rel="noopener noreferrer">
+          Made with ❤️ by <strong>David Sarrat González</strong>
+        </a>
+      </footer>
     </div>
   );
 }

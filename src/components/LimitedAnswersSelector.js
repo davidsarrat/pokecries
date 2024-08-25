@@ -11,7 +11,7 @@ function LimitedAnswersSelector({ limitedAnswers, setLimitedAnswers, numberOfAns
           checked={limitedAnswers}
           onChange={(e) => setLimitedAnswers(e.target.checked)}
         />
-        <label htmlFor="limitedAnswers">Limited Answers</label>
+        <label htmlFor="limitedAnswers">Limited answers</label>
       </div>
       {limitedAnswers && (
         <div className="number-of-answers">

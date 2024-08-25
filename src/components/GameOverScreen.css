@@ -169,3 +169,18 @@
     padding: 0.7rem 1.4rem;
   }
 }
+
+.game-over-footer {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.game-over-footer a {
+  color: #4a4a4a;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.game-over-footer a:hover {
+  text-decoration: underline;
+}

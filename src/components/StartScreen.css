@@ -83,3 +83,18 @@
     font-size: 2.5rem;
   }
 }
+
+.start-screen-footer {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.start-screen-footer a {
+  color: #4a4a4a;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.start-screen-footer a:hover {
+  text-decoration: underline;
+}

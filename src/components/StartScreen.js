@@ -91,6 +91,12 @@ function StartScreen() {
         Start Game
       </button>
       {error && <p className="error-message">{error}</p>}
+
+      <footer className="start-screen-footer">
+        <a href="https://davidsarratgonzalez.github.io" target="_blank" rel="noopener noreferrer">
+          Made with ❤️ by <strong>David Sarrat González</strong>
+        </a>
+      </footer>
     </div>
   );
 }
