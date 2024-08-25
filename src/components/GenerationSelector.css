@@ -7,36 +7,95 @@
 
 .btn-group-vertical {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 1rem;
   width: 100%;
 }
 
+/* Nuevo estilo para centrar el último botón si está solo */
+.btn-group-vertical::after {
+  content: '';
+  grid-column: 1 / -1;
+}
+
+.btn-group-vertical .btn:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: calc(50% - 0.5rem);
+}
+
 .btn-group-vertical .btn {
   border-radius: 15px !important;
-  padding: 0.8rem;
-  font-size: 1rem;
+  padding: 0.8rem 0.8rem 0.8rem 4rem;
+  font-size: 0.6rem;
   font-weight: 500;
   transition: all 0.3s ease;
   background-color: rgba(255, 255, 255, 0.7);
   border: 2px solid #e0e0e0;
   color: #4a4a4a;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  position: relative;
+  font-family: 'Press Start 2P', cursive;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.btn-group-vertical .btn:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-  transform: translateY(-2px);
-  box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+.btn-group-vertical .btn .gen-icon {
+  width: auto;
+  height: 32px;
+  max-width: 48px;
+  position: absolute;
+  left: 0.8rem;
+}
+
+.btn-group-vertical .btn span {
+  flex-grow: 1;
+  padding-right: 0.5rem;
 }
 
 .btn-group-vertical .btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: transparent;
   color: white;
+  border-color: transparent;
 }
 
+/* Nuevos gradientes basados en los Pokémon icónicos */
+.btn-group-vertical .btn:nth-child(1).active {
+  background: linear-gradient(135deg, #FFF000 0%, #FFD700 100%); /* Amarillo para Pikachu */
+}
+
+.btn-group-vertical .btn:nth-child(2).active {
+  background: linear-gradient(135deg, #FF0000 0%, #8B0000 100%); /* Rojo para Ho-Oh */
+}
+
+.btn-group-vertical .btn:nth-child(3).active {
+  background: linear-gradient(135deg, #00FF00 0%, #008000 100%); /* Verde para Rayquaza */
+}
+
+.btn-group-vertical .btn:nth-child(4).active {
+  background: linear-gradient(135deg, #1E90FF 0%, #000080 100%); /* Azul para Lucario */
+}
+
+.btn-group-vertical .btn:nth-child(5).active {
+  background: linear-gradient(135deg, #808080 0%, #000000 100%); /* Negro/Gris para Zoroark */
+}
+
+/* Estilos para dispositivos no táctiles (generalmente, escritorio) */
+@media (hover: hover) and (pointer: fine) {
+  .btn-group-vertical .btn:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* Estilos para dispositivos táctiles (generalmente, móviles) */
 @media (hover: none) and (pointer: coarse) {
-  .btn-group-vertical .btn:active {
-    transform: scale(0.98);
+  .btn-group-vertical .btn:active:not(.active) {
+    background-color: rgba(255, 255, 255, 0.9);
   }
 }
