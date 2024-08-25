@@ -25,7 +25,8 @@
   margin-top: 0;
   font-size: 0.8rem;
   text-align: center;
-  color: inherit;
+  color: #333; /* Color de texto fijo */
+  font-weight: bold; /* Hacemos el texto más grueso para mejorar la legibilidad */
 }
 
 .pokemon-card.correct {
@@ -38,12 +39,12 @@
 
 @keyframes correctFeedback {
   0%, 100% { background-color: #f0f0f0; }
-  50% { background-color: #4CAF50; }
+  50% { background-color: #4CAF50; } /* Verde intenso */
 }
 
 @keyframes incorrectFeedback {
   0%, 100% { background-color: #f0f0f0; }
-  50% { background-color: #f44336; }
+  50% { background-color: #f44336; } /* Rojo intenso */
 }
 
 @media (max-width: 576px) {

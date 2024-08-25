@@ -8,6 +8,10 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch }
   useImperativeHandle(ref, () => ({
     focusSearchInput: () => {
       searchInputRef.current.focus();
+    },
+    resetSearch: () => {
+      setSearchTerm('');
+      onSearch('');
     }
   }));
 

@@ -47,12 +47,20 @@ function GameScreen({ selectedGenerations }) {
     }
   };
 
+  const resetSearch = () => {
+    if (navbarRef.current) {
+      navbarRef.current.resetSearch();
+    }
+    setFilteredPokemonList(pokemonList);
+  };
+
   const handlePokemonClick = (clickedPokemon) => {
     setSelectedPokemon(clickedPokemon);
     if (clickedPokemon.id === currentPokemon.id) {
       setCorrectCount(correctCount + 1);
       setTimeout(() => {
         alert('Correct!');
+        resetSearch();
         setRandomPokemon(pokemonList);
         setSelectedPokemon(null);
       }, 1000);
@@ -60,6 +68,7 @@ function GameScreen({ selectedGenerations }) {
       setIncorrectCount(incorrectCount + 1);
       setTimeout(() => {
         alert('Incorrect. Try again!');
+        resetSearch();
         setRandomPokemon(pokemonList);
         setSelectedPokemon(null);
       }, 1000);
