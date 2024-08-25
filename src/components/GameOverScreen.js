@@ -35,7 +35,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
         )}
       </div>
       
-      {failedPokemon.length > 0 && (
+      {failedPokemon.length > 0 ? (
         <>
           <h2 className="failed-pokemon-title">Pokémon you missed:</h2>
           <div className="failed-pokemon-grid">
@@ -48,6 +48,10 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
             ))}
           </div>
         </>
+      ) : (
+        selectedGameMode === 'pokedex_completer' && (
+          <h2 className="congratulations-title">Congratulations! You are a true Pokémon Master!</h2>
+        )
       )}
       
       <button className="play-again-button" onClick={onPlayAgain}>
