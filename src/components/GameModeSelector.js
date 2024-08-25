@@ -7,27 +7,17 @@ const gameModes = [
   { name: 'Time Attack!', key: 'time_attack' }
 ];
 
-function GameModeSelector({ selectedGameMode, setSelectedGameMode, setTimeAttackSettings }) {
-  const [minutes, setMinutes] = useState(2);
-  const [seconds, setSeconds] = useState(0);
-  const [gainTime, setGainTime] = useState(0);
-  const [loseTime, setLoseTime] = useState(0);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (selectedGameMode === 'time_attack') {
-      setTimeAttackSettings({ minutes, seconds, gainTime, loseTime });
-    }
-  }, [selectedGameMode, minutes, seconds, gainTime, loseTime, setTimeAttackSettings]);
-
+function GameModeSelector({ selectedGameMode, setSelectedGameMode, timeAttackSettings, setTimeAttackSettings }) {
   const handleModeChange = (e) => {
     setSelectedGameMode(e.target.value);
-    setError('');
   };
 
-  const handleInputChange = (setter) => (e) => {
-    const value = Math.max(0, parseInt(e.target.value) || 0);
-    setter(value);
+  const handleTimeAttackSettingsChange = (e) => {
+    const { name, value } = e.target;
+    setTimeAttackSettings(prevSettings => ({
+      ...prevSettings,
+      [name]: parseInt(value, 10)
+    }));
   };
 
   return (
@@ -50,15 +40,17 @@ function GameModeSelector({ selectedGameMode, setSelectedGameMode, setTimeAttack
             <div className="time-inputs">
               <input 
                 type="number" 
-                value={minutes} 
-                onChange={handleInputChange(setMinutes)} 
+                value={timeAttackSettings.minutes} 
+                onChange={handleTimeAttackSettingsChange} 
+                name="minutes"
                 min="0" 
               />
               <span>min</span>
               <input 
                 type="number" 
-                value={seconds} 
-                onChange={handleInputChange(setSeconds)} 
+                value={timeAttackSettings.seconds} 
+                onChange={handleTimeAttackSettingsChange} 
+                name="seconds"
                 min="0" 
                 max="59" 
               />
@@ -70,11 +62,12 @@ function GameModeSelector({ selectedGameMode, setSelectedGameMode, setTimeAttack
             <div className="time-inputs">
               <input 
                 type="number" 
-                value={gainTime} 
-                onChange={handleInputChange(setGainTime)} 
+                value={timeAttackSettings.gainTime} 
+                onChange={handleTimeAttackSettingsChange} 
+                name="gainTime"
                 min="0" 
               />
-              <span>sec</span>
+              <span>ms</span>
             </div>
           </div>
           <div className="time-setting">
@@ -82,14 +75,14 @@ function GameModeSelector({ selectedGameMode, setSelectedGameMode, setTimeAttack
             <div className="time-inputs">
               <input 
                 type="number" 
-                value={loseTime} 
-                onChange={handleInputChange(setLoseTime)} 
+                value={timeAttackSettings.loseTime} 
+                onChange={handleTimeAttackSettingsChange} 
+                name="loseTime"
                 min="0" 
               />
-              <span>sec</span>
+              <span>ms</span>
             </div>
           </div>
-          {error && <p className="error-message">{error}</p>}
         </div>
       )}
     </div>

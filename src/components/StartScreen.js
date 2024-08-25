@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './StartScreen.css';
 import GenerationSelector from './GenerationSelector';
 import GameModeSelector from './GameModeSelector';
@@ -43,20 +43,24 @@ function StartScreen() {
 
   const handleExitGame = () => {
     setGameStarted(false);
-    setSelectedGenerations(['gen1']);
-    setSelectedGameMode('freestyle');
   };
 
   if (gameStarted) {
     return (
       <GameScreen 
         selectedGenerations={selectedGenerations} 
+        setSelectedGenerations={setSelectedGenerations}
         selectedGameMode={selectedGameMode} 
+        setSelectedGameMode={setSelectedGameMode}
         onExit={handleExitGame}
         timeAttackSettings={timeAttackSettings}
+        setTimeAttackSettings={setTimeAttackSettings}
         limitedAnswers={limitedAnswers}
+        setLimitedAnswers={setLimitedAnswers}
         numberOfAnswers={numberOfAnswers}
+        setNumberOfAnswers={setNumberOfAnswers}
         keepCryOnError={keepCryOnError}
+        setKeepCryOnError={setKeepCryOnError}
       />
     );
   }
@@ -73,6 +77,7 @@ function StartScreen() {
         selectedGameMode={selectedGameMode}
         setSelectedGameMode={setSelectedGameMode}
         setTimeAttackSettings={setTimeAttackSettings}
+        timeAttackSettings={timeAttackSettings}
       />
       <LimitedAnswersSelector
         limitedAnswers={limitedAnswers}

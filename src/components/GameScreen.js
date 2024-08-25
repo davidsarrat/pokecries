@@ -7,7 +7,21 @@ import 'react-toastify/dist/ReactToastify.css';
 import './GameScreen.css';
 import pokemonData from '../data/pokemon.json';
 
-function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackSettings, limitedAnswers, numberOfAnswers, keepCryOnError }) {
+function GameScreen({ 
+  selectedGenerations, 
+  setSelectedGenerations,
+  selectedGameMode, 
+  setSelectedGameMode,
+  onExit, 
+  timeAttackSettings, 
+  setTimeAttackSettings,
+  limitedAnswers, 
+  setLimitedAnswers,
+  numberOfAnswers, 
+  setNumberOfAnswers,
+  keepCryOnError,
+  setKeepCryOnError
+}) {
   const [pokemonList, setPokemonList] = useState([]);
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
   const [currentPokemon, setCurrentPokemon] = useState(null);
@@ -240,10 +254,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
   }, []);
 
   const handleExitClick = () => {
-    if (window.confirm("Are you sure you want to exit the game?")) {
-      setVisiblePokemon(pokemonList);
-      onExit();
-    }
+    onExit();
   };
 
   const formatTime = (time) => {

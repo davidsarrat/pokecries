@@ -2,6 +2,14 @@ import React from 'react';
 import './LimitedAnswersSelector.css';
 
 function LimitedAnswersSelector({ limitedAnswers, setLimitedAnswers, numberOfAnswers, setNumberOfAnswers }) {
+  const handleLimitedAnswersChange = (e) => {
+    setLimitedAnswers(e.target.checked);
+  };
+
+  const handleNumberOfAnswersChange = (e) => {
+    setNumberOfAnswers(parseInt(e.target.value, 10));
+  };
+
   return (
     <div className="limited-answers-selector">
       <div className="limited-answers-checkbox">
@@ -9,19 +17,19 @@ function LimitedAnswersSelector({ limitedAnswers, setLimitedAnswers, numberOfAns
           type="checkbox"
           id="limitedAnswers"
           checked={limitedAnswers}
-          onChange={(e) => setLimitedAnswers(e.target.checked)}
+          onChange={handleLimitedAnswersChange}
         />
-        <label htmlFor="limitedAnswers">Limited answers</label>
+        <label htmlFor="limitedAnswers">Limited Answers</label>
       </div>
       {limitedAnswers && (
         <div className="number-of-answers">
-          <label htmlFor="numberOfAnswers">Number of answers:</label>
+          <label htmlFor="numberOfAnswers">Number of Answers:</label>
           <input
             type="number"
             id="numberOfAnswers"
             value={numberOfAnswers}
-            onChange={(e) => setNumberOfAnswers(Math.max(2, parseInt(e.target.value) || 2))}
-            min="2"
+            onChange={handleNumberOfAnswersChange}
+            min="0"
           />
         </div>
       )}
