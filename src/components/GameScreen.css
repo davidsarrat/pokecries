@@ -202,9 +202,10 @@
   }
 
   .custom-toast {
-    min-height: 40px !important;
-    padding: 8px 12px !important;
+    min-height: 30px !important;
+    padding: 6px 12px !important;
     border-radius: 0 !important;
+    margin-bottom: 0 !important;
   }
 
   .custom-toast .Toastify__toast-body {
@@ -215,6 +216,10 @@
 
   .custom-toast .Toastify__toast-body > div:last-child {
     flex: 1 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .custom-toast .Toastify__toast-body p {
     margin-bottom: 0 !important;
   }
 
