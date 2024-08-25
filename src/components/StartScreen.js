@@ -7,7 +7,7 @@ import GameOptionsSelector from './GameOptionsSelector';
 import GameScreen from './GameScreen';
 
 function StartScreen() {
-  const [selectedGenerations, setSelectedGenerations] = useState(['gen1']); // Gen 1 activada por defecto
+  const [selectedGenerations, setSelectedGenerations] = useState(['gen1']);
   const [selectedGameMode, setSelectedGameMode] = useState('freestyle');
   const [gameStarted, setGameStarted] = useState(false);
   const [timeAttackSettings, setTimeAttackSettings] = useState({
