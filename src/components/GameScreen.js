@@ -32,6 +32,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
   const lastUpdateTimeRef = useRef(Date.now());
   const [visiblePokemon, setVisiblePokemon] = useState([]);
   const [showAnimations, setShowAnimations] = useState(true);
+  const [navbarHeight, setNavbarHeight] = useState(0);
 
   const showToast = (content, type) => {
     const existingToasts = document.getElementsByClassName('Toastify__toast');
@@ -355,6 +356,12 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
     window.scrollTo(0, 0);
   }, []);
 
+  useEffect(() => {
+    if (navbarRef.current) {
+      setNavbarHeight(navbarRef.current.offsetHeight);
+    }
+  }, [navbarRef]);
+
   if (gameOver) {
     return (
       <GameOverScreen
@@ -379,7 +386,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
   }
 
   return (
-    <div className="game-container">
+    <div className="game-container" style={{ paddingTop: `${navbarHeight}px` }}>
       <Navbar 
         ref={navbarRef}
         onPlayCry={() => playCurrentCry()}
