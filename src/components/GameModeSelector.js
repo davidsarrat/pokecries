@@ -4,8 +4,7 @@ import './GameModeSelector.css';
 const gameModes = [
   { name: 'Freestyle', key: 'freestyle' },
   { name: 'Pokédex Completer', key: 'pokedex_completer' },
-  { name: 'Time Attack!', key: 'time_attack' },
-  { name: 'Training Grounds', key: 'training_grounds' }
+  { name: 'Time Attack!', key: 'time_attack' }
 ];
 
 function GameModeSelector({ selectedGameMode, setSelectedGameMode, setTimeAttackSettings }) {

@@ -167,34 +167,14 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       );
     }
 
+    setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
+    
+    setTimeout(() => {
+      setAnimatingCards(new Map());
+    }, 500);
+
     resetSearch();
     moveToNextPokemon();
-
-    setAnimatingCards(prev => {
-      const newMap = new Map(prev);
-      const now = Date.now();
-      const existingTimeout = newMap.get(clickedPokemon.id);
-      
-      if (existingTimeout) {
-        clearTimeout(existingTimeout.timeoutId);
-      }
-
-      const timeoutId = setTimeout(() => {
-        setAnimatingCards(current => {
-          const updatedMap = new Map(current);
-          updatedMap.delete(clickedPokemon.id);
-          return updatedMap;
-        });
-      }, 1000);
-
-      newMap.set(clickedPokemon.id, {
-        timeoutId,
-        startTime: now,
-        isCorrect: isCorrect
-      });
-
-      return newMap;
-    });
   };
 
   const resetSearch = () => {

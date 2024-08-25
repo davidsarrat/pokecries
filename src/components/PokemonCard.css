@@ -6,13 +6,12 @@
   background-color: #f0f0f0;
   border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
+  transition: background-color 0.3s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .pokemon-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    background-color: #e0e0e0;
   }
 }
 
@@ -32,27 +31,23 @@
 }
 
 .pokemon-card.correct {
-  animation: correctFeedback 1s ease;
+  animation: correctFeedback 0.5s ease;
 }
 
 .pokemon-card.incorrect {
-  animation: incorrectFeedback 1s ease;
+  animation: incorrectFeedback 0.5s ease;
 }
 
 @keyframes correctFeedback {
-  0% { transform: translateY(0); background-color: #f0f0f0; }
-  10% { transform: translateY(-5px); }
+  0% { background-color: #f0f0f0; }
   50% { background-color: #4CAF50; }
-  90% { transform: translateY(-5px); }
-  100% { transform: translateY(0); background-color: #f0f0f0; }
+  100% { background-color: #f0f0f0; }
 }
 
 @keyframes incorrectFeedback {
-  0% { transform: translateY(0); background-color: #f0f0f0; }
-  10% { transform: translateY(-5px); }
+  0% { background-color: #f0f0f0; }
   50% { background-color: #f44336; }
-  90% { transform: translateY(-5px); }
-  100% { transform: translateY(0); background-color: #f0f0f0; }
+  100% { background-color: #f0f0f0; }
 }
 
 @media (max-width: 576px) {
