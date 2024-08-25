@@ -177,6 +177,8 @@ function GameScreen({
       moveToNextPokemon();
     } else {
       setIncorrectCount(prevCount => prevCount + 1);
+      setFailedPokemon(prev => [...prev, currentPokemon]);
+      
       if (selectedGameMode === 'time_attack') {
         const loseTimeMs = timeAttackSettings.loseTime * 1000;
         const newTime = Math.max(0, timeLeftMs - loseTimeMs);
@@ -189,7 +191,6 @@ function GameScreen({
           return;
         }
       }
-      setFailedPokemon(prev => [...prev, currentPokemon]);
       
       if (keepCryOnError) {
         showToast(
