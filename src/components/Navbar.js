@@ -1,10 +1,28 @@
-import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { FaPlay, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
 import './Navbar.css';
 
-const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, onEnterPress, isPlaying, progressCount, totalPokemon, timer, showProgress }, ref) => {
+const Navbar = forwardRef(({ 
+  onPlayCry, 
+  correctCount, 
+  incorrectCount, 
+  onSearch, 
+  onEnterPress, 
+  isPlaying, 
+  progressCount, 
+  totalPokemon, 
+  timer,
+  showProgress, 
+  timeLeft,
+  showTimer,
+  timeGained,
+  timeLost,
+  formatTime,
+  selectedGameMode
+}, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const searchInputRef = useRef(null);
+  const [timerClass, setTimerClass] = useState('');
 
   useImperativeHandle(ref, () => ({
     focusSearchInput: () => {
@@ -28,11 +46,15 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, 
     }
   };
 
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-  };
+  useEffect(() => {
+    if (timeGained > 0) {
+      setTimerClass('time-gained');
+      setTimeout(() => setTimerClass(''), 500);
+    } else if (timeLost > 0) {
+      setTimerClass('time-lost');
+      setTimeout(() => setTimerClass(''), 500);
+    }
+  }, [timeGained, timeLost]);
 
   return (
     <nav className="navbar">
@@ -62,16 +84,22 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, 
           <FaTimes className="score-icon" />
           <span>{incorrectCount}</span>
         </div>
-        {showProgress && (
-          <>
-            <div className="score-item progress">
-              <span>{progressCount + 1}/{totalPokemon}</span>
-            </div>
-            <div className="score-item timer">
-              <FaClock className="score-icon" />
-              <span>{formatTime(timer)}</span>
-            </div>
-          </>
+        {showProgress && selectedGameMode !== 'time_attack' && (
+          <div className="score-item progress">
+            <span>{progressCount}</span>
+          </div>
+        )}
+        {showTimer && (
+          <div className={`score-item timer ${timerClass}`}>
+            <FaClock className="score-icon" />
+            <span>{formatTime(timeLeft)}</span>
+          </div>
+        )}
+        {selectedGameMode === 'freestyle' && (
+          <div className="score-item timer">
+            <FaClock className="score-icon" />
+            <span>{formatTime(timer * 1000)}</span>
+          </div>
         )}
       </div>
     </nav>

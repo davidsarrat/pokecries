@@ -112,6 +112,25 @@
 .score-item.timer {
   background-color: rgba(33, 150, 243, 0.1);
   color: #2196f3;
+  transition: background-color 0.3s ease;
+}
+
+.score-item.timer.time-gained {
+  animation: fadeGreen 0.5s ease;
+}
+
+.score-item.timer.time-lost {
+  animation: fadeRed 0.5s ease;
+}
+
+@keyframes fadeGreen {
+  0% { background-color: rgba(76, 175, 80, 0.5); }
+  100% { background-color: rgba(33, 150, 243, 0.1); }
+}
+
+@keyframes fadeRed {
+  0% { background-color: rgba(244, 67, 54, 0.5); }
+  100% { background-color: rgba(33, 150, 243, 0.1); }
 }
 
 .score-item span {

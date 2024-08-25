@@ -3,7 +3,7 @@ import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
 
 function GameOverScreen({ stats, failedPokemon, onPlayAgain }) {
-  const { correctCount, incorrectCount, totalTime } = stats;
+  const { correctCount, incorrectCount } = stats;
 
   const playPokemonCry = (pokemonId) => {
     const audio = new Audio(`/media/cries/${pokemonId}.mp3`);
@@ -22,13 +22,9 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain }) {
           <span className="stat-label">Incorrect</span>
           <span className="stat-value incorrect">{incorrectCount}</span>
         </div>
-        <div className="stat-item">
-          <span className="stat-label">Total Time</span>
-          <span className="stat-value time">{totalTime}</span>
-        </div>
       </div>
       
-      {failedPokemon.length > 0 ? (
+      {failedPokemon.length > 0 && (
         <>
           <h2 className="failed-pokemon-title">Pokémon you missed:</h2>
           <div className="failed-pokemon-grid">
@@ -40,10 +36,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain }) {
               />
             ))}
           </div>
-          <p className="result-message">Keep practicing to become a Pokémon Master!</p>
         </>
-      ) : (
-        <h2 className="result-message">Congratulations! You're a true Pokémon Master!</h2>
       )}
       
       <button className="play-again-button" onClick={onPlayAgain}>
