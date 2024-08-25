@@ -16,6 +16,34 @@ function GameScreen({ selectedGenerations }) {
   const [isAnimating, setIsAnimating] = useState(false);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
+  const [activeToast, setActiveToast] = useState(null);
+
+  const showToast = (content, type) => {
+    // Ocultar el toast activo si existe
+    if (activeToast) {
+      const toastElement = document.getElementById(activeToast);
+      if (toastElement) {
+        toastElement.style.display = 'none';
+      }
+      toast.dismiss(activeToast);
+    }
+
+    // Mostrar el nuevo toast
+    const newToast = toast[type](content, {
+      position: "bottom-right",
+      autoClose: 1000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      onOpen: (props) => {
+        setActiveToast(props.toastId);
+      },
+      onClose: () => setActiveToast(null),
+    });
+
+    setActiveToast(newToast);
+  };
 
   useEffect(() => {
     const selectedPokemon = selectedGenerations.flatMap(genKey => {
@@ -62,9 +90,10 @@ function GameScreen({ selectedGenerations }) {
 
     setIsAnimating(true);
     setSelectedPokemon(clickedPokemon);
+
     if (clickedPokemon.id === currentPokemon.id) {
       setCorrectCount(correctCount + 1);
-      toast.success(
+      showToast(
         <div>
           <p>Correct!</p>
           <img 
@@ -73,18 +102,11 @@ function GameScreen({ selectedGenerations }) {
             style={{width: '80px', height: '80px', objectFit: 'contain'}} 
           />
         </div>,
-        {
-          position: "bottom-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        }
+        'success'
       );
     } else {
       setIncorrectCount(incorrectCount + 1);
-      toast.error(
+      showToast(
         <div>
           <p>Incorrect. It was {currentPokemon.name}!</p>
           <img 
@@ -93,14 +115,7 @@ function GameScreen({ selectedGenerations }) {
             style={{width: '80px', height: '80px', objectFit: 'contain'}} 
           />
         </div>,
-        {
-          position: "bottom-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        }
+        'error'
       );
     }
     setTimeout(() => {
