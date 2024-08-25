@@ -13,7 +13,7 @@ function StartScreen() {
   return (
     <div className="start-screen">
       <h1 className="title">PokéCries</h1>
-      <p className="subtitle">Guess the Pokémon by its cry!</p>
+      <p className="subtitle">Can you guess the Pokémon by its cry?</p>
       <GenerationSelector 
         selectedGenerations={selectedGenerations}
         setSelectedGenerations={setSelectedGenerations}

@@ -1,35 +1,55 @@
 .start-screen {
-  background-color: white;
-  border-radius: 15px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   max-width: 90%;
-  width: 400px;
+  width: 450px;
 }
 
 .title {
-  font-size: 2.5rem;
-  color: #3c5aa6;
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #4a4a4a;
   margin-bottom: 0.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .subtitle {
-  font-size: 1rem;
-  color: #666;
-  margin-bottom: 2rem;
+  font-size: 1.2rem;
+  color: #6c757d;
+  margin-bottom: 3rem;
 }
 
 .start-button {
-  margin-top: 2rem;
+  margin-top: 3rem;
   width: 100%;
+  padding: 1rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  border-radius: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.start-button:hover:not(:disabled) {
+  box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+}
+
+.start-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 @media (max-width: 576px) {
   .start-screen {
-    padding: 1.5rem;
+    padding: 2rem;
   }
 
   .title {
-    font-size: 2rem;
+    font-size: 3rem;
   }
 }

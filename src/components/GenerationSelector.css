@@ -1,25 +1,42 @@
 .generation-selector h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #3c5aa6;
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+  color: #4a4a4a;
+  font-weight: 700;
 }
 
 .btn-group-vertical {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
   width: 100%;
 }
 
 .btn-group-vertical .btn {
-  margin-bottom: 0.5rem;
+  border-radius: 15px !important;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 2px solid #e0e0e0;
+  color: #4a4a4a;
 }
 
-.btn-outline-primary {
-  color: #3c5aa6;
-  border-color: #3c5aa6;
+.btn-group-vertical .btn:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
 }
 
-.btn-outline-primary:hover,
-.btn-outline-primary:active,
-.btn-outline-primary.active {
-  background-color: #3c5aa6;
-  border-color: #3c5aa6;
+.btn-group-vertical .btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: white;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .btn-group-vertical .btn:active {
+    transform: scale(0.98);
+  }
 }
