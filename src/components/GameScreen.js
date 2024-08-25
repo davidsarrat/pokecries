@@ -120,7 +120,7 @@ function GameScreen({
   }, [pokemonList]);
 
   const moveToNextPokemon = useCallback(() => {
-    if (selectedGameMode === 'time_attack') {
+    if (selectedGameMode === 'time_attack' || selectedGameMode === 'freestyle') {
       const nextPokemon = getRandomPokemon(currentPokemon);
       setCurrentPokemon(nextPokemon);
       setProgressCount(prevCount => prevCount + 1);
@@ -128,7 +128,7 @@ function GameScreen({
         setIsAutoPlaying(true);
         playCurrentCry(nextPokemon, true);
       }, 0);
-    } else {
+    } else if (selectedGameMode === 'pokedex_completer') {
       let nextIndex;
       let nextPokemon;
       do {
@@ -138,7 +138,7 @@ function GameScreen({
 
       const nextProgressCount = progressCount + 1;
       
-      if (selectedGameMode === 'pokedex_completer' && nextProgressCount === shuffledPokemonList.length) {
+      if (nextProgressCount === shuffledPokemonList.length) {
         endGame();
       } else {
         setCurrentPokemonIndex(nextIndex);
