@@ -118,12 +118,19 @@
   }
 }
 
-@media (max-width: 350px) {
+@media (max-width: 400px) {
   .btn-group-vertical {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .btn-group-vertical .btn:last-child:nth-child(odd) {
-    width: 100%;
+  .btn-group-vertical .btn {
+    font-size: 0.45rem;
+    padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+  }
+
+  .btn-group-vertical .btn .gen-icon {
+    height: 24px;
+    max-width: 28px;
+    left: 0.5rem;
   }
 }

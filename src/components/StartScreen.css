@@ -13,7 +13,7 @@
   font-size: 3.5rem;
   font-weight: 800;
   color: #4a4a4a;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
   width: 100%;
@@ -23,7 +23,6 @@
 .subtitle {
   font-size: 1.2rem;
   color: #6c757d;
-  margin-bottom: 3rem;
 }
 
 .start-button {
@@ -51,12 +50,22 @@
   pointer-events: all !important;
 }
 
+@media (max-width: 768px) {
+  .title {
+    font-size: 3rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+}
+
 @media (max-width: 576px) {
   .start-screen {
     padding: 2rem;
   }
 
-  .title {
-    font-size: 3rem;
+  .subtitle {
+    font-size: 1rem;
   }
 }

@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './GameScreen.css';
 import pokemonData from '../data/pokemon.json';
 
-function GameScreen({ selectedGenerations, onExit }) {
+function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
   const [pokemonList, setPokemonList] = useState([]);
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
   const [currentPokemon, setCurrentPokemon] = useState(null);

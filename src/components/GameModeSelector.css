@@ -1,0 +1,38 @@
+.game-mode-selector {
+  margin-top: 2rem;
+}
+
+.game-mode-selector h2 {
+  font-size: 1.8rem;
+  color: #4a4a4a;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.game-mode-dropdown {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+  background-color: rgba(255, 255, 255, 0.7);
+  color: #4a4a4a;
+  transition: all 0.3s ease;
+}
+
+.game-mode-dropdown:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.5);
+}
+
+@media (max-width: 576px) {
+  .game-mode-selector h2 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .game-mode-dropdown {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+}
