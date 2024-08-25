@@ -1,39 +1,47 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './PokemonCard.css';
 
 function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible }) {
-  const [animationClass, setAnimationClass] = useState('');
+  const cardRef = useRef(null);
 
   useEffect(() => {
     if (isAnimating) {
-      setAnimationClass(isCorrect ? 'correct-animation' : 'incorrect-animation');
-      const timer = setTimeout(() => {
-        setAnimationClass('');
-      }, 1000); // Duración de la animación aumentada a 1 segundo
-      return () => clearTimeout(timer);
+      const card = cardRef.current;
+      card.style.animation = 'none';
+      // Forzar un reflow
+      void card.offsetWidth;
+      card.style.animation = null;
+      card.classList.remove('correct-animation', 'incorrect-animation');
+      // Forzar otro reflow
+      void card.offsetWidth;
+      card.classList.add(isCorrect ? 'correct-animation' : 'incorrect-animation');
     }
   }, [isAnimating, isCorrect]);
+
+  const handleClick = () => {
+    const card = cardRef.current;
+    card.style.animation = 'none';
+    // Forzar un reflow
+    void card.offsetWidth;
+    card.style.animation = null;
+    card.classList.remove('correct-animation', 'incorrect-animation');
+    onClick();
+  };
 
   const visibilityClass = isVisible ? '' : 'hidden';
 
   return (
     <div 
-      className={`pokemon-card ${animationClass} ${visibilityClass}`} 
-      onClick={onClick}
+      ref={cardRef}
+      className={`pokemon-card ${visibilityClass}`} 
+      onClick={handleClick}
     >
-      <div className="card-inner">
-        <div className="card-front">
-          <img 
-            src={`/media/sprites/${pokemon.id}.png`} 
-            alt={pokemon.name} 
-            className="pokemon-image"
-          />
-          <p className="pokemon-name">{pokemon.name}</p>
-        </div>
-        <div className="card-back">
-          <div className="feedback-icon"></div>
-        </div>
-      </div>
+      <img 
+        src={`/media/sprites/${pokemon.id}.png`} 
+        alt={pokemon.name} 
+        className="pokemon-image"
+      />
+      <p className="pokemon-name">{pokemon.name}</p>
     </div>
   );
 }
