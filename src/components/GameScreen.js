@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PokemonGrid from './PokemonGrid';
 import Navbar from './Navbar';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './GameScreen.css';
 import pokemonData from '../data/pokemon.json';
 
@@ -11,6 +13,7 @@ function GameScreen({ selectedGenerations }) {
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCount, setIncorrectCount] = useState(0);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
+  const [isAnimating, setIsAnimating] = useState(false);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
 
@@ -55,24 +58,57 @@ function GameScreen({ selectedGenerations }) {
   };
 
   const handlePokemonClick = (clickedPokemon) => {
+    if (isAnimating) return; // Evita la selección durante la animación
+
+    setIsAnimating(true);
     setSelectedPokemon(clickedPokemon);
     if (clickedPokemon.id === currentPokemon.id) {
       setCorrectCount(correctCount + 1);
-      setTimeout(() => {
-        alert('Correct!');
-        resetSearch();
-        setRandomPokemon(pokemonList);
-        setSelectedPokemon(null);
-      }, 1000);
+      toast.success(
+        <div>
+          <p>Correct!</p>
+          <img 
+            src={`/media/sprites/${currentPokemon.id}.png`} 
+            alt={currentPokemon.name} 
+            style={{width: '80px', height: '80px', objectFit: 'contain'}} 
+          />
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
     } else {
       setIncorrectCount(incorrectCount + 1);
-      setTimeout(() => {
-        alert('Incorrect. Try again!');
-        resetSearch();
-        setRandomPokemon(pokemonList);
-        setSelectedPokemon(null);
-      }, 1000);
+      toast.error(
+        <div>
+          <p>Incorrect. It was {currentPokemon.name}!</p>
+          <img 
+            src={`/media/sprites/${currentPokemon.id}.png`} 
+            alt={currentPokemon.name} 
+            style={{width: '80px', height: '80px', objectFit: 'contain'}} 
+          />
+        </div>,
+        {
+          position: "bottom-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        }
+      );
     }
+    setTimeout(() => {
+      resetSearch();
+      setRandomPokemon(pokemonList);
+      setSelectedPokemon(null);
+      setIsAnimating(false);
+    }, 1000);
   };
 
   const handleSearch = (searchTerm) => {
@@ -84,6 +120,8 @@ function GameScreen({ selectedGenerations }) {
   };
 
   const handleEnterPress = (searchTerm) => {
+    if (isAnimating) return; // Evita la selección durante la animación
+
     const normalizedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
     if (filteredPokemonList.length === 1) {
       handlePokemonClick(filteredPokemonList[0]);
@@ -124,6 +162,7 @@ function GameScreen({ selectedGenerations }) {
         incorrectCount={incorrectCount}
         onSearch={handleSearch}
         onEnterPress={handleEnterPress}
+        isAnimating={isAnimating}
       />
       <div className="game-content">
         <div className="game-screen">
@@ -132,9 +171,11 @@ function GameScreen({ selectedGenerations }) {
             onPokemonClick={handlePokemonClick}
             currentPokemon={currentPokemon}
             selectedPokemon={selectedPokemon}
+            isAnimating={isAnimating}
           />
         </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }
