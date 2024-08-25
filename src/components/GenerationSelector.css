@@ -60,7 +60,6 @@
   border-color: transparent;
 }
 
-/* Nuevos gradientes basados en los Pokémon icónicos */
 .btn-group-vertical .btn:nth-child(1).active {
   background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
 }
@@ -81,7 +80,6 @@
   background: linear-gradient(135deg, #808080 0%, #000000 100%);
 }
 
-/* Estilos para dispositivos no táctiles (generalmente, escritorio) */
 @media (hover: hover) and (pointer: fine) {
   .btn-group-vertical .btn:hover:not(.active) {
     background-color: rgba(255, 255, 255, 0.9);
@@ -90,18 +88,16 @@
   }
 }
 
-/* Estilos para dispositivos táctiles (generalmente, móviles) */
 @media (hover: none) and (pointer: coarse) {
   .btn-group-vertical .btn:active:not(.active) {
     background-color: rgba(255, 255, 255, 0.9);
   }
 }
 
-/* Ajustes para pantallas móviles */
 @media (max-width: 576px) {
   .generation-selector h2 {
-    font-size: 1.4rem; /* Reducido el tamaño para móviles */
-    margin-bottom: 1rem; /* Ajustado el margen inferior */
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
   }
 
   .btn-group-vertical .btn {
@@ -122,7 +118,6 @@
   }
 }
 
-/* Ajustes para pantallas muy pequeñas */
 @media (max-width: 350px) {
   .btn-group-vertical {
     grid-template-columns: 1fr;

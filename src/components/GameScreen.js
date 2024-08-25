@@ -20,7 +20,6 @@ function GameScreen({ selectedGenerations }) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const showToast = (content, type) => {
-    // Ocultar el toast activo si existe
     if (activeToast) {
       const toastElement = document.getElementById(activeToast);
       if (toastElement) {
@@ -29,7 +28,6 @@ function GameScreen({ selectedGenerations }) {
       toast.dismiss(activeToast);
     }
 
-    // Mostrar el nuevo toast
     const newToast = toast[type](content, {
       position: "bottom-right",
       autoClose: 1000,
@@ -95,7 +93,7 @@ function GameScreen({ selectedGenerations }) {
   };
 
   const handlePokemonClick = (clickedPokemon) => {
-    if (isAnimating) return; // Evita la selección durante la animación
+    if (isAnimating) return;
 
     setIsAnimating(true);
     setSelectedPokemon(clickedPokemon);
@@ -117,7 +115,7 @@ function GameScreen({ selectedGenerations }) {
       setIncorrectCount(incorrectCount + 1);
       showToast(
         <div>
-          <p>Incorrect. It was {currentPokemon.name}!</p>
+          <p>Incorrect. It was <strong>{currentPokemon.name}</strong>!</p>
           <img 
             src={`/media/sprites/${currentPokemon.id}.png`} 
             alt={currentPokemon.name} 
@@ -144,7 +142,7 @@ function GameScreen({ selectedGenerations }) {
   };
 
   const handleEnterPress = (searchTerm) => {
-    if (isAnimating) return; // Evita la selección durante la animación
+    if (isAnimating) return;
 
     const normalizedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
     if (filteredPokemonList.length === 1) {
@@ -156,8 +154,6 @@ function GameScreen({ selectedGenerations }) {
       if (exactMatches.length === 1) {
         handlePokemonClick(exactMatches[0]);
       } else if (exactMatches.length > 1) {
-        // Aquí puedes manejar el caso de múltiples coincidencias exactas
-        // Por ejemplo, podrías mostrar un mensaje al usuario o seleccionar el primero
         console.log('Multiple exact matches found');
       }
     }

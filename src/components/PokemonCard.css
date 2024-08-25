@@ -9,9 +9,11 @@
   transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
 }
 
-.pokemon-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+@media (hover: hover) and (pointer: fine) {
+  .pokemon-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  }
 }
 
 .pokemon-card img {
@@ -25,8 +27,8 @@
   margin-top: 0;
   font-size: 0.8rem;
   text-align: center;
-  color: #333; /* Color de texto fijo */
-  font-weight: bold; /* Hacemos el texto más grueso para mejorar la legibilidad */
+  color: #333;
+  font-weight: bold;
 }
 
 .pokemon-card.correct {
@@ -38,13 +40,19 @@
 }
 
 @keyframes correctFeedback {
-  0%, 100% { background-color: #f0f0f0; }
-  50% { background-color: #4CAF50; } /* Verde intenso */
+  0% { transform: translateY(0); background-color: #f0f0f0; }
+  10% { transform: translateY(-5px); }
+  50% { background-color: #4CAF50; }
+  90% { transform: translateY(-5px); }
+  100% { transform: translateY(0); background-color: #f0f0f0; }
 }
 
 @keyframes incorrectFeedback {
-  0%, 100% { background-color: #f0f0f0; }
-  50% { background-color: #f44336; } /* Rojo intenso */
+  0% { transform: translateY(0); background-color: #f0f0f0; }
+  10% { transform: translateY(-5px); }
+  50% { background-color: #f44336; }
+  90% { transform: translateY(-5px); }
+  100% { transform: translateY(0); background-color: #f0f0f0; }
 }
 
 @media (max-width: 576px) {
