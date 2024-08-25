@@ -221,21 +221,16 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
     setFilteredPokemonList(filtered);
   };
 
-  const handleEnterPress = (searchTerm) => {
-    const normalizedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (filteredPokemonList.length === 1) {
-      handlePokemonClick(filteredPokemonList[0]);
-    } else {
-      const exactMatches = pokemonList.filter(pokemon => 
-        pokemon.name.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSearchTerm
-      );
-      if (exactMatches.length === 1) {
-        handlePokemonClick(exactMatches[0]);
-      } else if (exactMatches.length > 1) {
-        console.log('Multiple exact matches found');
-      }
+  const handleEnterPress = useCallback((searchTerm) => {
+    const filteredVisiblePokemon = filteredPokemonList.filter(pokemon => 
+      pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+      visiblePokemon.some(visible => visible.id === pokemon.id)
+    );
+
+    if (filteredVisiblePokemon.length === 1) {
+      handlePokemonClick(filteredVisiblePokemon[0]);
     }
-  };
+  }, [filteredPokemonList, visiblePokemon, handlePokemonClick]);
 
   const handleKeyPress = useCallback((event) => {
     const char = event.key;
