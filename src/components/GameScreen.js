@@ -30,7 +30,6 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
   const [timeGained, setTimeGained] = useState(0);
   const [timeLost, setTimeLost] = useState(0);
   const lastUpdateTimeRef = useRef(Date.now());
-  const [freestyleTimer, setFreestyleTimer] = useState(0);
 
   const showToast = (content, type) => {
     const existingToasts = document.getElementsByClassName('Toastify__toast');
@@ -274,9 +273,9 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
 
   useEffect(() => {
     let intervalId;
-    if (selectedGameMode === 'freestyle' && !isGameFinished) {
+    if ((selectedGameMode === 'freestyle' || selectedGameMode === 'pokedex_completer') && !isGameFinished) {
       intervalId = setInterval(() => {
-        setFreestyleTimer(prevTimer => prevTimer + 1);
+        setTimer(prevTimer => prevTimer + 1);
       }, 1000);
     }
 
@@ -338,6 +337,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
         }}
         failedPokemon={failedPokemon}
         onPlayAgain={onExit}
+        selectedGameMode={selectedGameMode}
       />
     );
   }
@@ -356,14 +356,14 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
         onSearch={handleSearch}
         onEnterPress={handleEnterPress}
         isPlaying={isPlaying || isAutoPlaying}
-        progressCount={progressCount}
+        progressCount={`${progressCount}/${shuffledPokemonList.length}`}
         showProgress={selectedGameMode === 'pokedex_completer'}
-        timeLeft={timeLeftMs}
-        showTimer={selectedGameMode === 'time_attack'}
+        timeLeft={selectedGameMode === 'time_attack' ? timeLeftMs : timer * 1000}
+        showTimer={selectedGameMode === 'time_attack' || selectedGameMode === 'pokedex_completer' || selectedGameMode === 'freestyle'}
         timeGained={timeGained}
         timeLost={timeLost}
         formatTime={formatTime}
-        timer={freestyleTimer}
+        timer={timer}
         selectedGameMode={selectedGameMode}
       />
       <div className="game-content">

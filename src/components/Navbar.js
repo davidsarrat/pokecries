@@ -95,12 +95,6 @@ const Navbar = forwardRef(({
             <span>{formatTime(timeLeft)}</span>
           </div>
         )}
-        {selectedGameMode === 'freestyle' && (
-          <div className="score-item timer">
-            <FaClock className="score-icon" />
-            <span>{formatTime(timer * 1000)}</span>
-          </div>
-        )}
       </div>
     </nav>
   );

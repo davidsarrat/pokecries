@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
 
-function GameOverScreen({ stats, failedPokemon, onPlayAgain }) {
-  const { correctCount, incorrectCount } = stats;
+function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode }) {
+  const { correctCount, incorrectCount, totalTime } = stats;
+  const audioRef = useRef(null);
 
   const playPokemonCry = (pokemonId) => {
-    const audio = new Audio(`/media/cries/${pokemonId}.mp3`);
-    audio.play();
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    audioRef.current = new Audio(`/media/cries/${pokemonId}.mp3`);
+    audioRef.current.play();
   };
 
   return (
@@ -22,6 +27,12 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain }) {
           <span className="stat-label">Incorrect</span>
           <span className="stat-value incorrect">{incorrectCount}</span>
         </div>
+        {(selectedGameMode === 'pokedex_completer' || selectedGameMode === 'freestyle') && (
+          <div className="stat-item">
+            <span className="stat-label">Total Time</span>
+            <span className="stat-value time">{totalTime}</span>
+          </div>
+        )}
       </div>
       
       {failedPokemon.length > 0 && (
