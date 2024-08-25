@@ -1,0 +1,25 @@
+.generation-selector h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #3c5aa6;
+}
+
+.btn-group-vertical {
+  width: 100%;
+}
+
+.btn-group-vertical .btn {
+  margin-bottom: 0.5rem;
+}
+
+.btn-outline-primary {
+  color: #3c5aa6;
+  border-color: #3c5aa6;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:active,
+.btn-outline-primary.active {
+  background-color: #3c5aa6;
+  border-color: #3c5aa6;
+}
