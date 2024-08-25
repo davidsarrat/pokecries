@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './GameScreen.css';
 import pokemonData from '../data/pokemon.json';
 
-function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackSettings, limitedAnswers, numberOfAnswers }) {
+function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackSettings, limitedAnswers, numberOfAnswers, keepCryOnError }) {
   const [pokemonList, setPokemonList] = useState([]);
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
   const [currentPokemon, setCurrentPokemon] = useState(null);
@@ -147,6 +147,8 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
         </div>,
         'success'
       );
+      resetSearch();
+      moveToNextPokemon();
     } else {
       setIncorrectCount(prevCount => prevCount + 1);
       if (selectedGameMode === 'time_attack') {
@@ -156,17 +158,22 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
         setTimeout(() => setTimeLost(0), 500);
       }
       setFailedPokemon(prev => [...prev, currentPokemon]);
+      
+      // Mostrar toast de Pokémon incorrecto
       showToast(
         <div>
-          <p>Incorrect. It was <strong>{currentPokemon.name}</strong>!</p>
-          <img 
-            src={`/media/sprites/${currentPokemon.id}.png`} 
-            alt={currentPokemon.name} 
-            style={{width: '80px', height: '80px', objectFit: 'contain'}} 
-          />
+          <p>Incorrect Pokémon!</p>
         </div>,
         'error'
       );
+      
+      // Reproducir el cry nuevamente
+      playCurrentCry();
+      
+      if (!keepCryOnError) {
+        resetSearch();
+        moveToNextPokemon();
+      }
     }
 
     setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
@@ -174,9 +181,6 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
     setTimeout(() => {
       setAnimatingCards(new Map());
     }, 500);
-
-    resetSearch();
-    moveToNextPokemon();
   };
 
   const resetSearch = () => {

@@ -3,6 +3,7 @@ import './StartScreen.css';
 import GenerationSelector from './GenerationSelector';
 import GameModeSelector from './GameModeSelector';
 import LimitedAnswersSelector from './LimitedAnswersSelector';
+import GameOptionsSelector from './GameOptionsSelector';
 import GameScreen from './GameScreen';
 
 function StartScreen() {
@@ -17,6 +18,7 @@ function StartScreen() {
   });
   const [limitedAnswers, setLimitedAnswers] = useState(false);
   const [numberOfAnswers, setNumberOfAnswers] = useState(4);
+  const [keepCryOnError, setKeepCryOnError] = useState(false);
 
   const handleStartGame = () => {
     if (selectedGameMode === 'time_attack') {
@@ -47,6 +49,7 @@ function StartScreen() {
         timeAttackSettings={timeAttackSettings}
         limitedAnswers={limitedAnswers}
         numberOfAnswers={numberOfAnswers}
+        keepCryOnError={keepCryOnError}
       />
     );
   }
@@ -69,6 +72,10 @@ function StartScreen() {
         setLimitedAnswers={setLimitedAnswers}
         numberOfAnswers={numberOfAnswers}
         setNumberOfAnswers={setNumberOfAnswers}
+      />
+      <GameOptionsSelector
+        keepCryOnError={keepCryOnError}
+        setKeepCryOnError={setKeepCryOnError}
       />
       <button 
         className="btn btn-primary btn-lg start-button"

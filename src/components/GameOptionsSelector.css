@@ -1,0 +1,16 @@
+.game-options-selector {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.keep-cry-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.keep-cry-checkbox input {
+  margin-right: 0.5rem;
+}
