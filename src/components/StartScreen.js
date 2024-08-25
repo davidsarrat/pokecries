@@ -11,8 +11,13 @@ function StartScreen() {
     setGameStarted(true);
   };
 
+  const handleExitGame = () => {
+    setGameStarted(false);
+    setSelectedGenerations([]);
+  };
+
   if (gameStarted) {
-    return <GameScreen selectedGenerations={selectedGenerations} />;
+    return <GameScreen selectedGenerations={selectedGenerations} onExit={handleExitGame} />;
   }
 
   return (

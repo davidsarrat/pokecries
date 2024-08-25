@@ -6,7 +6,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './GameScreen.css';
 import pokemonData from '../data/pokemon.json';
 
-function GameScreen({ selectedGenerations }) {
+function GameScreen({ selectedGenerations, onExit }) {
   const [pokemonList, setPokemonList] = useState([]);
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
   const [currentPokemon, setCurrentPokemon] = useState(null);
@@ -173,6 +173,12 @@ function GameScreen({ selectedGenerations }) {
     };
   }, [handleKeyPress]);
 
+  const handleExitClick = () => {
+    if (window.confirm("Are you sure you want to exit the game?")) {
+      onExit();
+    }
+  };
+
   if (pokemonList.length === 0) {
     return <div>No Pokémon selected. Please select at least one generation.</div>;
   }
@@ -199,6 +205,12 @@ function GameScreen({ selectedGenerations }) {
           />
         </div>
       </div>
+      <footer className="game-footer">
+        <p className="footer-text">
+          Made with ❤️ by <a href="https://davidsarratgonzalez.github.io" target="_blank" rel="noopener noreferrer">David Sarrat González</a>
+        </p>
+        <button className="exit-button" onClick={handleExitClick}>Exit Game</button>
+      </footer>
       <ToastContainer />
     </div>
   );
