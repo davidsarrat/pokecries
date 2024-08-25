@@ -19,11 +19,11 @@ function LimitedAnswersSelector({ limitedAnswers, setLimitedAnswers, numberOfAns
           checked={limitedAnswers}
           onChange={handleLimitedAnswersChange}
         />
-        <label htmlFor="limitedAnswers">Limited Answers</label>
+        <label htmlFor="limitedAnswers">Limited answers</label>
       </div>
       {limitedAnswers && (
         <div className="number-of-answers">
-          <label htmlFor="numberOfAnswers">Number of Answers:</label>
+          <label htmlFor="numberOfAnswers">Number of answers:</label>
           <input
             type="number"
             id="numberOfAnswers"

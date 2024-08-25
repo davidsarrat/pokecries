@@ -3,7 +3,7 @@ import './GameModeSelector.css';
 
 const gameModes = [
   { name: 'Freestyle', key: 'freestyle' },
-  { name: 'Pokédex Completer', key: 'pokedex_completer' },
+  { name: 'Pokédex Run', key: 'pokedex_completer' },
   { name: 'Time Attack!', key: 'time_attack' }
 ];
 

@@ -28,12 +28,12 @@ function StartScreen() {
     }
     if (selectedGameMode === 'time_attack') {
       if (timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) {
-        alert('Please set a time greater than 0 for Time Attack mode!');
+        alert('Please set a time greater than 0 for Time Attack!');
         return;
       }
     }
     if (limitedAnswers && numberOfAnswers < 2) {
-      alert('Number of answers must be at least 2 when Limited Answers is enabled!');
+      alert('Number of answers must be at least 2 when Limited answers is enabled!');
       return;
     }
     setError('');
