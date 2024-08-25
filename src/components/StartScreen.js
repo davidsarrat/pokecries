@@ -1,14 +1,19 @@
 import React, { useState } from 'react';
 import './StartScreen.css';
 import GenerationSelector from './GenerationSelector';
+import GameScreen from './GameScreen';
 
 function StartScreen() {
   const [selectedGenerations, setSelectedGenerations] = useState([]);
+  const [gameStarted, setGameStarted] = useState(false);
 
   const handleStartGame = () => {
-    // Implementar lógica para iniciar el juego
-    console.log('Starting game with generations:', selectedGenerations);
+    setGameStarted(true);
   };
+
+  if (gameStarted) {
+    return <GameScreen selectedGenerations={selectedGenerations} />;
+  }
 
   return (
     <div className="start-screen">

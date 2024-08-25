@@ -1,0 +1,12 @@
+.pokemon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  width: 100%;
+}
+
+@media (max-width: 576px) {
+  .pokemon-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  }
+}
