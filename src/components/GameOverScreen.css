@@ -1,103 +1,154 @@
 .game-over-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 2rem;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
-    width: 90%;
-    margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  width: 90%;
+  margin: 2rem auto;
+}
+
+.game-over-title {
+  font-size: 2.5rem;
+  color: #4a4a4a;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: 800;
+}
+
+.stats-container {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem;
+}
+
+.stat-label {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.stat-value.correct {
+  color: #4CAF50;
+}
+
+.stat-value.incorrect {
+  color: #f44336;
+}
+
+.stat-value.time {
+  color: #2196f3;
+}
+
+.failed-pokemon-title, .result-message {
+  font-size: 1.3rem;
+  color: #4a4a4a;
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: bold;
+}
+
+.failed-pokemon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.play-again-button {
+  padding: 1rem 2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.play-again-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 768px) {
+  .game-over-container {
+    padding: 1.5rem;
   }
-  
+
   .game-over-title {
-    font-size: 3rem;
-    color: #4a4a4a;
-    margin-bottom: 1.5rem;
-    text-align: center;
+    font-size: 2rem;
   }
-  
-  .stats-container {
-    display: flex;
-    justify-content: space-around;
-    width: 100%;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
+
+  .stat-label {
+    font-size: 0.9rem;
   }
-  
-  .stats-container p {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin: 0.5rem;
-    color: #333;
+
+  .stat-value {
+    font-size: 1.3rem;
   }
-  
+
   .failed-pokemon-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 1rem;
-    width: 100%;
-    margin-bottom: 2rem;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   }
-  
-  .better-luck, .congratulations {
-    font-size: 1.5rem;
-    color: #4a4a4a;
-    margin-bottom: 2rem;
-    text-align: center;
+
+  .failed-pokemon-title, .result-message {
+    font-size: 1.1rem;
   }
-  
-  .congratulations {
-    color: #4CAF50;
-  }
-  
+
   .play-again-button {
-    padding: 1rem 2rem;
-    font-size: 1.2rem;
-    font-weight: bold;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    font-size: 1rem;
+    padding: 0.8rem 1.6rem;
   }
-  
-  .play-again-button:hover {
-    background-color: #45a049;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 480px) {
+  .game-over-container {
+    padding: 1rem;
   }
-  
-  @media (max-width: 600px) {
-    .game-over-container {
-      padding: 1.5rem;
-    }
-  
-    .game-over-title {
-      font-size: 2.5rem;
-    }
-  
-    .stats-container {
-      flex-direction: column;
-      align-items: center;
-    }
-  
-    .stats-container p {
-      margin-bottom: 0.5rem;
-    }
-  
-    .failed-pokemon-grid {
-      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    }
-  
-    .better-luck, .congratulations {
-      font-size: 1.2rem;
-    }
-  
-    .play-again-button {
-      font-size: 1rem;
-      padding: 0.8rem 1.6rem;
-    }
+
+  .game-over-title {
+    font-size: 1.8rem;
   }
+
+  .stat-label {
+    font-size: 0.8rem;
+  }
+
+  .stat-value {
+    font-size: 1.1rem;
+  }
+
+  .failed-pokemon-grid {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .failed-pokemon-title, .result-message {
+    font-size: 1rem;
+  }
+
+  .play-again-button {
+    font-size: 0.9rem;
+    padding: 0.7rem 1.4rem;
+  }
+}

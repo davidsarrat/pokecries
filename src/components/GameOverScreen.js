@@ -14,14 +14,23 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain }) {
     <div className="game-over-container">
       <h1 className="game-over-title">Game Over!</h1>
       <div className="stats-container">
-        <p>Correct: {correctCount}</p>
-        <p>Incorrect: {incorrectCount}</p>
-        <p>Total Time: {totalTime}</p>
+        <div className="stat-item">
+          <span className="stat-label">Correct</span>
+          <span className="stat-value correct">{correctCount}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Incorrect</span>
+          <span className="stat-value incorrect">{incorrectCount}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Total Time</span>
+          <span className="stat-value time">{totalTime}</span>
+        </div>
       </div>
       
       {failedPokemon.length > 0 ? (
         <>
-          <h2>Pokémon you missed:</h2>
+          <h2 className="failed-pokemon-title">Pokémon you missed:</h2>
           <div className="failed-pokemon-grid">
             {failedPokemon.map(pokemon => (
               <PokemonCard
@@ -31,10 +40,10 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain }) {
               />
             ))}
           </div>
-          <p className="better-luck">Better luck next time!</p>
+          <p className="result-message">Keep practicing to become a Pokémon Master!</p>
         </>
       ) : (
-        <h2 className="congratulations">Congratulations! You didn't miss any Pokémon!</h2>
+        <h2 className="result-message">Congratulations! You're a true Pokémon Master!</h2>
       )}
       
       <button className="play-again-button" onClick={onPlayAgain}>
