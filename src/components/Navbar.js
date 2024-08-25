@@ -1,7 +1,7 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
 import './Navbar.css';
 
-const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch }, ref) => {
+const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, onEnterPress }, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const searchInputRef = useRef(null);
 
@@ -21,6 +21,12 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch }
     onSearch(value);
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      onEnterPress(searchTerm);
+    }
+  };
+
   return (
     <nav className="navbar">
       <button className="play-cry-button" onClick={onPlayCry}>
@@ -33,6 +39,7 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch }
           placeholder="Search Pokémon..."
           value={searchTerm}
           onChange={handleSearch}
+          onKeyPress={handleKeyPress}
         />
       </div>
       <div className="score-container">

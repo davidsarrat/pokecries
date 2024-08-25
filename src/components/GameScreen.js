@@ -83,6 +83,20 @@ function GameScreen({ selectedGenerations }) {
     setFilteredPokemonList(filtered);
   };
 
+  const handleEnterPress = (searchTerm) => {
+    const normalizedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (filteredPokemonList.length === 1) {
+      handlePokemonClick(filteredPokemonList[0]);
+    } else {
+      const exactMatch = pokemonList.find(pokemon => 
+        pokemon.name.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSearchTerm
+      );
+      if (exactMatch) {
+        handlePokemonClick(exactMatch);
+      }
+    }
+  };
+
   const handleKeyPress = useCallback((event) => {
     const char = event.key;
     if (/^[a-zA-Z0-9]$/.test(char) && navbarRef.current) {
@@ -109,6 +123,7 @@ function GameScreen({ selectedGenerations }) {
         correctCount={correctCount}
         incorrectCount={incorrectCount}
         onSearch={handleSearch}
+        onEnterPress={handleEnterPress}
       />
       <PokemonGrid 
         pokemonList={filteredPokemonList} 
