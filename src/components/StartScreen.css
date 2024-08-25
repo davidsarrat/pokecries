@@ -6,6 +6,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   max-width: 90%;
   width: 450px;
+  text-align: center;
 }
 
 .title {
@@ -14,6 +15,9 @@
   color: #4a4a4a;
   margin-bottom: 0.5rem;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  width: 100%;
+  display: block;
 }
 
 .subtitle {
@@ -33,6 +37,7 @@
   border: none;
   color: white;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .start-button:hover:not(:disabled) {
@@ -40,8 +45,10 @@
 }
 
 .start-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  opacity: 0.5;
+  background: linear-gradient(135deg, #a0a0a0 0%, #808080 100%);
+  cursor: not-allowed !important;
+  pointer-events: all !important;
 }
 
 @media (max-width: 576px) {

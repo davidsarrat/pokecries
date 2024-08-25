@@ -1,33 +1,21 @@
 .generation-selector h2 {
   font-size: 1.8rem;
-  margin-bottom: 2rem;
   color: #4a4a4a;
   font-weight: 700;
+  margin-bottom: 1.5rem;
 }
 
 .btn-group-vertical {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   width: 100%;
 }
 
-/* Nuevo estilo para centrar el último botón si está solo */
-.btn-group-vertical::after {
-  content: '';
-  grid-column: 1 / -1;
-}
-
-.btn-group-vertical .btn:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
-  justify-self: center;
-  width: calc(50% - 0.5rem);
-}
-
 .btn-group-vertical .btn {
   border-radius: 15px !important;
-  padding: 0.8rem 0.8rem 0.8rem 4rem;
-  font-size: 0.6rem;
+  padding: 0.8rem 0.8rem 0.8rem 3rem;
+  font-size: 0.55rem;
   font-weight: 500;
   transition: all 0.3s ease;
   background-color: rgba(255, 255, 255, 0.7);
@@ -35,27 +23,36 @@
   color: #4a4a4a;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  text-align: left;
+  justify-content: center;
+  text-align: center;
   position: relative;
   font-family: 'Press Start 2P', cursive;
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-height: 3rem;
+}
+
+.btn-group-vertical .btn:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+  width: calc(50% - 0.5rem);
+  justify-self: center;
 }
 
 .btn-group-vertical .btn .gen-icon {
   width: auto;
-  height: 32px;
-  max-width: 48px;
+  height: 28px;
+  max-width: 32px;
   position: absolute;
   left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .btn-group-vertical .btn span {
   flex-grow: 1;
-  padding-right: 0.5rem;
+  text-align: center;
 }
 
 .btn-group-vertical .btn.active {
@@ -65,23 +62,23 @@
 
 /* Nuevos gradientes basados en los Pokémon icónicos */
 .btn-group-vertical .btn:nth-child(1).active {
-  background: linear-gradient(135deg, #FFF000 0%, #FFD700 100%); /* Amarillo para Pikachu */
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
 }
 
 .btn-group-vertical .btn:nth-child(2).active {
-  background: linear-gradient(135deg, #FF0000 0%, #8B0000 100%); /* Rojo para Ho-Oh */
+  background: linear-gradient(135deg, #FF0000 0%, #8B0000 100%);
 }
 
 .btn-group-vertical .btn:nth-child(3).active {
-  background: linear-gradient(135deg, #00FF00 0%, #008000 100%); /* Verde para Rayquaza */
+  background: linear-gradient(135deg, #00FF00 0%, #008000 100%);
 }
 
 .btn-group-vertical .btn:nth-child(4).active {
-  background: linear-gradient(135deg, #1E90FF 0%, #000080 100%); /* Azul para Lucario */
+  background: linear-gradient(135deg, #1E90FF 0%, #000080 100%);
 }
 
 .btn-group-vertical .btn:nth-child(5).active {
-  background: linear-gradient(135deg, #808080 0%, #000000 100%); /* Negro/Gris para Zoroark */
+  background: linear-gradient(135deg, #808080 0%, #000000 100%);
 }
 
 /* Estilos para dispositivos no táctiles (generalmente, escritorio) */
@@ -97,5 +94,41 @@
 @media (hover: none) and (pointer: coarse) {
   .btn-group-vertical .btn:active:not(.active) {
     background-color: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* Ajustes para pantallas móviles */
+@media (max-width: 576px) {
+  .generation-selector h2 {
+    font-size: 1.4rem; /* Reducido el tamaño para móviles */
+    margin-bottom: 1rem; /* Ajustado el margen inferior */
+  }
+
+  .btn-group-vertical .btn {
+    font-size: 0.5rem;
+    padding: 0.6rem 0.6rem 0.6rem 2.8rem;
+    justify-content: center;
+  }
+
+  .btn-group-vertical .btn .gen-icon {
+    height: 26px;
+    max-width: 30px;
+    left: 0.6rem;
+  }
+
+  .btn-group-vertical .btn span {
+    flex-grow: 1;
+    text-align: center;
+  }
+}
+
+/* Ajustes para pantallas muy pequeñas */
+@media (max-width: 350px) {
+  .btn-group-vertical {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-group-vertical .btn:last-child:nth-child(odd) {
+    width: 100%;
   }
 }
