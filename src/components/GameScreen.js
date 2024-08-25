@@ -110,14 +110,18 @@ function GameScreen({
     }
   }, [currentPokemon]);
 
-  const getRandomPokemon = useCallback(() => {
-    const randomIndex = Math.floor(Math.random() * pokemonList.length);
-    return pokemonList[randomIndex];
+  const getRandomPokemon = useCallback((excludePokemon = null) => {
+    let newPokemon;
+    do {
+      const randomIndex = Math.floor(Math.random() * pokemonList.length);
+      newPokemon = pokemonList[randomIndex];
+    } while (excludePokemon && newPokemon.id === excludePokemon.id);
+    return newPokemon;
   }, [pokemonList]);
 
   const moveToNextPokemon = useCallback(() => {
     if (selectedGameMode === 'time_attack') {
-      const nextPokemon = getRandomPokemon();
+      const nextPokemon = getRandomPokemon(currentPokemon);
       setCurrentPokemon(nextPokemon);
       setProgressCount(prevCount => prevCount + 1);
       setTimeout(() => {
@@ -125,13 +129,18 @@ function GameScreen({
         playCurrentCry(nextPokemon, true);
       }, 0);
     } else {
-      const nextIndex = (currentPokemonIndex + 1) % shuffledPokemonList.length;
+      let nextIndex;
+      let nextPokemon;
+      do {
+        nextIndex = (currentPokemonIndex + 1) % shuffledPokemonList.length;
+        nextPokemon = shuffledPokemonList[nextIndex];
+      } while (nextPokemon.id === currentPokemon.id);
+
       const nextProgressCount = progressCount + 1;
       
       if (selectedGameMode === 'pokedex_completer' && nextProgressCount === shuffledPokemonList.length) {
         endGame();
       } else {
-        const nextPokemon = shuffledPokemonList[nextIndex];
         setCurrentPokemonIndex(nextIndex);
         setCurrentPokemon(nextPokemon);
         setProgressCount(nextProgressCount);
@@ -141,7 +150,7 @@ function GameScreen({
         }, 0);
       }
     }
-  }, [selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, getRandomPokemon, playCurrentCry, endGame]);
+  }, [selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, currentPokemon, getRandomPokemon, playCurrentCry, endGame]);
 
   const handlePokemonClick = (clickedPokemon) => {
     const isCorrect = clickedPokemon.id === currentPokemon.id;
