@@ -1,10 +1,18 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
 
 function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode }) {
   const { correctCount, incorrectCount, totalTime } = stats;
   const audioRef = useRef(null);
+
+  useEffect(() => {
+    // Mostrar todas las tarjetas al entrar en la pantalla de Game Over
+    const allPokemonCards = document.querySelectorAll('.pokemon-card');
+    allPokemonCards.forEach(card => {
+      card.classList.remove('hidden');
+    });
+  }, []);
 
   const playPokemonCry = (pokemonId) => {
     if (audioRef.current) {
@@ -44,6 +52,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
                 key={pokemon.id}
                 pokemon={pokemon}
                 onClick={() => playPokemonCry(pokemon.id)}
+                isVisible={true}
               />
             ))}
           </div>

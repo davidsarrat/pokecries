@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './GameScreen.css';
 import pokemonData from '../data/pokemon.json';
 
-function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackSettings }) {
+function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackSettings, limitedAnswers, numberOfAnswers }) {
   const [pokemonList, setPokemonList] = useState([]);
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
   const [currentPokemon, setCurrentPokemon] = useState(null);
@@ -30,6 +30,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
   const [timeGained, setTimeGained] = useState(0);
   const [timeLost, setTimeLost] = useState(0);
   const lastUpdateTimeRef = useRef(Date.now());
+  const [visiblePokemon, setVisiblePokemon] = useState([]);
 
   const showToast = (content, type) => {
     const existingToasts = document.getElementsByClassName('Toastify__toast');
@@ -218,6 +219,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
 
   const handleExitClick = () => {
     if (window.confirm("Are you sure you want to exit the game?")) {
+      setVisiblePokemon(pokemonList); // Mostrar todas las tarjetas antes de salir
       onExit();
     }
   };
@@ -228,6 +230,20 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
   };
+
+  const updateVisiblePokemon = useCallback(() => {
+    if (!limitedAnswers || numberOfAnswers >= pokemonList.length) {
+      setVisiblePokemon(pokemonList);
+    } else {
+      const availablePokemon = pokemonList.filter(p => p.id !== currentPokemon.id);
+      const randomPokemon = availablePokemon.sort(() => 0.5 - Math.random()).slice(0, numberOfAnswers - 1);
+      setVisiblePokemon([...randomPokemon, currentPokemon].sort(() => 0.5 - Math.random()));
+    }
+  }, [limitedAnswers, numberOfAnswers, pokemonList, currentPokemon]);
+
+  useEffect(() => {
+    updateVisiblePokemon();
+  }, [currentPokemon, updateVisiblePokemon]);
 
   useEffect(() => {
     const selectedPokemon = selectedGenerations.flatMap(genKey => {
@@ -317,8 +333,12 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
           totalTime: formatTime(timer * 1000)
         }}
         failedPokemon={failedPokemon}
-        onPlayAgain={onExit}
+        onPlayAgain={() => {
+          setVisiblePokemon(pokemonList); // Mostrar todas las tarjetas antes de volver al menú
+          onExit();
+        }}
         selectedGameMode={selectedGameMode}
+        pokemonList={pokemonList} // Pasar la lista completa de Pokémon
       />
     );
   }
@@ -351,6 +371,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
         <div className="game-screen">
           <PokemonGrid 
             pokemonList={filteredPokemonList} 
+            visiblePokemon={visiblePokemon}
             onPokemonClick={handlePokemonClick}
             currentPokemon={currentPokemon}
             animatingCards={animatingCards}

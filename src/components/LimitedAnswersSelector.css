@@ -1,0 +1,32 @@
+.limited-answers-selector {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.limited-answers-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.limited-answers-checkbox input {
+  margin-right: 0.5rem;
+}
+
+.number-of-answers {
+  display: flex;
+  align-items: center;
+}
+
+.number-of-answers label {
+  margin-right: 0.5rem;
+}
+
+.number-of-answers input {
+  width: 60px;
+  padding: 0.3rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+}

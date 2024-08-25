@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './StartScreen.css';
 import GenerationSelector from './GenerationSelector';
 import GameModeSelector from './GameModeSelector';
+import LimitedAnswersSelector from './LimitedAnswersSelector';
 import GameScreen from './GameScreen';
 
 function StartScreen() {
@@ -14,6 +15,8 @@ function StartScreen() {
     gainTime: 0,
     loseTime: 0
   });
+  const [limitedAnswers, setLimitedAnswers] = useState(false);
+  const [numberOfAnswers, setNumberOfAnswers] = useState(4);
 
   const handleStartGame = () => {
     if (selectedGameMode === 'time_attack') {
@@ -21,6 +24,10 @@ function StartScreen() {
         alert('Please set a time greater than 0 for Time Attack mode!');
         return;
       }
+    }
+    if (limitedAnswers && numberOfAnswers < 2) {
+      alert('Number of answers must be at least 2 when Limited Answers is enabled!');
+      return;
     }
     setGameStarted(true);
   };
@@ -38,6 +45,8 @@ function StartScreen() {
         selectedGameMode={selectedGameMode} 
         onExit={handleExitGame}
         timeAttackSettings={timeAttackSettings}
+        limitedAnswers={limitedAnswers}
+        numberOfAnswers={numberOfAnswers}
       />
     );
   }
@@ -54,6 +63,12 @@ function StartScreen() {
         selectedGameMode={selectedGameMode}
         setSelectedGameMode={setSelectedGameMode}
         setTimeAttackSettings={setTimeAttackSettings}
+      />
+      <LimitedAnswersSelector
+        limitedAnswers={limitedAnswers}
+        setLimitedAnswers={setLimitedAnswers}
+        numberOfAnswers={numberOfAnswers}
+        setNumberOfAnswers={setNumberOfAnswers}
       />
       <button 
         className="btn btn-primary btn-lg start-button"
