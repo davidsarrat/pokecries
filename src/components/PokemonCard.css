@@ -6,7 +6,7 @@
   background-color: #f0f0f0;
   border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s, background-color 0.3s;
 }
 
 .pokemon-card:hover {
@@ -18,12 +18,32 @@
   width: 80px;
   height: 80px;
   object-fit: contain;
+  margin-bottom: 0;
 }
 
 .pokemon-card p {
-  margin-top: 0.5rem;
+  margin-top: 0;
   font-size: 0.8rem;
   text-align: center;
+  color: inherit;
+}
+
+.pokemon-card.correct {
+  animation: correctFeedback 1s ease;
+}
+
+.pokemon-card.incorrect {
+  animation: incorrectFeedback 1s ease;
+}
+
+@keyframes correctFeedback {
+  0%, 100% { background-color: #f0f0f0; }
+  50% { background-color: #4CAF50; }
+}
+
+@keyframes incorrectFeedback {
+  0%, 100% { background-color: #f0f0f0; }
+  50% { background-color: #f44336; }
 }
 
 @media (max-width: 576px) {

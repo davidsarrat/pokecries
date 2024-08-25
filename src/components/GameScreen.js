@@ -10,7 +10,9 @@ function GameScreen({ selectedGenerations }) {
   const [currentPokemon, setCurrentPokemon] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCount, setIncorrectCount] = useState(0);
+  const [selectedPokemon, setSelectedPokemon] = useState(null);
   const navbarRef = useRef(null);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     const selectedPokemon = selectedGenerations.flatMap(genKey => {
@@ -23,6 +25,12 @@ function GameScreen({ selectedGenerations }) {
     }
   }, [selectedGenerations]);
 
+  useEffect(() => {
+    if (currentPokemon) {
+      playCurrentCry();
+    }
+  }, [currentPokemon]);
+
   const setRandomPokemon = (pokemonArray) => {
     const randomIndex = Math.floor(Math.random() * pokemonArray.length);
     setCurrentPokemon(pokemonArray[randomIndex]);
@@ -30,20 +38,32 @@ function GameScreen({ selectedGenerations }) {
 
   const playCurrentCry = () => {
     if (currentPokemon) {
-      const audio = new Audio(`/media/cries/${currentPokemon.id}.mp3`);
-      audio.play().catch(error => console.error('Error playing audio:', error));
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      audioRef.current = new Audio(`/media/cries/${currentPokemon.id}.mp3`);
+      audioRef.current.play().catch(error => console.error('Error playing audio:', error));
     }
   };
 
   const handlePokemonClick = (clickedPokemon) => {
+    setSelectedPokemon(clickedPokemon);
     if (clickedPokemon.id === currentPokemon.id) {
       setCorrectCount(correctCount + 1);
-      alert('Correct!');
+      setTimeout(() => {
+        alert('Correct!');
+        setRandomPokemon(pokemonList);
+        setSelectedPokemon(null);
+      }, 1000);
     } else {
       setIncorrectCount(incorrectCount + 1);
-      alert('Incorrect. Try again!');
+      setTimeout(() => {
+        alert('Incorrect. Try again!');
+        setRandomPokemon(pokemonList);
+        setSelectedPokemon(null);
+      }, 1000);
     }
-    setRandomPokemon(pokemonList);
   };
 
   const handleSearch = (searchTerm) => {
@@ -81,7 +101,12 @@ function GameScreen({ selectedGenerations }) {
         incorrectCount={incorrectCount}
         onSearch={handleSearch}
       />
-      <PokemonGrid pokemonList={filteredPokemonList} onPokemonClick={handlePokemonClick} />
+      <PokemonGrid 
+        pokemonList={filteredPokemonList} 
+        onPokemonClick={handlePokemonClick}
+        currentPokemon={currentPokemon}
+        selectedPokemon={selectedPokemon}
+      />
     </div>
   );
 }
