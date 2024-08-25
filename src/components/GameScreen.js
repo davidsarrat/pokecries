@@ -46,6 +46,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
+      className: 'custom-toast', // Added this line
     });
   };
 
@@ -362,7 +363,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
         </p>
         <button className="exit-button" onClick={handleExitClick}>Exit Game</button>
       </footer>
-      <ToastContainer />
+      <ToastContainer className="toast-container-custom" />
     </div>
   );
 }

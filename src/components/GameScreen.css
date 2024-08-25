@@ -191,3 +191,36 @@
     gap: 0.5rem;
   }
 }
+
+/* Estilos para toasts en pantallas pequeñas */
+@media (max-width: 768px) {
+  .toast-container-custom {
+    width: 100% !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    padding: 0 !important;
+  }
+
+  .custom-toast {
+    min-height: 40px !important;
+    padding: 8px 12px !important;
+    border-radius: 0 !important;
+  }
+
+  .custom-toast .Toastify__toast-body {
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 14px !important;
+  }
+
+  .custom-toast .Toastify__toast-body > div:last-child {
+    flex: 1 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .custom-toast .Toastify__toast-icon {
+    width: 16px !important;
+    height: 16px !important;
+    margin-right: 8px !important;
+  }
+}
