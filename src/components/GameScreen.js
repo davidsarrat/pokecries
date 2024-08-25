@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PokemonGrid from './PokemonGrid';
 import Navbar from './Navbar';
+import GameOverScreen from './GameOverScreen';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './GameScreen.css';
@@ -12,28 +13,28 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
   const [currentPokemon, setCurrentPokemon] = useState(null);
   const [correctCount, setCorrectCount] = useState(0);
   const [incorrectCount, setIncorrectCount] = useState(0);
-  const [selectedPokemon, setSelectedPokemon] = useState(null);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [shuffledPokemonList, setShuffledPokemonList] = useState([]);
   const [currentPokemonIndex, setCurrentPokemonIndex] = useState(0);
+  const [progressCount, setProgressCount] = useState(0);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [timer, setTimer] = useState(0);
   const [isGameFinished, setIsGameFinished] = useState(false);
   const timerRef = useRef(null);
+  const [failedPokemon, setFailedPokemon] = useState([]);
+  const [gameOver, setGameOver] = useState(false);
+  const [animatingCards, setAnimatingCards] = useState(new Map());
+  const [isAutoPlaying, setIsAutoPlaying] = useState(false);
 
   const showToast = (content, type) => {
-    // Hacer invisibles las toasts existentes
     const existingToasts = document.getElementsByClassName('Toastify__toast');
     for (let i = 0; i < existingToasts.length; i++) {
       existingToasts[i].style.display = 'none';
     }
 
-    // Eliminar todos los toasts existentes
     toast.dismiss();
 
-    // Mostrar el nuevo toast inmediatamente
     toast[type](content, {
       position: "bottom-right",
       autoClose: 1000,
@@ -51,13 +52,13 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
     setPokemonList(selectedPokemon);
     setFilteredPokemonList(selectedPokemon);
     
-    // Shuffle the selected Pokemon list
     const shuffled = [...selectedPokemon].sort(() => Math.random() - 0.5);
     setShuffledPokemonList(shuffled);
     
     if (shuffled.length > 0) {
       setCurrentPokemon(shuffled[0]);
       setCurrentPokemonIndex(0);
+      setProgressCount(0);
     }
   }, [selectedGenerations]);
 
@@ -81,55 +82,11 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
     };
   }, [selectedGameMode, isGameFinished]);
 
-  const moveToNextPokemon = () => {
-    const nextIndex = (currentPokemonIndex + 1) % shuffledPokemonList.length;
-    setCurrentPokemonIndex(nextIndex);
-    setCurrentPokemon(shuffledPokemonList[nextIndex]);
-
-    if (selectedGameMode === 'pokedex_completer' && nextIndex === 0) {
-      endGame();
-    }
-  };
-
-  const playCurrentCry = () => {
-    if (currentPokemon) {
-      try {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-        }
-        audioRef.current = new Audio(`/media/cries/${currentPokemon.id}.mp3`);
-        setIsPlaying(true);
-        audioRef.current.play()
-          .then(() => {
-            audioRef.current.addEventListener('ended', () => setIsPlaying(false));
-          })
-          .catch(error => {
-            // Ignorar el error
-            setIsPlaying(false);
-          });
-      } catch (error) {
-        // Ignorar el error
-        setIsPlaying(false);
-      }
-    }
-  };
-
-  const resetSearch = () => {
-    if (navbarRef.current) {
-      navbarRef.current.resetSearch();
-    }
-    setFilteredPokemonList(pokemonList);
-  };
-
   const handlePokemonClick = (clickedPokemon) => {
-    if (isAnimating) return;
+    const isCorrect = clickedPokemon.id === currentPokemon.id;
 
-    setIsAnimating(true);
-    setSelectedPokemon(clickedPokemon);
-
-    if (clickedPokemon.id === currentPokemon.id) {
-      setCorrectCount(correctCount + 1);
+    if (isCorrect) {
+      setCorrectCount(prevCount => prevCount + 1);
       showToast(
         <div>
           <p>Correct!</p>
@@ -142,7 +99,8 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
         'success'
       );
     } else {
-      setIncorrectCount(incorrectCount + 1);
+      setIncorrectCount(prevCount => prevCount + 1);
+      setFailedPokemon(prev => [...prev, currentPokemon]);
       showToast(
         <div>
           <p>Incorrect. It was <strong>{currentPokemon.name}</strong>!</p>
@@ -156,12 +114,101 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
       );
     }
 
-    setTimeout(() => {
-      resetSearch();
-      moveToNextPokemon();
-      setSelectedPokemon(null);
-      setIsAnimating(false);
-    }, 1000);
+    // Resetear la búsqueda inmediatamente
+    resetSearch();
+
+    // Mover al siguiente Pokémon inmediatamente
+    moveToNextPokemon();
+
+    // Iniciar o extender la animación para la carta clickeada
+    setAnimatingCards(prev => {
+      const newMap = new Map(prev);
+      const now = Date.now();
+      const existingTimeout = newMap.get(clickedPokemon.id);
+      
+      if (existingTimeout) {
+        clearTimeout(existingTimeout.timeoutId);
+      }
+
+      const timeoutId = setTimeout(() => {
+        setAnimatingCards(current => {
+          const updatedMap = new Map(current);
+          updatedMap.delete(clickedPokemon.id);
+          return updatedMap;
+        });
+      }, 1000);
+
+      newMap.set(clickedPokemon.id, {
+        timeoutId,
+        startTime: now,
+        isCorrect: isCorrect
+      });
+
+      return newMap;
+    });
+  };
+
+  const playCurrentCry = useCallback((pokemon = currentPokemon, isAutoplay = false) => {
+    if (pokemon) {
+      try {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+        audioRef.current = new Audio(`/media/cries/${pokemon.id}.mp3`);
+        setIsPlaying(true);
+        audioRef.current.play()
+          .then(() => {
+            audioRef.current.addEventListener('ended', () => {
+              setIsPlaying(false);
+              if (isAutoplay) {
+                // Si es autoplay, actualizar el estado para detener la animación del botón
+                setIsAutoPlaying(false);
+              }
+            });
+          })
+          .catch(error => {
+            console.error('Error playing audio:', error);
+            setIsPlaying(false);
+            if (isAutoplay) {
+              setIsAutoPlaying(false);
+            }
+          });
+      } catch (error) {
+        console.error('Error setting up audio:', error);
+        setIsPlaying(false);
+        if (isAutoplay) {
+          setIsAutoPlaying(false);
+        }
+      }
+    }
+  }, [currentPokemon]);
+
+  const moveToNextPokemon = useCallback(() => {
+    const nextIndex = (currentPokemonIndex + 1) % shuffledPokemonList.length;
+    const nextProgressCount = progressCount + 1;
+    
+    if (selectedGameMode === 'pokedex_completer' && nextProgressCount === shuffledPokemonList.length) {
+      endGame();
+    } else {
+      const nextPokemon = shuffledPokemonList[nextIndex];
+      setCurrentPokemonIndex(nextIndex);
+      setCurrentPokemon(nextPokemon);
+      setProgressCount(nextProgressCount);
+      
+      // Iniciar el autoplay y la animación del botón
+      setIsAutoPlaying(true);
+      setTimeout(() => {
+        playCurrentCry(nextPokemon, true);
+      }, 0);
+    }
+  }, [currentPokemonIndex, shuffledPokemonList, progressCount, selectedGameMode, playCurrentCry]);
+
+  const resetSearch = () => {
+    if (navbarRef.current) {
+      navbarRef.current.resetSearch();
+    }
+    setFilteredPokemonList(pokemonList);
   };
 
   const handleSearch = (searchTerm) => {
@@ -173,8 +220,6 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
   };
 
   const handleEnterPress = (searchTerm) => {
-    if (isAnimating) return;
-
     const normalizedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
     if (filteredPokemonList.length === 1) {
       handlePokemonClick(filteredPokemonList[0]);
@@ -219,13 +264,22 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
   const endGame = () => {
     setIsGameFinished(true);
     clearInterval(timerRef.current);
-    const totalTime = formatTime(timer);
-    alert(`Congratulations! You've completed the Pokédex!
-    Time: ${totalTime}
-    Correct: ${correctCount}
-    Incorrect: ${incorrectCount}`);
-    onExit();
+    setGameOver(true);
   };
+
+  if (gameOver) {
+    return (
+      <GameOverScreen
+        stats={{
+          correctCount,
+          incorrectCount,
+          totalTime: formatTime(timer)
+        }}
+        failedPokemon={failedPokemon}
+        onPlayAgain={onExit}
+      />
+    );
+  }
 
   if (pokemonList.length === 0) {
     return <div>No Pokémon selected. Please select at least one generation.</div>;
@@ -235,13 +289,13 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
     <div className="game-container">
       <Navbar 
         ref={navbarRef}
-        onPlayCry={playCurrentCry}
+        onPlayCry={() => playCurrentCry()}
         correctCount={correctCount}
         incorrectCount={incorrectCount}
         onSearch={handleSearch}
         onEnterPress={handleEnterPress}
-        isPlaying={isPlaying}
-        currentPokemonIndex={currentPokemonIndex}
+        isPlaying={isPlaying || isAutoPlaying}
+        progressCount={progressCount}
         totalPokemon={shuffledPokemonList.length}
         timer={timer}
         showProgress={selectedGameMode === 'pokedex_completer'}
@@ -252,8 +306,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
             pokemonList={filteredPokemonList} 
             onPokemonClick={handlePokemonClick}
             currentPokemon={currentPokemon}
-            selectedPokemon={selectedPokemon}
-            isAnimating={isAnimating}
+            animatingCards={animatingCards}
           />
         </div>
       </div>

@@ -1,0 +1,103 @@
+.game-over-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    width: 90%;
+    margin: 2rem auto;
+  }
+  
+  .game-over-title {
+    font-size: 3rem;
+    color: #4a4a4a;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .stats-container {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .stats-container p {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0.5rem;
+    color: #333;
+  }
+  
+  .failed-pokemon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+  
+  .better-luck, .congratulations {
+    font-size: 1.5rem;
+    color: #4a4a4a;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+  
+  .congratulations {
+    color: #4CAF50;
+  }
+  
+  .play-again-button {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .play-again-button:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  @media (max-width: 600px) {
+    .game-over-container {
+      padding: 1.5rem;
+    }
+  
+    .game-over-title {
+      font-size: 2.5rem;
+    }
+  
+    .stats-container {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .stats-container p {
+      margin-bottom: 0.5rem;
+    }
+  
+    .failed-pokemon-grid {
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+  
+    .better-luck, .congratulations {
+      font-size: 1.2rem;
+    }
+  
+    .play-again-button {
+      font-size: 1rem;
+      padding: 0.8rem 1.6rem;
+    }
+  }

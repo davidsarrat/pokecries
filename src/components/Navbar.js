@@ -2,7 +2,7 @@ import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react'
 import { FaPlay, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
 import './Navbar.css';
 
-const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, onEnterPress, isPlaying, currentPokemonIndex, totalPokemon, timer, showProgress }, ref) => {
+const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, onEnterPress, isPlaying, progressCount, totalPokemon, timer, showProgress }, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const searchInputRef = useRef(null);
 
@@ -39,7 +39,6 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, 
       <button 
         className={`play-cry-button ${isPlaying ? 'playing' : ''}`} 
         onClick={onPlayCry}
-        disabled={isPlaying}
       >
         <FaPlay className="play-icon" />
         <span>Play Cry</span>
@@ -66,7 +65,7 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, 
         {showProgress && (
           <>
             <div className="score-item progress">
-              <span>{currentPokemonIndex + 1}/{totalPokemon}</span>
+              <span>{progressCount + 1}/{totalPokemon}</span>
             </div>
             <div className="score-item timer">
               <FaClock className="score-icon" />

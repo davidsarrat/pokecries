@@ -1,24 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './PokemonCard.css';
 
-function PokemonCard({ pokemon, onClick, isCorrect, isIncorrect }) {
-  const [feedback, setFeedback] = useState('');
-
-  useEffect(() => {
-    if (isCorrect) {
-      setFeedback('correct');
-    } else if (isIncorrect) {
-      setFeedback('incorrect');
-    } else {
-      setFeedback('');
-    }
-
-    const timer = setTimeout(() => {
-      setFeedback('');
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [isCorrect, isIncorrect]);
+function PokemonCard({ pokemon, onClick, isAnimating, isCorrect }) {
+  const feedback = isAnimating ? (isCorrect ? 'correct' : 'incorrect') : '';
 
   return (
     <div className={`pokemon-card ${feedback}`} onClick={onClick}>
