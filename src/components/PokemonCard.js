@@ -8,11 +8,9 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible }) {
     if (isAnimating) {
       const card = cardRef.current;
       card.style.animation = 'none';
-      // Forzar un reflow
       void card.offsetWidth;
       card.style.animation = null;
       card.classList.remove('correct-animation', 'incorrect-animation');
-      // Forzar otro reflow
       void card.offsetWidth;
       card.classList.add(isCorrect ? 'correct-animation' : 'incorrect-animation');
     }
@@ -21,7 +19,6 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible }) {
   const handleClick = () => {
     const card = cardRef.current;
     card.style.animation = 'none';
-    // Forzar un reflow
     void card.offsetWidth;
     card.style.animation = null;
     card.classList.remove('correct-animation', 'incorrect-animation');

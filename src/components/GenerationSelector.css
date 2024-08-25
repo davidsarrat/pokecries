@@ -55,23 +55,23 @@
 }
 
 .btn-group-vertical .btn:nth-child(1).active {
-  background: #ffc107; /* Amarillo - Bootstrap "warning" */
+  background: #ffc107;
 }
 
 .btn-group-vertical .btn:nth-child(2).active {
-  background: #dc3545; /* Rojo - Bootstrap "danger" */
+  background: #dc3545;
 }
 
 .btn-group-vertical .btn:nth-child(3).active {
-  background: #28a745; /* Verde - Bootstrap "success" */
+  background: #28a745;
 }
 
 .btn-group-vertical .btn:nth-child(4).active {
-  background: #007bff; /* Azul - Bootstrap "primary" */
+  background: #007bff;
 }
 
 .btn-group-vertical .btn:nth-child(5).active {
-  background: #6c757d; /* Plateado - Bootstrap "secondary" */
+  background: #6c757d;
 }
 
 @media (hover: hover) and (pointer: fine) {

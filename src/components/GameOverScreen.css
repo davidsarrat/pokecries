@@ -93,7 +93,7 @@
   padding: 1rem 2rem;
   font-size: 1.2rem;
   font-weight: bold;
-  background-color: #007bff; /* Color azul de Bootstrap */
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 50px;
@@ -102,7 +102,7 @@
 }
 
 .play-again-button:hover {
-  background-color: #0056b3; /* Un tono más oscuro para el hover */
+  background-color: #0056b3;
   transform: translateY(-2px);
   box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
 }

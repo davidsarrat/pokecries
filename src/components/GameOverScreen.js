@@ -7,7 +7,6 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
   const audioRef = useRef(null);
 
   useEffect(() => {
-    // Mostrar todas las tarjetas al entrar en la pantalla de Game Over
     const allPokemonCards = document.querySelectorAll('.pokemon-card');
     allPokemonCards.forEach(card => {
       card.classList.remove('hidden');

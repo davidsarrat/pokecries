@@ -1,6 +1,6 @@
 .game-mode-selector {
   margin-top: 2rem;
-  margin-bottom: 1rem; /* Reduced from 2rem to 1rem */
+  margin-bottom: 1rem;
 }
 
 .game-mode-selector h2 {
@@ -28,7 +28,7 @@
 }
 
 .time-attack-settings {
-  padding: 0; /* Removed bottom padding */
+  padding: 0;
 }
 
 .time-setting {

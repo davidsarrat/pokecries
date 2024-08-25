@@ -245,7 +245,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
 
   const handleExitClick = () => {
     if (window.confirm("Are you sure you want to exit the game?")) {
-      setVisiblePokemon(pokemonList); // Mostrar todas las tarjetas antes de salir
+      setVisiblePokemon(pokemonList);
       onExit();
     }
   };
@@ -360,11 +360,11 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
         }}
         failedPokemon={failedPokemon}
         onPlayAgain={() => {
-          setVisiblePokemon(pokemonList); // Mostrar todas las tarjetas antes de volver al menú
+          setVisiblePokemon(pokemonList); 
           onExit();
         }}
         selectedGameMode={selectedGameMode}
-        pokemonList={pokemonList} // Pasar la lista completa de Pokémon
+        pokemonList={pokemonList} 
       />
     );
   }

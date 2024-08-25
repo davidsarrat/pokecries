@@ -42,7 +42,7 @@ function StartScreen() {
 
   const handleExitGame = () => {
     setGameStarted(false);
-    setSelectedGenerations(['gen1']); // Volver a Gen 1 por defecto
+    setSelectedGenerations(['gen1']);
     setSelectedGameMode('freestyle');
   };
 

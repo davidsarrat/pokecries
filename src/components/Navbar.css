@@ -2,7 +2,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;  /* Aumentado el padding vertical */
+  padding: 0.75rem 1rem;
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   position: sticky;
@@ -22,7 +22,7 @@
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s ease;
-  height: 42px;  /* Aumentado la altura */
+  height: 42px;
 }
 
 .play-cry-button {
@@ -70,7 +70,7 @@
   border-radius: 20px;
   width: 100%;
   transition: all 0.3s ease;
-  height: 42px;  /* Aumentado la altura */
+  height: 42px;
 }
 
 .search-container input:focus {
@@ -107,8 +107,8 @@
 }
 
 .score-item.progress {
-  background-color: rgba(255, 193, 7, 0.2);  /* Aumentado la opacidad */
-  color: #FFA000;  /* Cambiado a un amarillo más oscuro */
+  background-color: rgba(255, 193, 7, 0.2);
+  color: #FFA000;
 }
 
 .score-item.timer {
@@ -144,7 +144,7 @@
     flex-direction: column;
     gap: 0.5rem;
     padding: 0.75rem;
-    padding-bottom: 0.75rem; /* Remove the extra padding */
+    padding-bottom: 0.75rem;
   }
 
   .play-cry-button,
