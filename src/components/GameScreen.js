@@ -263,7 +263,17 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       setVisiblePokemon(pokemonList);
     } else {
       const availablePokemon = pokemonList.filter(p => p.id !== currentPokemon.id);
-      const randomPokemon = availablePokemon.sort(() => 0.5 - Math.random()).slice(0, numberOfAnswers - 1);
+      const randomPokemon = [];
+      const usedIndices = new Set();
+
+      while (randomPokemon.length < numberOfAnswers - 1) {
+        const randomIndex = Math.floor(Math.random() * availablePokemon.length);
+        if (!usedIndices.has(randomIndex)) {
+          usedIndices.add(randomIndex);
+          randomPokemon.push(availablePokemon[randomIndex]);
+        }
+      }
+
       setVisiblePokemon([...randomPokemon, currentPokemon].sort(() => 0.5 - Math.random()));
     }
   }, [limitedAnswers, numberOfAnswers, pokemonList, currentPokemon]);
