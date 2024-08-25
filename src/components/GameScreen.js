@@ -14,10 +14,14 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
   const [incorrectCount, setIncorrectCount] = useState(0);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [usedPokemonIds, setUsedPokemonIds] = useState([]);
+  const [shuffledPokemonList, setShuffledPokemonList] = useState([]);
+  const [currentPokemonIndex, setCurrentPokemonIndex] = useState(0);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [timer, setTimer] = useState(0);
+  const [isGameFinished, setIsGameFinished] = useState(false);
+  const timerRef = useRef(null);
 
   const showToast = (content, type) => {
     // Hacer invisibles las toasts existentes
@@ -46,8 +50,14 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
     });
     setPokemonList(selectedPokemon);
     setFilteredPokemonList(selectedPokemon);
-    if (selectedPokemon.length > 0) {
-      setRandomPokemon(selectedPokemon);
+    
+    // Shuffle the selected Pokemon list
+    const shuffled = [...selectedPokemon].sort(() => Math.random() - 0.5);
+    setShuffledPokemonList(shuffled);
+    
+    if (shuffled.length > 0) {
+      setCurrentPokemon(shuffled[0]);
+      setCurrentPokemonIndex(0);
     }
   }, [selectedGenerations]);
 
@@ -57,14 +67,28 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
     }
   }, [currentPokemon]);
 
-  const setRandomPokemon = (pokemonArray) => {
-    const availablePokemon = pokemonArray.filter(pokemon => !usedPokemonIds.includes(pokemon.id));
-    if (availablePokemon.length === 0) {
-      endGame();
-      return;
+  useEffect(() => {
+    if (selectedGameMode === 'pokedex_completer' && !isGameFinished) {
+      timerRef.current = setInterval(() => {
+        setTimer(prevTimer => prevTimer + 1);
+      }, 1000);
     }
-    const randomIndex = Math.floor(Math.random() * availablePokemon.length);
-    setCurrentPokemon(availablePokemon[randomIndex]);
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [selectedGameMode, isGameFinished]);
+
+  const moveToNextPokemon = () => {
+    const nextIndex = (currentPokemonIndex + 1) % shuffledPokemonList.length;
+    setCurrentPokemonIndex(nextIndex);
+    setCurrentPokemon(shuffledPokemonList[nextIndex]);
+
+    if (selectedGameMode === 'pokedex_completer' && nextIndex === 0) {
+      endGame();
+    }
   };
 
   const playCurrentCry = () => {
@@ -132,11 +156,9 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
       );
     }
 
-    setUsedPokemonIds([...usedPokemonIds, currentPokemon.id]);
-
     setTimeout(() => {
       resetSearch();
-      setRandomPokemon(pokemonList);
+      moveToNextPokemon();
       setSelectedPokemon(null);
       setIsAnimating(false);
     }, 1000);
@@ -188,8 +210,20 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
     }
   };
 
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  };
+
   const endGame = () => {
-    alert("Congratulations! You've completed the Pokédex!");
+    setIsGameFinished(true);
+    clearInterval(timerRef.current);
+    const totalTime = formatTime(timer);
+    alert(`Congratulations! You've completed the Pokédex!
+    Time: ${totalTime}
+    Correct: ${correctCount}
+    Incorrect: ${incorrectCount}`);
     onExit();
   };
 
@@ -207,6 +241,10 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
         onSearch={handleSearch}
         onEnterPress={handleEnterPress}
         isPlaying={isPlaying}
+        currentPokemonIndex={currentPokemonIndex}
+        totalPokemon={shuffledPokemonList.length}
+        timer={timer}
+        showProgress={selectedGameMode === 'pokedex_completer'}
       />
       <div className="game-content">
         <div className="game-screen">

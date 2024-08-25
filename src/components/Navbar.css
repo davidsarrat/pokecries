@@ -2,24 +2,30 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
+  padding: 0.75rem 1rem;  /* Aumentado el padding vertical */
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   position: relative;
 }
 
-.play-cry-button {
+.play-cry-button,
+.score-item {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0.5rem 1rem;
-  font-size: 1rem;
-  background-color: #4CAF50;
-  color: white;
+  font-size: 0.9rem;
+  font-weight: bold;
   border: none;
   border-radius: 25px;
   cursor: pointer;
   transition: all 0.3s ease;
+  height: 42px;  /* Aumentado la altura */
+}
+
+.play-cry-button {
+  background-color: #4CAF50;
+  color: white;
 }
 
 .play-cry-button .play-icon {
@@ -49,23 +55,21 @@
 }
 
 .search-container {
-  flex-grow: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  width: 50%;
+  max-width: 300px;
 }
 
 .search-container input {
   padding: 0.5rem 0.5rem 0.5rem 2rem;
-  font-size: 1rem;
+  font-size: 0.9rem;
   border: 1px solid #ddd;
   border-radius: 20px;
   width: 100%;
-  max-width: 300px;
   transition: all 0.3s ease;
+  height: 42px;  /* Aumentado la altura */
 }
 
 .search-container input:focus {
@@ -76,21 +80,15 @@
 .search-icon {
   position: absolute;
   left: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
   color: #888;
   pointer-events: none;
 }
 
 .score-container {
   display: flex;
-  gap: 1rem;
-}
-
-.score-item {
-  display: flex;
-  align-items: center;
-  padding: 0.3rem 0.7rem;
-  border-radius: 15px;
-  font-weight: bold;
+  gap: 0.5rem;
 }
 
 .score-icon {
@@ -107,29 +105,46 @@
   color: #f44336;
 }
 
+.score-item.progress {
+  background-color: rgba(255, 193, 7, 0.2);  /* Aumentado la opacidad */
+  color: #FFA000;  /* Cambiado a un amarillo más oscuro */
+}
+
+.score-item.timer {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #2196f3;
+}
+
+.score-item span {
+  font-size: 0.9rem;
+}
+
 @media (max-width: 768px) {
   .navbar {
     flex-direction: column;
     gap: 0.5rem;
+    padding: 0.75rem;  /* Aumentado el padding */
   }
 
-  .play-cry-button {
+  .play-cry-button,
+  .search-container,
+  .score-container {
     width: 100%;
-  }
-
-  .search-container {
     position: static;
     transform: none;
-    width: 100%;
-    margin: 0.5rem 0;
-  }
-
-  .search-container input {
     max-width: none;
   }
 
+  .search-container {
+    margin: 0.5rem 0;
+  }
+
   .score-container {
-    width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .score-item {
+    flex: 1 1 calc(50% - 0.25rem);
   }
 }

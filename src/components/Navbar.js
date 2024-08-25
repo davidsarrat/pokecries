@@ -1,8 +1,8 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
-import { FaPlay, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaPlay, FaCheck, FaTimes, FaClock } from 'react-icons/fa';
 import './Navbar.css';
 
-const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, onEnterPress, isPlaying }, ref) => {
+const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, onEnterPress, isPlaying, currentPokemonIndex, totalPokemon, timer, showProgress }, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const searchInputRef = useRef(null);
 
@@ -26,6 +26,12 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, 
     if (e.key === 'Enter') {
       onEnterPress(searchTerm);
     }
+  };
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
 
   return (
@@ -57,6 +63,17 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, 
           <FaTimes className="score-icon" />
           <span>{incorrectCount}</span>
         </div>
+        {showProgress && (
+          <>
+            <div className="score-item progress">
+              <span>{currentPokemonIndex + 1}/{totalPokemon}</span>
+            </div>
+            <div className="score-item timer">
+              <FaClock className="score-icon" />
+              <span>{formatTime(timer)}</span>
+            </div>
+          </>
+        )}
       </div>
     </nav>
   );
