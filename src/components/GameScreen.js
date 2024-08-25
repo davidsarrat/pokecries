@@ -67,7 +67,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
           audioRef.current.pause();
           audioRef.current.currentTime = 0;
         }
-        audioRef.current = new Audio(`/media/cries/${pokemon.id}.mp3`);
+        audioRef.current = new Audio(`${process.env.PUBLIC_URL}/media/cries/${pokemon.id}.mp3`);
         setIsPlaying(true);
         audioRef.current.play()
           .then(() => {
@@ -142,7 +142,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       showToast(
         <div>
           <img 
-            src={`/media/sprites/${currentPokemon.id}.png`} 
+            src={`${process.env.PUBLIC_URL}/media/sprites/${currentPokemon.id}.png`} 
             alt={currentPokemon.name} 
             style={{width: '100%', height: '100%', objectFit: 'contain'}} 
           />
@@ -165,7 +165,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
         showToast(
           <div>
             <img 
-              src={`/media/sprites/0.png`} 
+              src={`${process.env.PUBLIC_URL}/media/sprites/0.png`} 
               alt="Unknown Pokémon"
               style={{width: '100%', height: '100%', objectFit: 'contain'}} 
             />
@@ -176,7 +176,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
         showToast(
           <div>
             <img 
-              src={`/media/sprites/${currentPokemon.id}.png`} 
+              src={`${process.env.PUBLIC_URL}/media/sprites/${currentPokemon.id}.png`} 
               alt={currentPokemon.name} 
               style={{width: '100%', height: '100%', objectFit: 'contain'}} 
             />

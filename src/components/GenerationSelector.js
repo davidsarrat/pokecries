@@ -28,7 +28,7 @@ function GenerationSelector({ selectedGenerations, setSelectedGenerations }) {
             className={`btn btn-outline-primary ${selectedGenerations.includes(gen.key) ? 'active' : ''}`}
             onClick={() => toggleGeneration(gen.key)}
           >
-            <img src={`/media/icons/${gen.icon}`} alt={`${gen.name} icon`} className="gen-icon" />
+            <img src={`${process.env.PUBLIC_URL}/media/icons/${gen.icon}`} alt={`${gen.name} icon`} className="gen-icon" />
             <span>{gen.name}</span>
           </button>
         ))}

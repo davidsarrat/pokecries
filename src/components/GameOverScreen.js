@@ -18,7 +18,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-    audioRef.current = new Audio(`/media/cries/${pokemonId}.mp3`);
+    audioRef.current = new Audio(`${process.env.PUBLIC_URL}/media/cries/${pokemonId}.mp3`);
     audioRef.current.play();
   };
 

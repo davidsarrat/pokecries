@@ -34,7 +34,7 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible }) {
       onClick={handleClick}
     >
       <img 
-        src={`/media/sprites/${pokemon.id}.png`} 
+        src={`${process.env.PUBLIC_URL}/media/sprites/${pokemon.id}.png`} 
         alt={pokemon.name} 
         className="pokemon-image"
       />
