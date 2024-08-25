@@ -26,28 +26,32 @@
 }
 
 .start-button {
-  margin-top: 1rem;
-  width: 100%;
-  padding: 1rem;
-  font-size: 1.2rem;
-  font-weight: 600;
-  border-radius: 50px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  color: white;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  margin-top: 1rem !important;
+  width: 100% !important;
+  padding: 1rem !important;
+  font-size: 1.2rem !important;
+  font-weight: 600 !important;
+  border-radius: 50px !important;
+  background-color: #007bff !important;
+  border: none !important;
+  color: white !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
 }
 
 .start-button:hover:not(:disabled) {
-  box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+  background-color: #0056b3 !important;
+  box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08) !important;
 }
 
 .start-button:disabled {
-  opacity: 0.5;
-  background: linear-gradient(135deg, #a0a0a0 0%, #808080 100%);
+  background-color: #6c757d !important;
+  opacity: 0.65 !important;
   cursor: not-allowed !important;
-  pointer-events: all !important;
+}
+
+.start-button:disabled:hover {
+  cursor: not-allowed !important;
 }
 
 @media (max-width: 768px) {

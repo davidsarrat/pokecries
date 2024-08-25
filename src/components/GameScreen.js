@@ -160,12 +160,26 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       setFailedPokemon(prev => [...prev, currentPokemon]);
       
       // Mostrar toast de Pokémon incorrecto
-      showToast(
-        <div>
-          <p>Incorrect Pokémon!</p>
-        </div>,
-        'error'
-      );
+      if (keepCryOnError) {
+        showToast(
+          <div>
+            <p>Incorrect Pokémon!</p>
+          </div>,
+          'error'
+        );
+      } else {
+        showToast(
+          <div>
+            <p>Incorrect. It was <strong>{currentPokemon.name}</strong>!</p>
+            <img 
+              src={`/media/sprites/${currentPokemon.id}.png`} 
+              alt={currentPokemon.name} 
+              style={{width: '80px', height: '80px', objectFit: 'contain'}} 
+            />
+          </div>,
+          'error'
+        );
+      }
       
       // Reproducir el cry nuevamente
       playCurrentCry();
