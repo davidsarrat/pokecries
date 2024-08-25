@@ -31,6 +31,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
   const [timeLost, setTimeLost] = useState(0);
   const lastUpdateTimeRef = useRef(Date.now());
   const [visiblePokemon, setVisiblePokemon] = useState([]);
+  const [showAnimations, setShowAnimations] = useState(true);
 
   const showToast = (content, type) => {
     const existingToasts = document.getElementsByClassName('Toastify__toast');
@@ -159,7 +160,6 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       }
       setFailedPokemon(prev => [...prev, currentPokemon]);
       
-      // Mostrar toast de Pokémon incorrecto
       if (keepCryOnError) {
         showToast(
           <div>
@@ -181,7 +181,6 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
         );
       }
       
-      // Reproducir el cry nuevamente
       playCurrentCry();
       
       if (!keepCryOnError) {
@@ -190,11 +189,16 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       }
     }
 
-    setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
-    
-    setTimeout(() => {
-      setAnimatingCards(new Map());
-    }, 500);
+    const shouldShowAnimations = !(limitedAnswers && !keepCryOnError) && 
+                                 !(limitedAnswers && keepCryOnError && isCorrect);
+
+    if (shouldShowAnimations) {
+      setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
+      
+      setTimeout(() => {
+        setAnimatingCards(new Map());
+      }, 500);
+    }
   };
 
   const resetSearch = () => {
