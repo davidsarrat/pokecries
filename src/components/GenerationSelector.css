@@ -34,12 +34,6 @@
   min-height: 3rem;
 }
 
-.btn-group-vertical .btn:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
-  width: calc(50% - 0.5rem);
-  justify-self: center;
-}
-
 .btn-group-vertical .btn .gen-icon {
   width: auto;
   height: 28px;
@@ -61,23 +55,23 @@
 }
 
 .btn-group-vertical .btn:nth-child(1).active {
-  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  background: #ffc107; /* Amarillo - Bootstrap "warning" */
 }
 
 .btn-group-vertical .btn:nth-child(2).active {
-  background: linear-gradient(135deg, #FF0000 0%, #8B0000 100%);
+  background: #dc3545; /* Rojo - Bootstrap "danger" */
 }
 
 .btn-group-vertical .btn:nth-child(3).active {
-  background: linear-gradient(135deg, #00FF00 0%, #008000 100%);
+  background: #28a745; /* Verde - Bootstrap "success" */
 }
 
 .btn-group-vertical .btn:nth-child(4).active {
-  background: linear-gradient(135deg, #1E90FF 0%, #000080 100%);
+  background: #007bff; /* Azul - Bootstrap "primary" */
 }
 
 .btn-group-vertical .btn:nth-child(5).active {
-  background: linear-gradient(135deg, #808080 0%, #000000 100%);
+  background: #6c757d; /* Plateado - Bootstrap "secondary" */
 }
 
 @media (hover: hover) and (pointer: fine) {

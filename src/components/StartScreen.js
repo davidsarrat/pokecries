@@ -7,7 +7,7 @@ import GameOptionsSelector from './GameOptionsSelector';
 import GameScreen from './GameScreen';
 
 function StartScreen() {
-  const [selectedGenerations, setSelectedGenerations] = useState([]);
+  const [selectedGenerations, setSelectedGenerations] = useState(['gen1']); // Gen 1 activada por defecto
   const [selectedGameMode, setSelectedGameMode] = useState('freestyle');
   const [gameStarted, setGameStarted] = useState(false);
   const [timeAttackSettings, setTimeAttackSettings] = useState({
@@ -19,8 +19,13 @@ function StartScreen() {
   const [limitedAnswers, setLimitedAnswers] = useState(false);
   const [numberOfAnswers, setNumberOfAnswers] = useState(4);
   const [keepCryOnError, setKeepCryOnError] = useState(false);
+  const [error, setError] = useState('');
 
   const handleStartGame = () => {
+    if (selectedGenerations.length === 0) {
+      setError('You must select at least one generation!');
+      return;
+    }
     if (selectedGameMode === 'time_attack') {
       if (timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) {
         alert('Please set a time greater than 0 for Time Attack mode!');
@@ -31,12 +36,13 @@ function StartScreen() {
       alert('Number of answers must be at least 2 when Limited Answers is enabled!');
       return;
     }
+    setError('');
     setGameStarted(true);
   };
 
   const handleExitGame = () => {
     setGameStarted(false);
-    setSelectedGenerations([]);
+    setSelectedGenerations(['gen1']); // Volver a Gen 1 por defecto
     setSelectedGameMode('freestyle');
   };
 
@@ -84,6 +90,7 @@ function StartScreen() {
       >
         Start Game
       </button>
+      {error && <p className="error-message">{error}</p>}
     </div>
   );
 }

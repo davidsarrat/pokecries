@@ -54,6 +54,12 @@
   cursor: not-allowed !important;
 }
 
+.error-message {
+  color: #dc3545;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
 @media (max-width: 768px) {
   .title {
     font-size: 3rem;
