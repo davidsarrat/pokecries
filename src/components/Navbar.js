@@ -1,7 +1,8 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import { FaPlay, FaCheck, FaTimes } from 'react-icons/fa';
 import './Navbar.css';
 
-const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, onEnterPress }, ref) => {
+const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, onEnterPress, isPlaying }, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const searchInputRef = useRef(null);
 
@@ -29,8 +30,13 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, 
 
   return (
     <nav className="navbar">
-      <button className="play-cry-button" onClick={onPlayCry}>
-        Play Pokémon Cry
+      <button 
+        className={`play-cry-button ${isPlaying ? 'playing' : ''}`} 
+        onClick={onPlayCry}
+        disabled={isPlaying}
+      >
+        <FaPlay className="play-icon" />
+        <span>Play Cry</span>
       </button>
       <div className="search-container">
         <input
@@ -43,8 +49,14 @@ const Navbar = forwardRef(({ onPlayCry, correctCount, incorrectCount, onSearch, 
         />
       </div>
       <div className="score-container">
-        <span className="correct">Correct: {correctCount}</span>
-        <span className="incorrect">Incorrect: {incorrectCount}</span>
+        <div className="score-item correct">
+          <FaCheck className="score-icon" />
+          <span>{correctCount}</span>
+        </div>
+        <div className="score-item incorrect">
+          <FaTimes className="score-icon" />
+          <span>{incorrectCount}</span>
+        </div>
       </div>
     </nav>
   );

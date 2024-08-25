@@ -17,6 +17,7 @@ function GameScreen({ selectedGenerations }) {
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
   const [activeToast, setActiveToast] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const showToast = (content, type) => {
     // Ocultar el toast activo si existe
@@ -74,7 +75,15 @@ function GameScreen({ selectedGenerations }) {
         audioRef.current.currentTime = 0;
       }
       audioRef.current = new Audio(`/media/cries/${currentPokemon.id}.mp3`);
-      audioRef.current.play().catch(error => console.error('Error playing audio:', error));
+      setIsPlaying(true);
+      audioRef.current.play()
+        .then(() => {
+          audioRef.current.addEventListener('ended', () => setIsPlaying(false));
+        })
+        .catch(error => {
+          console.error('Error playing audio:', error);
+          setIsPlaying(false);
+        });
     }
   };
 
@@ -141,19 +150,23 @@ function GameScreen({ selectedGenerations }) {
     if (filteredPokemonList.length === 1) {
       handlePokemonClick(filteredPokemonList[0]);
     } else {
-      const exactMatch = pokemonList.find(pokemon => 
+      const exactMatches = pokemonList.filter(pokemon => 
         pokemon.name.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSearchTerm
       );
-      if (exactMatch) {
-        handlePokemonClick(exactMatch);
+      if (exactMatches.length === 1) {
+        handlePokemonClick(exactMatches[0]);
+      } else if (exactMatches.length > 1) {
+        // Aquí puedes manejar el caso de múltiples coincidencias exactas
+        // Por ejemplo, podrías mostrar un mensaje al usuario o seleccionar el primero
+        console.log('Multiple exact matches found');
       }
     }
   };
 
   const handleKeyPress = useCallback((event) => {
     const char = event.key;
-    if (/^[a-zA-Z0-9]$/.test(char) && navbarRef.current) {
-      navbarRef.current.focusSearchInput(char);
+    if ((/^[a-zA-Z0-9]$/.test(char) || char === 'Backspace') && navbarRef.current) {
+      navbarRef.current.focusSearchInput();
     }
   }, []);
 
@@ -177,7 +190,7 @@ function GameScreen({ selectedGenerations }) {
         incorrectCount={incorrectCount}
         onSearch={handleSearch}
         onEnterPress={handleEnterPress}
-        isAnimating={isAnimating}
+        isPlaying={isPlaying}
       />
       <div className="game-content">
         <div className="game-screen">

@@ -4,29 +4,78 @@
   align-items: center;
   padding: 1rem;
   background-color: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .play-cry-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0.5rem 1rem;
   font-size: 1rem;
   background-color: #4CAF50;
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 25px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
 }
 
-.play-cry-button:hover {
+.play-cry-button .play-icon {
+  margin-right: 0.5rem;
+}
+
+.play-cry-button:hover:not(:disabled) {
   background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.play-cry-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.play-cry-button.playing {
+  animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  25% { transform: translate(-2px, -2px) rotate(-1deg); }
+  50% { transform: translate(2px, 2px) rotate(1deg); }
+  75% { transform: translate(-2px, 2px) rotate(-1deg); }
+}
+
+.search-container {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 1rem;
+  position: relative;
 }
 
 .search-container input {
-  padding: 0.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 2rem;
   font-size: 1rem;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 300px;
+  transition: all 0.3s ease;
+}
+
+.search-container input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.5);
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.7rem;
+  color: #888;
+  pointer-events: none;
 }
 
 .score-container {
@@ -34,11 +83,25 @@
   gap: 1rem;
 }
 
-.correct {
+.score-item {
+  display: flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 15px;
+  font-weight: bold;
+}
+
+.score-icon {
+  margin-right: 0.3rem;
+}
+
+.score-item.correct {
+  background-color: rgba(76, 175, 80, 0.1);
   color: #4CAF50;
 }
 
-.incorrect {
+.score-item.incorrect {
+  background-color: rgba(244, 67, 54, 0.1);
   color: #f44336;
 }
 
@@ -54,10 +117,11 @@
 
   .search-container {
     width: 100%;
+    margin: 0.5rem 0;
   }
 
   .search-container input {
-    width: 100%;
+    max-width: none;
   }
 
   .score-container {
