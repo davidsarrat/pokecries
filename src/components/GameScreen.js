@@ -164,7 +164,11 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       if (keepCryOnError) {
         showToast(
           <div>
-            <p>Incorrect!</p>
+            <img 
+              src={`/media/sprites/0.png`} 
+              alt="Unknown Pokémon"
+              style={{width: '100%', height: '100%', objectFit: 'contain'}} 
+            />
           </div>,
           'error'
         );

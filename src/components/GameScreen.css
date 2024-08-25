@@ -193,6 +193,7 @@
 }
 
 .Toastify__toast-container {
+  pointer-events: none;
   width: auto !important;
   max-width: 300px;
   position: fixed;
@@ -202,6 +203,7 @@
 }
 
 .Toastify__toast {
+  pointer-events: auto;
   padding: 8px 12px !important;
   border-radius: 8px !important;
   cursor: pointer;
@@ -213,10 +215,12 @@
 }
 
 .custom-toast {
+  pointer-events: none;
   font-size: 14px !important;
 }
 
 .custom-toast img {
+  pointer-events: none;
   width: 80px !important;
   height: 80px !important;
   object-fit: contain;
@@ -245,6 +249,7 @@
   }
 
   .custom-toast {
+    pointer-events: none;
     min-height: auto !important;
     padding: 8px !important;
     border-radius: 8px !important;
