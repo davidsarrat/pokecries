@@ -116,7 +116,7 @@ function GameScreen({ selectedGenerations }) {
   }
 
   return (
-    <div className="game-screen">
+    <div className="game-container">
       <Navbar 
         ref={navbarRef}
         onPlayCry={playCurrentCry}
@@ -125,12 +125,16 @@ function GameScreen({ selectedGenerations }) {
         onSearch={handleSearch}
         onEnterPress={handleEnterPress}
       />
-      <PokemonGrid 
-        pokemonList={filteredPokemonList} 
-        onPokemonClick={handlePokemonClick}
-        currentPokemon={currentPokemon}
-        selectedPokemon={selectedPokemon}
-      />
+      <div className="game-content">
+        <div className="game-screen">
+          <PokemonGrid 
+            pokemonList={filteredPokemonList} 
+            onPokemonClick={handlePokemonClick}
+            currentPokemon={currentPokemon}
+            selectedPokemon={selectedPokemon}
+          />
+        </div>
+      </div>
     </div>
   );
 }

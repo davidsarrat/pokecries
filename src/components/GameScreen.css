@@ -1,20 +1,42 @@
+.game-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.game-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
 .game-screen {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem 2rem 2rem 2rem;
   background-color: rgba(255, 255, 255, 0.8);
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  max-width: 95%;
-  width: 1300px;
-  margin: 0 auto;
+  max-width: 1300px;
+  width: 100%;
+  margin: 1rem auto;
+  padding: 1rem;
 }
 
 .play-cry-button {
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   padding: 0.5rem 1rem;
-  font-size: 1.2rem;
+  font-size: 1rem;
   background-color: #4CAF50;
   color: white;
   border: none;
@@ -27,8 +49,14 @@
   background-color: #45a049;
 }
 
-@media (max-width: 1400px) {
+@media (max-width: 768px) {
   .game-screen {
-    width: 95%;
+    padding: 0.5rem;
+    margin: 0.5rem auto;
+  }
+
+  .play-cry-button {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
   }
 }

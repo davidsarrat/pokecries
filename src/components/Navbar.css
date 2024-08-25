@@ -1,15 +1,10 @@
 .navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 1000;
 }
 
 .play-cry-button {
@@ -45,4 +40,28 @@
 
 .incorrect {
   color: #f44336;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .play-cry-button {
+    width: 100%;
+  }
+
+  .search-container {
+    width: 100%;
+  }
+
+  .search-container input {
+    width: 100%;
+  }
+
+  .score-container {
+    width: 100%;
+    justify-content: space-between;
+  }
 }

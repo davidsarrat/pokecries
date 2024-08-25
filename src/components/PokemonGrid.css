@@ -5,6 +5,7 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 1rem;
 }
 
 @media (min-width: 1300px) {
@@ -28,5 +29,7 @@
 @media (max-width: 767px) {
   .pokemon-grid {
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+    padding: 0.5rem;
   }
 }
