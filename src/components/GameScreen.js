@@ -41,8 +41,8 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
 
     toast.dismiss();
 
-    toast[type](content, {
-      position: "bottom-right",
+    toast(content, {
+      position: "top-right",
       autoClose: 1000,
       hideProgressBar: true,
       closeOnClick: true,
@@ -50,7 +50,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       draggable: false,
       closeButton: false,
       onMouseEnter: toast.dismiss,
-      className: 'custom-toast',
+      className: `custom-toast ${type === 'success' ? 'correct-toast' : 'incorrect-toast'}`,
     });
   };
 
@@ -141,11 +141,10 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       }
       showToast(
         <div>
-          <p>Correct!</p>
           <img 
             src={`/media/sprites/${currentPokemon.id}.png`} 
             alt={currentPokemon.name} 
-            style={{width: '80px', height: '80px', objectFit: 'contain'}} 
+            style={{width: '100%', height: '100%', objectFit: 'contain'}} 
           />
         </div>,
         'success'
@@ -172,11 +171,10 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
       } else {
         showToast(
           <div>
-            <p>Incorrect!</p>
             <img 
               src={`/media/sprites/${currentPokemon.id}.png`} 
               alt={currentPokemon.name} 
-              style={{width: '80px', height: '80px', objectFit: 'contain'}} 
+              style={{width: '100%', height: '100%', objectFit: 'contain'}} 
             />
           </div>,
           'error'
