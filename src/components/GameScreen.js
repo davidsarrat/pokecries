@@ -14,6 +14,7 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
   const [incorrectCount, setIncorrectCount] = useState(0);
   const [selectedPokemon, setSelectedPokemon] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [usedPokemonIds, setUsedPokemonIds] = useState([]);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
   const [activeToast, setActiveToast] = useState(null);
@@ -21,11 +22,15 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
 
   const showToast = (content, type) => {
     if (activeToast) {
-      const toastElement = document.getElementById(activeToast);
-      if (toastElement) {
-        toastElement.style.display = 'none';
+      try {
+        const toastElement = document.getElementById(activeToast);
+        if (toastElement) {
+          toastElement.remove(); // Eliminar el elemento del DOM
+        }
+        toast.dismiss(activeToast);
+      } catch (error) {
+        console.error('Error removing toast element:', error);
       }
-      toast.dismiss(activeToast);
     }
 
     const newToast = toast[type](content, {
@@ -62,8 +67,13 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
   }, [currentPokemon]);
 
   const setRandomPokemon = (pokemonArray) => {
-    const randomIndex = Math.floor(Math.random() * pokemonArray.length);
-    setCurrentPokemon(pokemonArray[randomIndex]);
+    const availablePokemon = pokemonArray.filter(pokemon => !usedPokemonIds.includes(pokemon.id));
+    if (availablePokemon.length === 0) {
+      endGame();
+      return;
+    }
+    const randomIndex = Math.floor(Math.random() * availablePokemon.length);
+    setCurrentPokemon(availablePokemon[randomIndex]);
   };
 
   const playCurrentCry = () => {
@@ -125,6 +135,9 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
         'error'
       );
     }
+
+    setUsedPokemonIds([...usedPokemonIds, currentPokemon.id]);
+
     setTimeout(() => {
       resetSearch();
       setRandomPokemon(pokemonList);
@@ -177,6 +190,11 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
     if (window.confirm("Are you sure you want to exit the game?")) {
       onExit();
     }
+  };
+
+  const endGame = () => {
+    alert("Congratulations! You've completed the Pokédex!");
+    onExit();
   };
 
   if (pokemonList.length === 0) {
