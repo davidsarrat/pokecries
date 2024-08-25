@@ -179,9 +179,15 @@ function GameScreen({
       setIncorrectCount(prevCount => prevCount + 1);
       if (selectedGameMode === 'time_attack') {
         const loseTimeMs = timeAttackSettings.loseTime * 1000;
-        setTimeLeftMs(prevTime => Math.max(0, prevTime - loseTimeMs));
+        const newTime = Math.max(0, timeLeftMs - loseTimeMs);
+        setTimeLeftMs(newTime);
         setTimeLost(loseTimeMs);
         setTimeout(() => setTimeLost(0), 500);
+        
+        if (newTime <= 0) {
+          endGame();
+          return;
+        }
       }
       setFailedPokemon(prev => [...prev, currentPokemon]);
       
