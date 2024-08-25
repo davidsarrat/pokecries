@@ -37,6 +37,7 @@ function StartScreen() {
       return;
     }
     setError('');
+    window.scrollTo(0, 0);
     setGameStarted(true);
   };
 

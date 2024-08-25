@@ -352,11 +352,6 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit, timeAttackS
   }, [handleKeyPress]);
 
   useEffect(() => {
-    // Forzar el scroll al inicio de la página cuando el componente se monta
-    window.scrollTo(0, 0);
-  }, []);
-
-  useEffect(() => {
     if (navbarRef.current) {
       setNavbarHeight(navbarRef.current.offsetHeight);
     }
