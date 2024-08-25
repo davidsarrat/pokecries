@@ -17,36 +17,27 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
   const [usedPokemonIds, setUsedPokemonIds] = useState([]);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
-  const [activeToast, setActiveToast] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   const showToast = (content, type) => {
-    if (activeToast) {
-      try {
-        const toastElement = document.getElementById(activeToast);
-        if (toastElement) {
-          toastElement.remove(); // Eliminar el elemento del DOM
-        }
-        toast.dismiss(activeToast);
-      } catch (error) {
-        console.error('Error removing toast element:', error);
-      }
+    // Hacer invisibles las toasts existentes
+    const existingToasts = document.getElementsByClassName('Toastify__toast');
+    for (let i = 0; i < existingToasts.length; i++) {
+      existingToasts[i].style.display = 'none';
     }
 
-    const newToast = toast[type](content, {
+    // Eliminar todos los toasts existentes
+    toast.dismiss();
+
+    // Mostrar el nuevo toast inmediatamente
+    toast[type](content, {
       position: "bottom-right",
       autoClose: 1000,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
-      onOpen: (props) => {
-        setActiveToast(props.toastId);
-      },
-      onClose: () => setActiveToast(null),
     });
-
-    setActiveToast(newToast);
   };
 
   useEffect(() => {
@@ -78,20 +69,25 @@ function GameScreen({ selectedGenerations, selectedGameMode, onExit }) {
 
   const playCurrentCry = () => {
     if (currentPokemon) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+      try {
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.currentTime = 0;
+        }
+        audioRef.current = new Audio(`/media/cries/${currentPokemon.id}.mp3`);
+        setIsPlaying(true);
+        audioRef.current.play()
+          .then(() => {
+            audioRef.current.addEventListener('ended', () => setIsPlaying(false));
+          })
+          .catch(error => {
+            // Ignorar el error
+            setIsPlaying(false);
+          });
+      } catch (error) {
+        // Ignorar el error
+        setIsPlaying(false);
       }
-      audioRef.current = new Audio(`/media/cries/${currentPokemon.id}.mp3`);
-      setIsPlaying(true);
-      audioRef.current.play()
-        .then(() => {
-          audioRef.current.addEventListener('ended', () => setIsPlaying(false));
-        })
-        .catch(error => {
-          console.error('Error playing audio:', error);
-          setIsPlaying(false);
-        });
     }
   };
 
