@@ -5,6 +5,7 @@
   padding: 1rem;
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  position: relative;
 }
 
 .play-cry-button {
@@ -52,8 +53,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 1rem;
-  position: relative;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .search-container input {
@@ -116,6 +118,8 @@
   }
 
   .search-container {
+    position: static;
+    transform: none;
     width: 100%;
     margin: 0.5rem 0;
   }
