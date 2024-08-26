@@ -32,14 +32,16 @@ function LimitedAnswersSelector({ limitedAnswers, setLimitedAnswers, numberOfAns
         <div className="number-of-answers">
           <div className="number-of-answers-input">
             <label htmlFor="numberOfAnswers">Number of answers:</label>
-            <input
-              type="number"
-              id="numberOfAnswers"
-              value={numberOfAnswers}
-              onChange={handleNumberOfAnswersChange}
-              min="2"
-              placeholder="0"
-            />
+            <div className="input-wrapper">
+              <input
+                type="number"
+                id="numberOfAnswers"
+                value={numberOfAnswers}
+                onChange={handleNumberOfAnswersChange}
+                min="2"
+                placeholder="0"
+              />
+            </div>
           </div>
           {!isNumberOfAnswersValid() && (
             <p className="error-message">Number of answers must be at least 2!</p>
