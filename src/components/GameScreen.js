@@ -45,8 +45,14 @@ function GameScreen({
   const [timeLost, setTimeLost] = useState(0);
   const lastUpdateTimeRef = useRef(Date.now());
   const [visiblePokemon, setVisiblePokemon] = useState([]);
-  const [showAnimations, setShowAnimations] = useState(true);
   const [navbarHeight, setNavbarHeight] = useState(0);
+
+  const resetSearch = useCallback(() => {
+    if (navbarRef.current) {
+      navbarRef.current.resetSearch();
+    }
+    setFilteredPokemonList(pokemonList);
+  }, [pokemonList]);
 
   const showToast = (content, type) => {
     const existingToasts = document.getElementsByClassName('Toastify__toast');
@@ -152,7 +158,7 @@ function GameScreen({
     }
   }, [selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, currentPokemon, getRandomPokemon, playCurrentCry, endGame]);
 
-  const handlePokemonClick = (clickedPokemon) => {
+  const handlePokemonClick = useCallback((clickedPokemon) => {
     const isCorrect = clickedPokemon.id === currentPokemon.id;
 
     if (isCorrect) {
@@ -234,14 +240,7 @@ function GameScreen({
         setAnimatingCards(new Map());
       }, 500);
     }
-  };
-
-  const resetSearch = () => {
-    if (navbarRef.current) {
-      navbarRef.current.resetSearch();
-    }
-    setFilteredPokemonList(pokemonList);
-  };
+  }, [currentPokemon, keepCryOnError, limitedAnswers, moveToNextPokemon, playCurrentCry, resetSearch, selectedGameMode, timeAttackSettings, timeLeftMs, endGame]);
 
   const handleSearch = (searchTerm) => {
     const normalizedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
