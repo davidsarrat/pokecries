@@ -244,18 +244,31 @@ function GameScreen({
   }, [currentPokemon, keepCryOnError, limitedAnswers, moveToNextPokemon, playCurrentCry, resetSearch, selectedGameMode, timeAttackSettings, timeLeftMs, endGame]);
 
   const handleSearch = (searchTerm) => {
-    const normalizedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normalizedSearchTerm = searchTerm.toLowerCase()
+      .replace(/♂/g, 'm')
+      .replace(/♀/g, 'f')
+      .replace(/[^a-z0-9mf]/g, '');
     const filtered = pokemonList.filter(pokemon => 
-      pokemon.name.toLowerCase().replace(/[^a-z0-9]/g, '').includes(normalizedSearchTerm)
+      pokemon.name.toLowerCase()
+        .replace(/♂/g, 'm')
+        .replace(/♀/g, 'f')
+        .replace(/[^a-z0-9mf]/g, '')
+        .includes(normalizedSearchTerm)
     );
     setFilteredPokemonList(filtered);
   };
 
   const handleEnterPress = useCallback((searchTerm) => {
-    const normalizedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const normalizedSearchTerm = searchTerm.toLowerCase()
+      .replace(/♂/g, 'm')
+      .replace(/♀/g, 'f')
+      .replace(/[^a-z0-9mf]/g, '');
   
     const exactMatch = filteredPokemonList.find(pokemon => 
-      pokemon.name.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSearchTerm &&
+      pokemon.name.toLowerCase()
+        .replace(/♂/g, 'm')
+        .replace(/♀/g, 'f')
+        .replace(/[^a-z0-9mf]/g, '') === normalizedSearchTerm &&
       visiblePokemon.some(visible => visible.id === pokemon.id)
     );
 
@@ -265,7 +278,11 @@ function GameScreen({
     }
 
     const filteredVisiblePokemon = filteredPokemonList.filter(pokemon => 
-      pokemon.name.toLowerCase().includes(normalizedSearchTerm) && 
+      pokemon.name.toLowerCase()
+        .replace(/♂/g, 'm')
+        .replace(/♀/g, 'f')
+        .replace(/[^a-z0-9mf]/g, '')
+        .includes(normalizedSearchTerm) && 
       visiblePokemon.some(visible => visible.id === pokemon.id)
     );
 
