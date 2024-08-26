@@ -414,7 +414,11 @@ function GameScreen({
   }
 
   if (pokemonList.length === 0) {
-    return <div>No Pokémon selected. Please select at least one generation.</div>;
+    return (
+      <div className="game-container">
+        <p className="error-message">No Pokémon selected. Please select at least one generation.</p>
+      </div>
+    );
   }
 
   return (

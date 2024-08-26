@@ -15,7 +15,7 @@ function LimitedAnswersSelector({ limitedAnswers, setLimitedAnswers, numberOfAns
   };
 
   const isNumberOfAnswersValid = () => {
-    return numberOfAnswers === '' || numberOfAnswers >= 2;
+    return numberOfAnswers !== '' && numberOfAnswers >= 2;
   };
 
   return (

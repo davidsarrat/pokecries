@@ -33,6 +33,9 @@ function GenerationSelector({ selectedGenerations, setSelectedGenerations }) {
           </button>
         ))}
       </div>
+      {selectedGenerations.length === 0 && (
+        <p className="error-message">You must select at least one generation!</p>
+      )}
     </div>
   );
 }

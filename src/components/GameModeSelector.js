@@ -67,7 +67,7 @@ function GameModeSelector({ selectedGameMode, setSelectedGameMode, timeAttackSet
             </div>
           </div>
           {!isTimeAttackValid() && (
-            <p className="error-message">Please set a time greater than 0 for Time Attack!</p>
+            <p className="error-message">Time must be greater than 00:00!</p>
           )}
           <div className="time-setting">
             <label>Time gain on correct:</label>
