@@ -56,6 +56,31 @@ const Navbar = forwardRef(({
     }
   }, [timeGained, timeLost]);
 
+  useEffect(() => {
+    const preventZoom = (e) => {
+      e.preventDefault();
+      document.body.style.touchAction = 'none';
+      document.documentElement.style.touchAction = 'none';
+    };
+
+    const allowZoom = () => {
+      document.body.style.touchAction = 'auto';
+      document.documentElement.style.touchAction = 'auto';
+    };
+
+    if (searchInputRef.current) {
+      searchInputRef.current.addEventListener('focus', preventZoom, false);
+      searchInputRef.current.addEventListener('blur', allowZoom, false);
+    }
+
+    return () => {
+      if (searchInputRef.current) {
+        searchInputRef.current.removeEventListener('focus', preventZoom);
+        searchInputRef.current.removeEventListener('blur', allowZoom);
+      }
+    };
+  }, []);
+
   return (
     <nav className="navbar">
       <button 
