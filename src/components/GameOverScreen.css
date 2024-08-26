@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Pocket Monk';
+  src: url('../../public/fonts/pocket-monk.otf') format('opentype');
+}
+
 .game-over-container {
   display: flex;
   flex-direction: column;
@@ -12,11 +17,40 @@
 }
 
 .game-over-title {
-  font-size: 2.5rem;
-  color: #4a4a4a;
+  font-size: 4.8rem;
+  font-weight: 900;
+  color: #FFCB05;
   margin-bottom: 2rem;
   text-align: center;
-  font-weight: 800;
+  width: 100%;
+  display: block;
+  font-family: 'Pocket Monk', sans-serif;
+  position: relative;
+  letter-spacing: 2px;
+  -webkit-text-stroke: 2px #3B4CCA;
+  text-stroke: 2px #3B4CCA;
+}
+
+.game-over-title::before,
+.game-over-title::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.game-over-title::before {
+  -webkit-text-stroke: 10px #3B4CCA;
+  text-stroke: 10px #3B4CCA;
+  z-index: -2;
+}
+
+.game-over-title::after {
+  -webkit-text-stroke: 5px #1E3A8A;
+  text-stroke: 5px #1E3A8A;
+  z-index: -1;
 }
 
 .stats-container {
@@ -113,7 +147,7 @@
   }
 
   .game-over-title {
-    font-size: 2rem;
+    font-size: 2.5rem;
   }
 
   .stat-label {
@@ -144,7 +178,7 @@
   }
 
   .game-over-title {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
 
   .stat-label {

@@ -26,7 +26,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
 
   return (
     <div className="game-over-container">
-      <h1 className="game-over-title">Game Over!</h1>
+      <h1 className="game-over-title" data-text="Game Over!">Game Over!</h1>
       <div className="stats-container">
         <div className="stat-item">
           <span className="stat-label">Correct</span>

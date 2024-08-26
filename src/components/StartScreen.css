@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Pocket Monk';
+  src: url('../../public/fonts/pocket-monk.otf') format('opentype');
+}
+
 .start-screen {
   background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
@@ -10,19 +15,57 @@
 }
 
 .title {
-  font-size: 3.5rem;
-  font-weight: 800;
-  color: #4a4a4a;
+  font-size: 4.8rem;
+  font-weight: 900;
+  color: #FFCB05;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
   width: 100%;
   display: block;
+  font-family: 'Pocket Monk', sans-serif;
+  position: relative;
+  letter-spacing: 2px;
+  -webkit-text-stroke: 2px #3B4CCA;
+  text-stroke: 2px #3B4CCA;
+}
+
+.title::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+.title::before,
+.title::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.title::before {
+  -webkit-text-stroke: 10px #3B4CCA;
+  text-stroke: 10px #3B4CCA;
+  z-index: -2;
+}
+
+.title::after {
+  -webkit-text-stroke: 5px #1E3A8A;
+  text-stroke: 5px #1E3A8A;
+  z-index: -1;
 }
 
 .subtitle {
   font-size: 1.2rem;
   color: #6c757d;
+  font-family: Arial, sans-serif;
+  margin-top: 1rem;
 }
 
 .start-button {
@@ -62,7 +105,7 @@
 
 @media (max-width: 768px) {
   .title {
-    font-size: 3rem;
+    font-size: 3.5rem;
   }
 
   .subtitle {
@@ -80,7 +123,7 @@
   }
 
   .title {
-    font-size: 2.5rem;
+    font-size: 3rem;
   }
 }
 
