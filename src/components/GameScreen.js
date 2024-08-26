@@ -252,8 +252,20 @@ function GameScreen({
   };
 
   const handleEnterPress = useCallback((searchTerm) => {
+    const normalizedSearchTerm = searchTerm.toLowerCase().replace(/[^a-z0-9]/g, '');
+  
+    const exactMatch = filteredPokemonList.find(pokemon => 
+      pokemon.name.toLowerCase().replace(/[^a-z0-9]/g, '') === normalizedSearchTerm &&
+      visiblePokemon.some(visible => visible.id === pokemon.id)
+    );
+
+    if (exactMatch) {
+      handlePokemonClick(exactMatch);
+      return;
+    }
+
     const filteredVisiblePokemon = filteredPokemonList.filter(pokemon => 
-      pokemon.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
+      pokemon.name.toLowerCase().includes(normalizedSearchTerm) && 
       visiblePokemon.some(visible => visible.id === pokemon.id)
     );
 

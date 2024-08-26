@@ -8,7 +8,6 @@ function LimitedAnswersSelector({ limitedAnswers, setLimitedAnswers, numberOfAns
 
   const handleNumberOfAnswersChange = (e) => {
     const value = e.target.value;
-    // Permitir cualquier número o un campo vacío
     if (value === '' || !isNaN(parseInt(value, 10))) {
       setNumberOfAnswers(value === '' ? '' : parseInt(value, 10));
     }
