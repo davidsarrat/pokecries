@@ -70,7 +70,7 @@ function GameModeSelector({ selectedGameMode, setSelectedGameMode, timeAttackSet
             <p className="error-message">Please set a time greater than 0 for Time Attack!</p>
           )}
           <div className="time-setting">
-            <label>Gain time on correct:</label>
+            <label>Time gain on correct:</label>
             <div className="time-inputs">
               <input 
                 type="number" 
@@ -84,7 +84,7 @@ function GameModeSelector({ selectedGameMode, setSelectedGameMode, timeAttackSet
             </div>
           </div>
           <div className="time-setting">
-            <label>Lose time on incorrect:</label>
+            <label>Time loss on incorrect:</label>
             <div className="time-inputs">
               <input 
                 type="number" 
