@@ -1,12 +1,14 @@
 import React, { useRef, useEffect } from 'react';
 import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
+import { scrollToTop } from '../utils/scrollUtils';
 
 function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode }) {
   const { correctCount, incorrectCount, totalTime } = stats;
   const audioRef = useRef(null);
 
   useEffect(() => {
+    scrollToTop();
     const allPokemonCards = document.querySelectorAll('.pokemon-card');
     allPokemonCards.forEach(card => {
       card.classList.remove('hidden');
@@ -62,7 +64,10 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
         )
       )}
       
-      <button className="play-again-button" onClick={onPlayAgain}>
+      <button className="play-again-button" onClick={() => {
+        scrollToTop();
+        onPlayAgain();
+      }}>
         Back to Main Menu
       </button>
 

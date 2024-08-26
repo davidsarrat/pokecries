@@ -6,6 +6,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './GameScreen.css';
 import pokemonData from '../data/pokemon.json';
+import { scrollToTop } from '../utils/scrollUtils';
 
 function GameScreen({ 
   selectedGenerations, 
@@ -269,6 +270,7 @@ function GameScreen({
   }, []);
 
   const handleExitClick = () => {
+    scrollToTop();
     onExit();
   };
 
@@ -387,6 +389,10 @@ function GameScreen({
       setNavbarHeight(navbarRef.current.offsetHeight);
     }
   }, [navbarRef]);
+
+  useEffect(() => {
+    scrollToTop();
+  }, []);
 
   if (gameOver) {
     return (

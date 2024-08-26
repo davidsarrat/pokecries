@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './StartScreen.css';
 import GenerationSelector from './GenerationSelector';
 import GameModeSelector from './GameModeSelector';
 import LimitedAnswersSelector from './LimitedAnswersSelector';
 import GameOptionsSelector from './GameOptionsSelector';
 import GameScreen from './GameScreen';
+import { scrollToTop } from '../utils/scrollUtils';
 
 function StartScreen() {
   const [selectedGenerations, setSelectedGenerations] = useState(['gen1']);
@@ -20,6 +21,10 @@ function StartScreen() {
   const [numberOfAnswers, setNumberOfAnswers] = useState(4);
   const [keepCryOnError, setKeepCryOnError] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    scrollToTop();
+  }, []);
 
   const handleStartGame = () => {
     if (selectedGenerations.length === 0) {
@@ -37,8 +42,10 @@ function StartScreen() {
       return;
     }
     setError('');
-    window.scrollTo(0, 0);
-    setGameStarted(true);
+    scrollToTop();
+    setTimeout(() => {
+      setGameStarted(true);
+    }, 100); // Pequeño retraso de 100ms
   };
 
   const handleExitGame = () => {
