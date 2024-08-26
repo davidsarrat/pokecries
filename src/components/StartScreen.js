@@ -26,26 +26,31 @@ function StartScreen() {
     scrollToTop();
   }, []);
 
+  const isStartButtonDisabled = () => {
+    if (selectedGenerations.length === 0) return true;
+    if (selectedGameMode === 'time_attack' && timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) return true;
+    if (limitedAnswers && numberOfAnswers < 2) return true;
+    return false;
+  };
+
   const handleStartGame = () => {
     if (selectedGenerations.length === 0) {
       setError('You must select at least one generation!');
       return;
     }
-    if (selectedGameMode === 'time_attack') {
-      if (timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) {
-        alert('Please set a time greater than 0 for Time Attack!');
-        return;
-      }
+    if (selectedGameMode === 'time_attack' && timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) {
+      setError('Please set a time greater than 0 for Time Attack!');
+      return;
     }
     if (limitedAnswers && numberOfAnswers < 2) {
-      alert('Number of answers must be at least 2 when Limited answers is enabled!');
+      setError('Number of answers must be at least 2 when Limited answers is enabled!');
       return;
     }
     setError('');
     scrollToTop();
     setTimeout(() => {
       setGameStarted(true);
-    }, 100); // Pequeño retraso de 100ms
+    }, 100);
   };
 
   const handleExitGame = () => {
@@ -99,7 +104,7 @@ function StartScreen() {
       <button 
         className="btn btn-primary btn-lg start-button"
         onClick={handleStartGame}
-        disabled={selectedGenerations.length === 0 || !selectedGameMode}
+        disabled={isStartButtonDisabled()}
       >
         Start Game
       </button>
