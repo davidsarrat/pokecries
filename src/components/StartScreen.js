@@ -29,7 +29,7 @@ function StartScreen() {
   const isStartButtonDisabled = () => {
     if (selectedGenerations.length === 0) return true;
     if (selectedGameMode === 'time_attack' && timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) return true;
-    if (limitedAnswers && numberOfAnswers < 2) return true;
+    if (limitedAnswers && (numberOfAnswers === '' || numberOfAnswers < 2)) return true;
     return false;
   };
 

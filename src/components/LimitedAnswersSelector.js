@@ -7,7 +7,15 @@ function LimitedAnswersSelector({ limitedAnswers, setLimitedAnswers, numberOfAns
   };
 
   const handleNumberOfAnswersChange = (e) => {
-    setNumberOfAnswers(parseInt(e.target.value, 10));
+    const value = e.target.value;
+    // Permitir cualquier número o un campo vacío
+    if (value === '' || !isNaN(parseInt(value, 10))) {
+      setNumberOfAnswers(value === '' ? '' : parseInt(value, 10));
+    }
+  };
+
+  const isNumberOfAnswersValid = () => {
+    return numberOfAnswers === '' || numberOfAnswers >= 2;
   };
 
   return (
@@ -23,14 +31,20 @@ function LimitedAnswersSelector({ limitedAnswers, setLimitedAnswers, numberOfAns
       </div>
       {limitedAnswers && (
         <div className="number-of-answers">
-          <label htmlFor="numberOfAnswers">Number of answers:</label>
-          <input
-            type="number"
-            id="numberOfAnswers"
-            value={numberOfAnswers}
-            onChange={handleNumberOfAnswersChange}
-            min="0"
-          />
+          <div className="number-of-answers-input">
+            <label htmlFor="numberOfAnswers">Number of answers:</label>
+            <input
+              type="number"
+              id="numberOfAnswers"
+              value={numberOfAnswers}
+              onChange={handleNumberOfAnswersChange}
+              min="2"
+              placeholder="0"
+            />
+          </div>
+          {!isNumberOfAnswersValid() && (
+            <p className="error-message">Number of answers must be at least 2!</p>
+          )}
         </div>
       )}
     </div>
