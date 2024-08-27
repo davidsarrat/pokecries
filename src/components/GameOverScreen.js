@@ -13,6 +13,10 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
     allPokemonCards.forEach(card => {
       card.classList.remove('hidden');
     });
+
+    // Restore touchAction when navigating to Game Over screen
+    document.body.style.touchAction = 'auto';
+    document.documentElement.style.touchAction = 'auto';
   }, []);
 
   const playPokemonCry = (pokemonId) => {
