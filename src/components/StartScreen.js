@@ -17,15 +17,15 @@ function StartScreen() {
     gainTime: 0,
     loseTime: 0
   });
-  const [limitedAnswers, setLimitedAnswers] = useState(false);
+  const [limitedAnswers, setLimitedAnswers] = useState(true);
   const [numberOfAnswers, setNumberOfAnswers] = useState(4);
   const [keepCryOnError, setKeepCryOnError] = useState(false);
   const [error, setError] = useState('');
-  const [limitedQuestions, setLimitedQuestions] = useState(false);
+  const [limitedQuestions, setLimitedQuestions] = useState(true);
   const [numberOfQuestions, setNumberOfQuestions] = useState(10);
   const [hardcoreMode, setHardcoreMode] = useState(false);
   const [isTimeAttack, setIsTimeAttack] = useState(false);
-  const [dontRepeatPokemon, setDontRepeatPokemon] = useState(false);
+  const [dontRepeatPokemon, setDontRepeatPokemon] = useState(true);
 
   const totalAvailablePokemon = useMemo(() => {
     return selectedGenerations.reduce((total, gen) => {
