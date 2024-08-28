@@ -106,6 +106,13 @@
   margin-top: 0.5rem;
 }
 
+.info-message {
+  color: #0056b3;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .title {
     font-size: 4rem;
