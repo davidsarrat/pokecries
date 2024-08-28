@@ -14,7 +14,8 @@ function GameScreen({
   selectedGameMode, 
   setSelectedGameMode,
   onExit, 
-  timeAttackSettings, 
+  isTimeAttack,
+  timeAttackSettings,
   setTimeAttackSettings,
   limitedAnswers, 
   setLimitedAnswers,
@@ -133,7 +134,7 @@ function GameScreen({
   }, [pokemonList]);
 
   const moveToNextPokemon = useCallback(() => {
-    if (selectedGameMode === 'time_attack' || selectedGameMode === 'freestyle') {
+    if (isTimeAttack || selectedGameMode === 'freestyle') {
       const nextPokemon = getRandomPokemon(currentPokemon);
       setCurrentPokemon(nextPokemon);
       setProgressCount(prevCount => prevCount + 1);
@@ -167,14 +168,14 @@ function GameScreen({
     if (limitedQuestions && progressCount + 1 >= numberOfQuestions) {
       endGame();
     }
-  }, [selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, currentPokemon, getRandomPokemon, playCurrentCry, endGame, limitedQuestions, numberOfQuestions]);
+  }, [isTimeAttack, selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, currentPokemon, getRandomPokemon, playCurrentCry, endGame, limitedQuestions, numberOfQuestions]);
 
   const handlePokemonClick = useCallback((clickedPokemon) => {
     const isCorrect = clickedPokemon.id === currentPokemon.id;
 
     if (isCorrect) {
       setCorrectCount(prevCount => prevCount + 1);
-      if (selectedGameMode === 'time_attack') {
+      if (isTimeAttack) {
         const gainTimeMs = timeAttackSettings.gainTime * 1000;
         setTimeLeftMs(prevTime => prevTime + gainTimeMs);
         setTimeGained(gainTimeMs);
@@ -201,7 +202,7 @@ function GameScreen({
         return;
       }
       
-      if (selectedGameMode === 'time_attack') {
+      if (isTimeAttack) {
         const loseTimeMs = timeAttackSettings.loseTime * 1000;
         const newTime = Math.max(0, timeLeftMs - loseTimeMs);
         setTimeLeftMs(newTime);
@@ -255,7 +256,7 @@ function GameScreen({
         setAnimatingCards(new Map());
       }, 500);
     }
-  }, [currentPokemon, keepCryOnError, limitedAnswers, moveToNextPokemon, playCurrentCry, resetSearch, selectedGameMode, timeAttackSettings, timeLeftMs, endGame, hardcoreMode]);
+  }, [currentPokemon, keepCryOnError, limitedAnswers, moveToNextPokemon, playCurrentCry, resetSearch, isTimeAttack, timeAttackSettings, timeLeftMs, endGame, hardcoreMode]);
 
   const handleSearch = (searchTerm) => {
     const normalizedSearchTerm = searchTerm.toLowerCase()
@@ -390,7 +391,7 @@ function GameScreen({
     let animationFrameId;
     
     const updateTimer = () => {
-      if (selectedGameMode === 'time_attack' && timeLeftMs > 0 && !isGameFinished) {
+      if (isTimeAttack && timeLeftMs > 0 && !isGameFinished) {
         const now = Date.now();
         const deltaTime = now - lastUpdateTimeRef.current;
         lastUpdateTimeRef.current = now;
@@ -409,7 +410,9 @@ function GameScreen({
       }
     };
 
-    if (selectedGameMode === 'time_attack' && !isGameFinished) {
+    if (isTimeAttack && !isGameFinished) {
+      lastUpdateTimeRef.current = Date.now();
+      setTimeLeftMs((timeAttackSettings.minutes * 60 + timeAttackSettings.seconds) * 1000);
       animationFrameId = requestAnimationFrame(updateTimer);
     }
 
@@ -418,7 +421,7 @@ function GameScreen({
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [selectedGameMode, isGameFinished, timeLeftMs, endGame]);
+  }, [isTimeAttack, isGameFinished, timeAttackSettings, endGame]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
@@ -485,8 +488,8 @@ function GameScreen({
         progressCount={progressCount}
         totalCount={limitedQuestions ? numberOfQuestions : (selectedGameMode === 'pokedex_completer' ? shuffledPokemonList.length : undefined)}
         showProgress={true}
-        timeLeft={selectedGameMode === 'time_attack' ? timeLeftMs : timer * 1000}
-        showTimer={selectedGameMode === 'time_attack' || selectedGameMode === 'pokedex_completer' || selectedGameMode === 'freestyle'}
+        timeLeft={isTimeAttack ? timeLeftMs : timer * 1000}
+        showTimer={isTimeAttack || selectedGameMode === 'pokedex_completer' || selectedGameMode === 'freestyle'}
         timeGained={timeGained}
         timeLost={timeLost}
         formatTime={formatTime}

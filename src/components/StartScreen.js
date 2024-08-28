@@ -26,6 +26,7 @@ function StartScreen() {
   const [limitedQuestions, setLimitedQuestions] = useState(false);
   const [numberOfQuestions, setNumberOfQuestions] = useState(10);
   const [hardcoreMode, setHardcoreMode] = useState(false);
+  const [isTimeAttack, setIsTimeAttack] = useState(false);
 
   const totalAvailablePokemon = useMemo(() => {
     return selectedGenerations.reduce((total, gen) => {
@@ -39,7 +40,7 @@ function StartScreen() {
 
   const isStartButtonDisabled = () => {
     if (selectedGenerations.length === 0) return true;
-    if (selectedGameMode === 'time_attack' && timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) return true;
+    if (isTimeAttack && timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) return true;
     if (limitedAnswers && (numberOfAnswers === '' || numberOfAnswers < 2)) return true;
     if (limitedQuestions && (numberOfQuestions === '' || numberOfQuestions < 1)) return true;
     if (selectedGameMode === 'pokedex_completer' && limitedQuestions && numberOfQuestions > totalAvailablePokemon) return true;
@@ -51,7 +52,7 @@ function StartScreen() {
       setError('You must select at least one generation!');
       return;
     }
-    if (selectedGameMode === 'time_attack' && timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) {
+    if (isTimeAttack && timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) {
       setError('Please set a time greater than 0 for Time Attack!');
       return;
     }
@@ -99,6 +100,7 @@ function StartScreen() {
         limitedQuestions={limitedQuestions}
         numberOfQuestions={numberOfQuestions}
         hardcoreMode={hardcoreMode}
+        isTimeAttack={isTimeAttack}
       />
     );
   }
@@ -116,6 +118,8 @@ function StartScreen() {
         setSelectedGameMode={setSelectedGameMode}
         setTimeAttackSettings={setTimeAttackSettings}
         timeAttackSettings={timeAttackSettings}
+        isTimeAttack={isTimeAttack}
+        setIsTimeAttack={setIsTimeAttack}
       />
       <LimitedQuestionsSelector
         limitedQuestions={limitedQuestions}

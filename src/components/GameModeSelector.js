@@ -3,11 +3,17 @@ import './GameModeSelector.css';
 
 const gameModes = [
   { name: 'Freestyle', key: 'freestyle' },
-  { name: 'Pokédex Run', key: 'pokedex_completer' },
-  { name: 'Time Attack!', key: 'time_attack' }
+  { name: 'Pokédex Run', key: 'pokedex_completer' }
 ];
 
-function GameModeSelector({ selectedGameMode, setSelectedGameMode, timeAttackSettings, setTimeAttackSettings }) {
+function GameModeSelector({ 
+  selectedGameMode, 
+  setSelectedGameMode, 
+  timeAttackSettings, 
+  setTimeAttackSettings,
+  isTimeAttack,
+  setIsTimeAttack
+}) {
   const handleModeChange = (e) => {
     setSelectedGameMode(e.target.value);
   };
@@ -20,6 +26,10 @@ function GameModeSelector({ selectedGameMode, setSelectedGameMode, timeAttackSet
       ...prevSettings,
       [name]: parsedValue
     }));
+  };
+
+  const handleTimeAttackToggle = (e) => {
+    setIsTimeAttack(e.target.checked);
   };
 
   const isTimeAttackValid = () => {
@@ -40,7 +50,17 @@ function GameModeSelector({ selectedGameMode, setSelectedGameMode, timeAttackSet
         ))}
       </select>
       
-      {selectedGameMode === 'time_attack' && (
+      <div className="time-attack-checkbox">
+        <input
+          type="checkbox"
+          id="timeAttack"
+          checked={isTimeAttack}
+          onChange={handleTimeAttackToggle}
+        />
+        <label htmlFor="timeAttack">Time Attack</label>
+      </div>
+      
+      {isTimeAttack && (
         <div className="time-attack-settings">
           <div className="time-setting">
             <label>Time:</label>
