@@ -21,7 +21,9 @@ function GameScreen({
   numberOfAnswers, 
   setNumberOfAnswers,
   keepCryOnError,
-  setKeepCryOnError
+  setKeepCryOnError,
+  limitedQuestions, 
+  numberOfQuestions 
 }) {
   const [pokemonList, setPokemonList] = useState([]);
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
@@ -157,7 +159,11 @@ function GameScreen({
         }, 0);
       }
     }
-  }, [selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, currentPokemon, getRandomPokemon, playCurrentCry, endGame]);
+
+    if (limitedQuestions && progressCount + 1 >= numberOfQuestions) {
+      endGame();
+    }
+  }, [selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, currentPokemon, getRandomPokemon, playCurrentCry, endGame, limitedQuestions, numberOfQuestions]);
 
   const handlePokemonClick = useCallback((clickedPokemon) => {
     const isCorrect = clickedPokemon.id === currentPokemon.id;
@@ -460,8 +466,8 @@ function GameScreen({
         onSearch={handleSearch}
         onEnterPress={handleEnterPress}
         isPlaying={isPlaying || isAutoPlaying}
-        progressCount={`${progressCount}/${shuffledPokemonList.length}`}
-        showProgress={selectedGameMode === 'pokedex_completer'}
+        progressCount={`${progressCount}/${limitedQuestions ? numberOfQuestions : shuffledPokemonList.length}`}
+        showProgress={selectedGameMode === 'pokedex_completer' || limitedQuestions}
         timeLeft={selectedGameMode === 'time_attack' ? timeLeftMs : timer * 1000}
         showTimer={selectedGameMode === 'time_attack' || selectedGameMode === 'pokedex_completer' || selectedGameMode === 'freestyle'}
         timeGained={timeGained}

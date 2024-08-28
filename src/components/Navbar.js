@@ -110,7 +110,7 @@ const Navbar = forwardRef(({
           <FaTimes className="score-icon" />
           <span>{incorrectCount}</span>
         </div>
-        {showProgress && selectedGameMode !== 'time_attack' && (
+        {showProgress && (
           <div className="score-item progress">
             <span>{progressCount}</span>
           </div>

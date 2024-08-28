@@ -93,6 +93,8 @@ function StartScreen() {
         setNumberOfAnswers={setNumberOfAnswers}
         keepCryOnError={keepCryOnError}
         setKeepCryOnError={setKeepCryOnError}
+        limitedQuestions={limitedQuestions} // Pass limitedQuestions
+        numberOfQuestions={numberOfQuestions} // Pass numberOfQuestions
       />
     );
   }

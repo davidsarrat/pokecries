@@ -11,7 +11,7 @@ function GameOptionsSelector({ keepCryOnError, setKeepCryOnError }) {
           checked={keepCryOnError}
           onChange={(e) => setKeepCryOnError(e.target.checked)}
         />
-        <label htmlFor="keepCryOnError">Keep cry on error</label>
+        <label htmlFor="keepCryOnError">Keep same cry on error</label>
       </div>
     </div>
   );
