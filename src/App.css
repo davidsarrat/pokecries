@@ -4,7 +4,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-color: #B3E0FF; /* Slightly more vibrant Water */
+  animation: colorTransition 120s ease-in-out infinite;
 }
 
 .App-logo {
@@ -19,14 +20,14 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: rgba(40, 44, 52, 0.05);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #333;
 }
 
 .App-link {
@@ -40,4 +41,25 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes colorTransition {
+  0%, 100% { background-color: #B3E0FF; } /* Water */
+  5.55% { background-color: #B3FFB3; } /* Grass */
+  11.11% { background-color: #FFB3B3; } /* Fire */
+  16.66% { background-color: #FFF2B3; } /* Electric */
+  22.22% { background-color: #FFB3E0; } /* Fairy */
+  27.77% { background-color: #E0B3FF; } /* Psychic */
+  33.33% { background-color: #D9D9D9; } /* Normal */
+  38.88% { background-color: #FFD9B3; } /* Fighting */
+  44.44% { background-color: #B3FFE0; } /* Flying */
+  50% { background-color: #D9B3FF; } /* Poison */
+  55.55% { background-color: #E0CCB3; } /* Ground */
+  61.11% { background-color: #B3B3E0; } /* Rock */
+  66.66% { background-color: #CCFFB3; } /* Bug */
+  72.22% { background-color: #CCB3FF; } /* Ghost */
+  77.77% { background-color: #E0E0CC; } /* Steel */
+  83.33% { background-color: #B3F0FF; } /* Ice */
+  88.88% { background-color: #FFB3CC; } /* Dragon */
+  94.44% { background-color: #CCB3B3; } /* Dark */
 }
