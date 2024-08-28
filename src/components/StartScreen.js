@@ -8,6 +8,8 @@ import { scrollToTop } from '../utils/scrollUtils';
 import LimitedQuestionsSelector from './LimitedQuestionsSelector';
 import pokemonData from '../data/pokemon.json';
 
+const LOCAL_STORAGE_KEY = 'pokecries_start_screen_config';
+
 function StartScreen() {
   const [selectedGenerations, setSelectedGenerations] = useState(['gen1']);
   const [gameStarted, setGameStarted] = useState(false);
@@ -26,6 +28,52 @@ function StartScreen() {
   const [hardcoreMode, setHardcoreMode] = useState(false);
   const [isTimeAttack, setIsTimeAttack] = useState(false);
   const [dontRepeatPokemon, setDontRepeatPokemon] = useState(true);
+
+  // Load configuration from localStorage
+  useEffect(() => {
+    const savedConfig = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (savedConfig) {
+      const config = JSON.parse(savedConfig);
+      setSelectedGenerations(config.selectedGenerations || ['gen1']);
+      setTimeAttackSettings(config.timeAttackSettings || { minutes: 2, seconds: 0, gainTime: 0, loseTime: 0 });
+      setLimitedAnswers(config.limitedAnswers !== undefined ? config.limitedAnswers : true);
+      setNumberOfAnswers(config.numberOfAnswers !== undefined ? config.numberOfAnswers : 4);
+      setKeepCryOnError(config.keepCryOnError !== undefined ? config.keepCryOnError : false);
+      setLimitedQuestions(config.limitedQuestions !== undefined ? config.limitedQuestions : true);
+      setNumberOfQuestions(config.numberOfQuestions !== undefined ? config.numberOfQuestions : 10);
+      setHardcoreMode(config.hardcoreMode !== undefined ? config.hardcoreMode : false);
+      setIsTimeAttack(config.isTimeAttack !== undefined ? config.isTimeAttack : false);
+      setDontRepeatPokemon(config.dontRepeatPokemon !== undefined ? config.dontRepeatPokemon : true);
+    }
+  }, []);
+
+  // Save configuration to localStorage
+  useEffect(() => {
+    const config = {
+      selectedGenerations,
+      timeAttackSettings,
+      limitedAnswers,
+      numberOfAnswers,
+      keepCryOnError,
+      limitedQuestions,
+      numberOfQuestions,
+      hardcoreMode,
+      isTimeAttack,
+      dontRepeatPokemon
+    };
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config));
+  }, [
+    selectedGenerations,
+    timeAttackSettings,
+    limitedAnswers,
+    numberOfAnswers,
+    keepCryOnError,
+    limitedQuestions,
+    numberOfQuestions,
+    hardcoreMode,
+    isTimeAttack,
+    dontRepeatPokemon
+  ]);
 
   const totalAvailablePokemon = useMemo(() => {
     return selectedGenerations.reduce((total, gen) => {
