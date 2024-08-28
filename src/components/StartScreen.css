@@ -85,9 +85,17 @@
   cursor: pointer !important;
 }
 
+.start-button.hardcore {
+  background-color: #dc3545 !important;
+}
+
 .start-button:hover:not(:disabled) {
   background-color: #0056b3 !important;
   box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08) !important;
+}
+
+.start-button.hardcore:hover:not(:disabled) {
+  background-color: #c82333 !important;
 }
 
 .start-button:disabled {

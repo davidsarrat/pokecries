@@ -25,6 +25,7 @@ function StartScreen() {
   const [error, setError] = useState('');
   const [limitedQuestions, setLimitedQuestions] = useState(false);
   const [numberOfQuestions, setNumberOfQuestions] = useState(10);
+  const [hardcoreMode, setHardcoreMode] = useState(false);
 
   const totalAvailablePokemon = useMemo(() => {
     return selectedGenerations.reduce((total, gen) => {
@@ -76,6 +77,8 @@ function StartScreen() {
   const handleExitGame = () => {
     setGameStarted(false);
   };
+
+  const startButtonClass = hardcoreMode ? 'start-button hardcore' : 'start-button';
 
   if (gameStarted) {
     return (
@@ -130,9 +133,11 @@ function StartScreen() {
       <GameOptionsSelector
         keepCryOnError={keepCryOnError}
         setKeepCryOnError={setKeepCryOnError}
+        hardcoreMode={hardcoreMode}
+        setHardcoreMode={setHardcoreMode}
       />
       <button 
-        className="btn btn-primary btn-lg start-button"
+        className={startButtonClass}
         onClick={handleStartGame}
         disabled={isStartButtonDisabled()}
       >

@@ -22,6 +22,7 @@ function GameScreen({
   setNumberOfAnswers,
   keepCryOnError,
   setKeepCryOnError,
+  hardcoreMode,
   limitedQuestions, 
   numberOfQuestions 
 }) {

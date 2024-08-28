@@ -5,12 +5,14 @@
   align-items: flex-start;
 }
 
-.keep-cry-checkbox {
+.keep-cry-checkbox,
+.hardcore-checkbox {
   display: flex;
   align-items: center;
   margin-bottom: 0.5rem;
 }
 
-.keep-cry-checkbox input {
+.keep-cry-checkbox input,
+.hardcore-checkbox input {
   margin-right: 0.5rem;
 }
