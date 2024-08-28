@@ -30,7 +30,7 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGa
     onClick();
     if (isGameOver) {
       setIsShaking(true);
-      setTimeout(() => setIsShaking(false), 500); // Reset shaking after 0.5s
+      setTimeout(() => setIsShaking(false), 500);
     }
   };
 

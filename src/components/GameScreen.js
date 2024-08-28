@@ -274,6 +274,7 @@ function GameScreen({
         .includes(normalizedSearchTerm)
     );
     setFilteredPokemonList(filtered);
+    scrollToTop();
   };
 
   const handleEnterPress = useCallback((searchTerm) => {

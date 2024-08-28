@@ -4,7 +4,7 @@
 }
 
 .start-screen {
-  position: relative; /* Add this line */
+  position: relative;
   background-color: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   border-radius: 20px;
@@ -13,6 +13,7 @@
   max-width: 90%;
   width: 450px;
   text-align: center;
+  margin: 2rem auto;
 }
 
 .title {
@@ -73,7 +74,7 @@
 }
 
 .start-button {
-  position: relative; /* Add this line */
+  position: relative;
   margin-top: 1rem !important;
   width: 100% !important;
   padding: 1rem !important;
@@ -292,15 +293,15 @@
 }
 
 .darkrai-gif {
-  display: none; /* Hide by default */
+  display: none;
   position: absolute;
   top: 50%;
   left: 100%;
   transform: translate(-50%, -50%);
-  pointer-events: none; /* Ensure it doesn't interfere with button clicks */
-  z-index: 1; /* Ensure it appears above the button */
+  pointer-events: none;
+  z-index: 1;
 }
 
 .start-button.hardcore .darkrai-gif {
-  display: block; /* Show when hardcore mode is active */
+  display: block;
 }

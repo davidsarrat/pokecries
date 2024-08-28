@@ -80,7 +80,7 @@ const Navbar = forwardRef(({
         searchInputRef.current.removeEventListener('focus', preventZoom);
         searchInputRef.current.removeEventListener('blur', allowZoom);
       }
-      allowZoom(); // Ensure touchAction is restored when component unmounts
+      allowZoom();
     };
   }, []);
 
