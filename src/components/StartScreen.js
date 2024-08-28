@@ -98,6 +98,7 @@ function StartScreen() {
         setKeepCryOnError={setKeepCryOnError}
         limitedQuestions={limitedQuestions}
         numberOfQuestions={numberOfQuestions}
+        hardcoreMode={hardcoreMode}
       />
     );
   }

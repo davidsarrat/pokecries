@@ -196,6 +196,11 @@ function GameScreen({
       setIncorrectCount(prevCount => prevCount + 1);
       setFailedPokemon(prev => [...prev, currentPokemon]);
       
+      if (hardcoreMode) {
+        endGame();
+        return;
+      }
+      
       if (selectedGameMode === 'time_attack') {
         const loseTimeMs = timeAttackSettings.loseTime * 1000;
         const newTime = Math.max(0, timeLeftMs - loseTimeMs);
@@ -250,7 +255,7 @@ function GameScreen({
         setAnimatingCards(new Map());
       }, 500);
     }
-  }, [currentPokemon, keepCryOnError, limitedAnswers, moveToNextPokemon, playCurrentCry, resetSearch, selectedGameMode, timeAttackSettings, timeLeftMs, endGame]);
+  }, [currentPokemon, keepCryOnError, limitedAnswers, moveToNextPokemon, playCurrentCry, resetSearch, selectedGameMode, timeAttackSettings, timeLeftMs, endGame, hardcoreMode]);
 
   const handleSearch = (searchTerm) => {
     const normalizedSearchTerm = searchTerm.toLowerCase()
@@ -486,6 +491,7 @@ function GameScreen({
         formatTime={formatTime}
         timer={timer}
         selectedGameMode={selectedGameMode}
+        hardcoreMode={hardcoreMode}
       />
       <div className="game-content">
         <div className="game-screen">
