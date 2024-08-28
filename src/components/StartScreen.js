@@ -34,13 +34,18 @@ function StartScreen() {
     }, 0);
   }, [selectedGenerations]);
 
+  const isTimeAttackValid = () => {
+    const { minutes, seconds } = timeAttackSettings;
+    return minutes > 0 || seconds > 0;
+  };
+
   useEffect(() => {
     scrollToTop();
   }, []);
 
   const isStartButtonDisabled = () => {
     if (selectedGenerations.length === 0) return true;
-    if (isTimeAttack && timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) return true;
+    if (isTimeAttack && !isTimeAttackValid()) return true;
     if (limitedAnswers && (numberOfAnswers === '' || numberOfAnswers < 2)) return true;
     if (limitedQuestions && (numberOfQuestions === '' || numberOfQuestions < 1)) return true;
     if (selectedGameMode === 'pokedex_completer' && limitedQuestions && numberOfQuestions > totalAvailablePokemon) return true;
@@ -53,7 +58,7 @@ function StartScreen() {
       return;
     }
     if (isTimeAttack && timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) {
-      setError('Please set a time greater than 0 for Time Attack!');
+      setError('Please set a time greater than 00:00 for timed runs!');
       return;
     }
     if (limitedAnswers && numberOfAnswers < 2) {
@@ -116,11 +121,75 @@ function StartScreen() {
       <GameModeSelector 
         selectedGameMode={selectedGameMode}
         setSelectedGameMode={setSelectedGameMode}
-        setTimeAttackSettings={setTimeAttackSettings}
-        timeAttackSettings={timeAttackSettings}
-        isTimeAttack={isTimeAttack}
-        setIsTimeAttack={setIsTimeAttack}
       />
+      <div className="time-attack-checkbox">
+        <input
+          type="checkbox"
+          id="timeAttack"
+          checked={isTimeAttack}
+          onChange={(e) => setIsTimeAttack(e.target.checked)}
+        />
+        <label htmlFor="timeAttack">Timed run</label>
+      </div>
+      {isTimeAttack && (
+        <div className="time-attack-settings">
+          <div className="time-setting">
+            <label>Time:</label>
+            <div className="time-inputs">
+              <input 
+                type="number" 
+                value={timeAttackSettings.minutes === 0 ? '' : timeAttackSettings.minutes} 
+                onChange={(e) => setTimeAttackSettings(prev => ({ ...prev, minutes: e.target.value === '' ? 0 : parseInt(e.target.value, 10) }))} 
+                name="minutes"
+                min="0" 
+                placeholder="0"
+              />
+              <span>min</span>
+              <input 
+                type="number" 
+                value={timeAttackSettings.seconds === 0 ? '' : timeAttackSettings.seconds} 
+                onChange={(e) => setTimeAttackSettings(prev => ({ ...prev, seconds: e.target.value === '' ? 0 : parseInt(e.target.value, 10) }))} 
+                name="seconds"
+                min="0" 
+                max="59"
+                placeholder="0"
+              />
+              <span>sec</span>
+            </div>
+          </div>
+          {!isTimeAttackValid() && (
+            <p className="error-message">Time must be greater than 00:00!</p>
+          )}
+          <div className="time-setting">
+            <label>Time gain on correct:</label>
+            <div className="time-inputs">
+              <input 
+                type="number" 
+                value={timeAttackSettings.gainTime === 0 ? '' : timeAttackSettings.gainTime} 
+                onChange={(e) => setTimeAttackSettings(prev => ({ ...prev, gainTime: e.target.value === '' ? 0 : parseInt(e.target.value, 10) }))} 
+                name="gainTime"
+                min="0" 
+                placeholder="0"
+              />
+              <span>sec</span>
+            </div>
+          </div>
+          <div className="time-setting">
+            <label>Time loss on incorrect:</label>
+            <div className="time-inputs">
+              <input 
+                type="number" 
+                value={timeAttackSettings.loseTime === 0 ? '' : timeAttackSettings.loseTime} 
+                onChange={(e) => setTimeAttackSettings(prev => ({ ...prev, loseTime: e.target.value === '' ? 0 : parseInt(e.target.value, 10) }))} 
+                name="loseTime"
+                min="0" 
+                placeholder="0"
+              />
+              <span>sec</span>
+            </div>
+          </div>
+        </div>
+      )}
       <LimitedQuestionsSelector
         limitedQuestions={limitedQuestions}
         setLimitedQuestions={setLimitedQuestions}
