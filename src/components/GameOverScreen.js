@@ -36,6 +36,10 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
   const minutes = Math.floor(totalTimeSeconds / 60);
   const seconds = (totalTimeSeconds % 60).toFixed(4);
 
+  // Remove duplicate Pokémon
+  const uniqueFailedPokemon = Array.from(new Set(failedPokemon.map(p => p.id)))
+    .map(id => failedPokemon.find(p => p.id === id));
+
   return (
     <div className="game-over-container">
       <h1 className="game-over-title" data-text="Game Over!">Game Over!</h1>
@@ -58,11 +62,11 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
         </div>
       </div>
       
-      {failedPokemon.length > 0 && (
+      {uniqueFailedPokemon.length > 0 && (
         <>
           <h2 className="failed-pokemon-title">Pokémon you missed:</h2>
           <div className="failed-pokemon-grid">
-            {failedPokemon.map(pokemon => (
+            {uniqueFailedPokemon.map(pokemon => (
               <PokemonCard
                 key={pokemon.id}
                 pokemon={pokemon}
