@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
 import { scrollToTop } from '../utils/scrollUtils';
@@ -6,6 +6,7 @@ import { scrollToTop } from '../utils/scrollUtils';
 function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, startTime, endTime }) {
   const { correctCount, incorrectCount } = stats;
   const audioRef = useRef(null);
+  const [playingPokemonId, setPlayingPokemonId] = useState(null);
 
   useEffect(() => {
     scrollToTop();
@@ -26,6 +27,10 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
     }
     audioRef.current = new Audio(`${process.env.PUBLIC_URL}/media/cries/${pokemonId}.mp3`);
     audioRef.current.play();
+    setPlayingPokemonId(pokemonId);
+    audioRef.current.addEventListener('ended', () => {
+      setPlayingPokemonId(null);
+    });
   };
 
   const totalTimeSeconds = ((endTime - startTime) / 1000).toFixed(4);
@@ -64,6 +69,8 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
                 pokemon={pokemon}
                 onClick={() => playPokemonCry(pokemon.id)}
                 isVisible={true}
+                isAnimating={playingPokemonId === pokemon.id}
+                isGameOver={true}
               />
             ))}
           </div>

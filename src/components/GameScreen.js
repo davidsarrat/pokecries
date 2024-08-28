@@ -508,6 +508,7 @@ function GameScreen({
             onPokemonClick={handlePokemonClick}
             currentPokemon={currentPokemon}
             animatingCards={animatingCards}
+            isGameOver={false}
           />
         </div>
       </div>
