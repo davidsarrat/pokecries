@@ -482,8 +482,9 @@ function GameScreen({
         onSearch={handleSearch}
         onEnterPress={handleEnterPress}
         isPlaying={isPlaying || isAutoPlaying}
-        progressCount={`${progressCount}/${limitedQuestions ? numberOfQuestions : shuffledPokemonList.length}`}
-        showProgress={selectedGameMode === 'pokedex_completer' || limitedQuestions}
+        progressCount={progressCount}
+        totalCount={limitedQuestions ? numberOfQuestions : (selectedGameMode === 'pokedex_completer' ? shuffledPokemonList.length : undefined)}
+        showProgress={true}
         timeLeft={selectedGameMode === 'time_attack' ? timeLeftMs : timer * 1000}
         showTimer={selectedGameMode === 'time_attack' || selectedGameMode === 'pokedex_completer' || selectedGameMode === 'freestyle'}
         timeGained={timeGained}

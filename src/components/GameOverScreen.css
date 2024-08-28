@@ -92,7 +92,15 @@
   color: #2196f3;
 }
 
-.failed-pokemon-title, .result-message {
+.stat-value.progress {
+  color: #FFA000;
+}
+
+.stat-value.rounds {
+  color: #FFA000;
+}
+
+.failed-pokemon-title {
   font-size: 1.3rem;
   color: #4a4a4a;
   margin-bottom: 1rem;
@@ -142,6 +150,21 @@
   box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
 }
 
+.game-over-footer {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.game-over-footer a {
+  color: #4a4a4a;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.game-over-footer a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 768px) {
   .game-over-container {
     padding: 1.5rem;
@@ -151,7 +174,6 @@
     font-size: 4rem;
     -webkit-text-stroke: 1px #3B4CCA;
     text-stroke: 1px #3B4CCA;
-    white-space: nowrap;
   }
 
   .game-over-title::before {
@@ -176,7 +198,7 @@
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   }
 
-  .failed-pokemon-title, .result-message {
+  .failed-pokemon-title {
     font-size: 1.1rem;
   }
 
@@ -212,7 +234,7 @@
     gap: 0.5rem;
   }
 
-  .failed-pokemon-title, .result-message {
+  .failed-pokemon-title {
     font-size: 1rem;
   }
 
@@ -220,19 +242,4 @@
     font-size: 0.9rem;
     padding: 0.7rem 1.4rem;
   }
-}
-
-.game-over-footer {
-  margin-top: 1rem;
-  text-align: center;
-}
-
-.game-over-footer a {
-  color: #4a4a4a;
-  text-decoration: none;
-  font-size: 0.9rem;
-}
-
-.game-over-footer a:hover {
-  text-decoration: underline;
 }

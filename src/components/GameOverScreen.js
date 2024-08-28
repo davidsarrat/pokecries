@@ -28,9 +28,9 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
     audioRef.current.play();
   };
 
-  const totalTime = ((endTime - startTime) / 1000).toFixed(4);
-  const minutes = Math.floor(totalTime / 60);
-  const seconds = (totalTime % 60).toFixed(4);
+  const totalTimeSeconds = ((endTime - startTime) / 1000).toFixed(4);
+  const minutes = Math.floor(totalTimeSeconds / 60);
+  const seconds = (totalTimeSeconds % 60).toFixed(4);
 
   return (
     <div className="game-over-container">
@@ -43,6 +43,10 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
         <div className="stat-item">
           <span className="stat-label">Incorrect</span>
           <span className="stat-value incorrect">{incorrectCount}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Rounds</span>
+          <span className="stat-value rounds">{correctCount + incorrectCount}</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">Total Time</span>

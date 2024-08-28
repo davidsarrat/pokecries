@@ -1,5 +1,5 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { FaPlay, FaCheck, FaTimes, FaClock, FaSkull } from 'react-icons/fa'; // Añadir FaSkull
+import { FaPlay, FaCheck, FaTimes, FaClock, FaSkull, FaForward } from 'react-icons/fa';
 import './Navbar.css';
 
 const Navbar = forwardRef(({ 
@@ -10,6 +10,7 @@ const Navbar = forwardRef(({
   onEnterPress, 
   isPlaying, 
   progressCount, 
+  totalCount, 
   totalPokemon, 
   timer,
   showProgress, 
@@ -19,7 +20,7 @@ const Navbar = forwardRef(({
   timeLost,
   formatTime,
   selectedGameMode,
-  hardcoreMode // Añadir esta prop
+  hardcoreMode
 }, ref) => {
   const [searchTerm, setSearchTerm] = useState('');
   const searchInputRef = useRef(null);
@@ -122,7 +123,8 @@ const Navbar = forwardRef(({
         </div>
         {showProgress && (
           <div className="score-item progress">
-            <span>{progressCount}</span>
+            <FaForward className="score-icon" />
+            <span>{progressCount}{totalCount ? `/${totalCount}` : ''}</span>
           </div>
         )}
         {showTimer && (
