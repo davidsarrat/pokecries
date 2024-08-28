@@ -119,6 +119,7 @@ function StartScreen() {
         numberOfQuestions={numberOfQuestions}
         setNumberOfQuestions={setNumberOfQuestions}
         selectedGenerations={selectedGenerations}
+        selectedGameMode={selectedGameMode} // Añadimos esta prop
       />
       <LimitedAnswersSelector
         limitedAnswers={limitedAnswers}

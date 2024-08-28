@@ -7,7 +7,8 @@ function LimitedQuestionsSelector({
   setLimitedQuestions, 
   numberOfQuestions, 
   setNumberOfQuestions,
-  selectedGenerations
+  selectedGenerations,
+  selectedGameMode // Añadimos este prop
 }) {
   const handleLimitedQuestionsChange = (e) => {
     setLimitedQuestions(e.target.checked);
@@ -55,7 +56,7 @@ function LimitedQuestionsSelector({
               />
             </div>
           </div>
-          {!isNumberOfQuestionsValid() && selectedGenerations.length > 0 && (
+          {!isNumberOfQuestionsValid() && selectedGenerations.length > 0 && selectedGameMode === 'pokedex_completer' && (
             <p className="error-message">
               Number of questions cannot exceed {totalAvailablePokemon}!
             </p>
