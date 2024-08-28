@@ -141,7 +141,7 @@ body {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
   .game-screen {
     padding: 0.5rem;
     margin: 0.5rem auto;
@@ -194,7 +194,7 @@ body {
   color: #2c3e50;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
   .pokedex-progress {
     flex-direction: column;
     gap: 0.5rem;
@@ -245,7 +245,7 @@ body {
   color: white !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
   .Toastify__toast-container {
     width: auto !important;
     max-width: 250px !important;

@@ -4,7 +4,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #B3E0FF; /* Slightly more vibrant Water */
+  background-color: #B3E0FF;
   animation: colorTransition 120s ease-in-out infinite;
   user-select: none;
   -webkit-user-select: none;

@@ -1,5 +1,5 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { FaPlay, FaCheck, FaTimes, FaClock, FaSkull, FaForward } from 'react-icons/fa';
+import { FaPlay, FaCheck, FaTimes, FaClock, FaSkull, FaForward, FaSearch } from 'react-icons/fa';
 import './Navbar.css';
 
 const Navbar = forwardRef(({ 
@@ -94,6 +94,7 @@ const Navbar = forwardRef(({
         <span>Play Cry</span>
       </button>
       <div className="search-container">
+        <FaSearch className="search-icon" />
         <input
           ref={searchInputRef}
           type="text"
