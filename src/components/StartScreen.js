@@ -220,6 +220,11 @@ function StartScreen() {
         disabled={isStartButtonDisabled()}
       >
         Start Game
+        <img 
+          src={`${process.env.PUBLIC_URL}/media/images/darkrai.gif`} 
+          alt="Darkrai" 
+          className="darkrai-gif"
+        />
       </button>
       {error && <p className="error-message">{error}</p>}
       <footer className="start-screen-footer">

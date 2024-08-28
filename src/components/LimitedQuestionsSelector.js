@@ -34,7 +34,7 @@ function LimitedQuestionsSelector({
       return 'Number of questions must be at least 1!';
     }
     if (selectedGenerations.length > 0 && selectedGameMode === 'pokedex_completer' && numberOfQuestions > totalAvailablePokemon) {
-      return `Number of questions cannot exceed available Pokémon (${totalAvailablePokemon}) if you disabled repeating Pokémon!`;
+      return `Number of questions cannot exceed available Pokémon (${totalAvailablePokemon}) if you disable repeating Pokémon!`;
     }
     return '';
   };
