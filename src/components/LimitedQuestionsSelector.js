@@ -8,7 +8,7 @@ function LimitedQuestionsSelector({
   numberOfQuestions, 
   setNumberOfQuestions,
   selectedGenerations,
-  selectedGameMode // Añadimos este prop
+  selectedGameMode 
 }) {
   const handleLimitedQuestionsChange = (e) => {
     setLimitedQuestions(e.target.checked);
@@ -27,6 +27,16 @@ function LimitedQuestionsSelector({
 
   const isNumberOfQuestionsValid = () => {
     return numberOfQuestions !== '' && numberOfQuestions >= 1 && numberOfQuestions <= totalAvailablePokemon;
+  };
+
+  const getErrorMessage = () => {
+    if (numberOfQuestions < 1) {
+      return 'Number of questions must be at least 1!';
+    }
+    if (selectedGenerations.length > 0 && selectedGameMode === 'pokedex_completer' && numberOfQuestions > totalAvailablePokemon) {
+      return `Number of questions cannot exceed ${totalAvailablePokemon}!`;
+    }
+    return '';
   };
 
   return (
@@ -56,10 +66,8 @@ function LimitedQuestionsSelector({
               />
             </div>
           </div>
-          {!isNumberOfQuestionsValid() && selectedGenerations.length > 0 && selectedGameMode === 'pokedex_completer' && (
-            <p className="error-message">
-              Number of questions cannot exceed {totalAvailablePokemon}!
-            </p>
+          {!isNumberOfQuestionsValid() && getErrorMessage() && (
+            <p className="error-message">{getErrorMessage()}</p>
           )}
         </div>
       )}

@@ -93,8 +93,8 @@ function StartScreen() {
         setNumberOfAnswers={setNumberOfAnswers}
         keepCryOnError={keepCryOnError}
         setKeepCryOnError={setKeepCryOnError}
-        limitedQuestions={limitedQuestions} // Pass limitedQuestions
-        numberOfQuestions={numberOfQuestions} // Pass numberOfQuestions
+        limitedQuestions={limitedQuestions}
+        numberOfQuestions={numberOfQuestions}
       />
     );
   }
@@ -119,7 +119,7 @@ function StartScreen() {
         numberOfQuestions={numberOfQuestions}
         setNumberOfQuestions={setNumberOfQuestions}
         selectedGenerations={selectedGenerations}
-        selectedGameMode={selectedGameMode} // Añadimos esta prop
+        selectedGameMode={selectedGameMode}
       />
       <LimitedAnswersSelector
         limitedAnswers={limitedAnswers}
