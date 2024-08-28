@@ -187,3 +187,104 @@
 .start-screen-footer a:hover {
   text-decoration: underline;
 }
+
+.dont-repeat-pokemon-checkbox {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.dont-repeat-pokemon-checkbox input {
+  margin-right: 0.5rem;
+}
+
+.time-attack-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.time-attack-checkbox input {
+  margin-right: 0.5rem;
+}
+
+.time-attack-settings {
+  padding: 0;
+}
+
+.time-setting {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.time-setting label {
+  margin-right: 0.5rem;
+  text-align: right;
+}
+
+.time-inputs {
+  display: flex;
+  align-items: center;
+}
+
+.time-inputs input {
+  width: 50px;
+  padding: 0.3rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  margin-right: 0.5rem;
+}
+
+.time-inputs span {
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 576px) {
+  .time-setting {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .time-setting label {
+    flex: 1;
+    text-align: right;
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .time-inputs {
+    justify-content: flex-end;
+  }
+
+  .time-inputs input {
+    width: 40px;
+    margin-right: 0.3rem;
+  }
+
+  .time-inputs span {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+.settings-title {
+  font-size: 1.8rem;
+  color: #4a4a4a;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+@media (max-width: 576px) {
+  .settings-title {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+}

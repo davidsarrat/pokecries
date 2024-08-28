@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import './StartScreen.css';
 import GenerationSelector from './GenerationSelector';
-import GameModeSelector from './GameModeSelector';
 import LimitedAnswersSelector from './LimitedAnswersSelector';
 import GameOptionsSelector from './GameOptionsSelector';
 import GameScreen from './GameScreen';
@@ -11,7 +10,6 @@ import pokemonData from '../data/pokemon.json';
 
 function StartScreen() {
   const [selectedGenerations, setSelectedGenerations] = useState(['gen1']);
-  const [selectedGameMode, setSelectedGameMode] = useState('freestyle');
   const [gameStarted, setGameStarted] = useState(false);
   const [timeAttackSettings, setTimeAttackSettings] = useState({
     minutes: 2,
@@ -27,6 +25,7 @@ function StartScreen() {
   const [numberOfQuestions, setNumberOfQuestions] = useState(10);
   const [hardcoreMode, setHardcoreMode] = useState(false);
   const [isTimeAttack, setIsTimeAttack] = useState(false);
+  const [dontRepeatPokemon, setDontRepeatPokemon] = useState(false);
 
   const totalAvailablePokemon = useMemo(() => {
     return selectedGenerations.reduce((total, gen) => {
@@ -48,7 +47,7 @@ function StartScreen() {
     if (isTimeAttack && !isTimeAttackValid()) return true;
     if (limitedAnswers && (numberOfAnswers === '' || numberOfAnswers < 2)) return true;
     if (limitedQuestions && (numberOfQuestions === '' || numberOfQuestions < 1)) return true;
-    if (selectedGameMode === 'pokedex_completer' && limitedQuestions && numberOfQuestions > totalAvailablePokemon) return true;
+    if (dontRepeatPokemon && limitedQuestions && numberOfQuestions > totalAvailablePokemon) return true;
     return false;
   };
 
@@ -69,7 +68,7 @@ function StartScreen() {
       setError('Number of questions must be at least 1 when Limited questions is enabled!');
       return;
     }
-    if (selectedGameMode === 'pokedex_completer' && limitedQuestions && numberOfQuestions > totalAvailablePokemon) {
+    if (dontRepeatPokemon && limitedQuestions && numberOfQuestions > totalAvailablePokemon) {
       setError(`Number of questions (${numberOfQuestions}) exceeds the total number of available Pokémon (${totalAvailablePokemon}) for the selected generations!`);
       return;
     }
@@ -91,8 +90,7 @@ function StartScreen() {
       <GameScreen 
         selectedGenerations={selectedGenerations} 
         setSelectedGenerations={setSelectedGenerations}
-        selectedGameMode={selectedGameMode} 
-        setSelectedGameMode={setSelectedGameMode}
+        selectedGameMode={dontRepeatPokemon ? 'pokedex_completer' : 'freestyle'}
         onExit={handleExitGame}
         timeAttackSettings={timeAttackSettings}
         setTimeAttackSettings={setTimeAttackSettings}
@@ -118,10 +116,16 @@ function StartScreen() {
         selectedGenerations={selectedGenerations}
         setSelectedGenerations={setSelectedGenerations}
       />
-      <GameModeSelector 
-        selectedGameMode={selectedGameMode}
-        setSelectedGameMode={setSelectedGameMode}
-      />
+      <h2 className="settings-title">Game Rules</h2>
+      <div className="dont-repeat-pokemon-checkbox">
+        <input
+          type="checkbox"
+          id="dontRepeatPokemon"
+          checked={dontRepeatPokemon}
+          onChange={(e) => setDontRepeatPokemon(e.target.checked)}
+        />
+        <label htmlFor="dontRepeatPokemon">Don't repeat Pokémon</label>
+      </div>
       <div className="time-attack-checkbox">
         <input
           type="checkbox"
@@ -196,7 +200,7 @@ function StartScreen() {
         numberOfQuestions={numberOfQuestions}
         setNumberOfQuestions={setNumberOfQuestions}
         selectedGenerations={selectedGenerations}
-        selectedGameMode={selectedGameMode}
+        selectedGameMode={dontRepeatPokemon ? 'pokedex_completer' : 'freestyle'}
       />
       <LimitedAnswersSelector
         limitedAnswers={limitedAnswers}
