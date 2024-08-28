@@ -90,7 +90,7 @@ function StartScreen() {
   if (gameStarted) {
     return (
       <GameScreen 
-        selectedGenerations={selectedGenerations} 
+        selectedGenerations={[...selectedGenerations].sort()} // Sort here
         setSelectedGenerations={setSelectedGenerations}
         selectedGameMode={dontRepeatPokemon ? 'pokedex_completer' : 'freestyle'}
         onExit={handleExitGame}
