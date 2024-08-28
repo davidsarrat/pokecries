@@ -6,11 +6,17 @@
   align-items: center;
   background-color: #B3E0FF; /* Slightly more vibrant Water */
   animation: colorTransition 120s ease-in-out infinite;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+  user-drag: none;
+  -webkit-user-drag: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -61,4 +67,13 @@
   43.75%, 56.25% { background-color: #E0E0CC; } /* Steel */
   46.875%, 53.125% { background-color: #E0CCB3; } /* Ground */
   50% { background-color: #CCB3B3; } /* Dark (midpoint) */
+}
+
+img {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-drag: none;
+  -webkit-user-drag: none;
 }
