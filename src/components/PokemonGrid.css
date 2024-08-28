@@ -1,7 +1,7 @@
 .pokemon-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.75rem;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
@@ -10,26 +10,29 @@
 
 @media (min-width: 1300px) {
   .pokemon-grid {
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 1.25rem;
   }
 }
 
 @media (min-width: 1000px) and (max-width: 1299px) {
   .pokemon-grid {
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 1rem;
   }
 }
 
 @media (min-width: 768px) and (max-width: 999px) {
   .pokemon-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.75rem;
   }
 }
 
 @media (max-width: 767px) {
   .pokemon-grid {
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 0.5rem;
+    gap: 0.4rem;
     padding: 0.5rem;
   }
 }
