@@ -45,21 +45,20 @@
 
 @keyframes colorTransition {
   0%, 100% { background-color: #B3E0FF; } /* Water */
-  5.55% { background-color: #B3FFB3; } /* Grass */
-  11.11% { background-color: #FFB3B3; } /* Fire */
-  16.66% { background-color: #FFF2B3; } /* Electric */
-  22.22% { background-color: #FFB3E0; } /* Fairy */
-  27.77% { background-color: #E0B3FF; } /* Psychic */
-  33.33% { background-color: #D9D9D9; } /* Normal */
-  38.88% { background-color: #FFD9B3; } /* Fighting */
-  44.44% { background-color: #B3FFE0; } /* Flying */
-  50% { background-color: #D9B3FF; } /* Poison */
-  55.55% { background-color: #E0CCB3; } /* Ground */
-  61.11% { background-color: #B3B3E0; } /* Rock */
-  66.66% { background-color: #CCFFB3; } /* Bug */
-  72.22% { background-color: #CCB3FF; } /* Ghost */
-  77.77% { background-color: #E0E0CC; } /* Steel */
-  83.33% { background-color: #B3F0FF; } /* Ice */
-  88.88% { background-color: #FFB3CC; } /* Dragon */
-  94.44% { background-color: #CCB3B3; } /* Dark */
+  3.125%, 96.875% { background-color: #B3F0FF; } /* Ice */
+  6.25%, 93.75% { background-color: #B3FFE0; } /* Flying */
+  9.375%, 90.625% { background-color: #B3FFB3; } /* Grass */
+  12.5%, 87.5% { background-color: #CCFFB3; } /* Bug */
+  15.625%, 84.375% { background-color: #FFF2B3; } /* Electric */
+  18.75%, 81.25% { background-color: #FFD9B3; } /* Fighting */
+  21.875%, 78.125% { background-color: #FFB3B3; } /* Fire */
+  25%, 75% { background-color: #FFB3CC; } /* Dragon */
+  28.125%, 71.875% { background-color: #E0B3FF; } /* Psychic */
+  31.25%, 68.75% { background-color: #D9B3FF; } /* Poison */
+  34.375%, 65.625% { background-color: #CCB3FF; } /* Ghost */
+  37.5%, 62.5% { background-color: #B3B3E0; } /* Rock */
+  40.625%, 59.375% { background-color: #D9D9D9; } /* Normal */
+  43.75%, 56.25% { background-color: #E0E0CC; } /* Steel */
+  46.875%, 53.125% { background-color: #E0CCB3; } /* Ground */
+  50% { background-color: #CCB3B3; } /* Dark (midpoint) */
 }
