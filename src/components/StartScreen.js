@@ -84,6 +84,8 @@ function StartScreen() {
   };
 
   const startButtonClass = hardcoreMode ? 'start-button hardcore' : 'start-button';
+  const gifSrc = hardcoreMode ? `${process.env.PUBLIC_URL}/media/images/darkrai.gif` : `${process.env.PUBLIC_URL}/media/images/chatot.gif`;
+  const gifClass = hardcoreMode ? "darkrai-gif" : "chatot-gif";
 
   if (gameStarted) {
     return (
@@ -221,9 +223,9 @@ function StartScreen() {
       >
         Start Game
         <img 
-          src={`${process.env.PUBLIC_URL}/media/images/darkrai.gif`} 
-          alt="Darkrai" 
-          className="darkrai-gif"
+          src={gifSrc} 
+          alt={hardcoreMode ? "Darkrai" : "Chatot"} 
+          className={gifClass}
         />
       </button>
       {error && <p className="error-message">{error}</p>}

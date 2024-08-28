@@ -305,3 +305,17 @@
 .start-button.hardcore .darkrai-gif {
   display: block;
 }
+
+.chatot-gif {
+  display: none;
+  position: absolute;
+  bottom: 0; /* Parte más baja coincide con la parte más baja del botón */
+  left: 100%; /* Centro horizontal del borde derecho del botón */
+  transform: translate(-50%, 0);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.start-button:not(.hardcore) .chatot-gif {
+  display: block;
+}
