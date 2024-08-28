@@ -3,8 +3,8 @@ import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
 import { scrollToTop } from '../utils/scrollUtils';
 
-function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode }) {
-  const { correctCount, incorrectCount, totalTime } = stats;
+function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, startTime, endTime }) {
+  const { correctCount, incorrectCount } = stats;
   const audioRef = useRef(null);
 
   useEffect(() => {
@@ -28,6 +28,10 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
     audioRef.current.play();
   };
 
+  const totalTime = ((endTime - startTime) / 1000).toFixed(4);
+  const minutes = Math.floor(totalTime / 60);
+  const seconds = (totalTime % 60).toFixed(4);
+
   return (
     <div className="game-over-container">
       <h1 className="game-over-title" data-text="Game Over!">Game Over!</h1>
@@ -40,15 +44,13 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
           <span className="stat-label">Incorrect</span>
           <span className="stat-value incorrect">{incorrectCount}</span>
         </div>
-        {(selectedGameMode === 'pokedex_completer' || selectedGameMode === 'freestyle') && (
-          <div className="stat-item">
-            <span className="stat-label">Total Time</span>
-            <span className="stat-value time">{totalTime}</span>
-          </div>
-        )}
+        <div className="stat-item">
+          <span className="stat-label">Total Time</span>
+          <span className="stat-value time">{minutes}:{seconds < 10 ? '0' : ''}{seconds}</span>
+        </div>
       </div>
       
-      {failedPokemon.length > 0 ? (
+      {failedPokemon.length > 0 && (
         <>
           <h2 className="failed-pokemon-title">Pokémon you missed:</h2>
           <div className="failed-pokemon-grid">
@@ -62,10 +64,6 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode })
             ))}
           </div>
         </>
-      ) : (
-        selectedGameMode === 'pokedex_completer' && (
-          <h2 className="congratulations-title">Congratulations! You are a true Pokémon Master!</h2>
-        )
       )}
       
       <button className="play-again-button" onClick={() => {

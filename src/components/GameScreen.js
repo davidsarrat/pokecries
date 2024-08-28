@@ -49,6 +49,8 @@ function GameScreen({
   const lastUpdateTimeRef = useRef(Date.now());
   const [visiblePokemon, setVisiblePokemon] = useState([]);
   const [navbarHeight, setNavbarHeight] = useState(0);
+  const [startTime, setStartTime] = useState(Date.now());
+  const [endTime, setEndTime] = useState(null);
 
   const resetSearch = useCallback(() => {
     if (navbarRef.current) {
@@ -81,6 +83,7 @@ function GameScreen({
   const endGame = useCallback(() => {
     setIsGameFinished(true);
     clearInterval(timerRef.current);
+    setEndTime(Date.now());
     setGameOver(true);
   }, []);
 
@@ -239,7 +242,6 @@ function GameScreen({
 
     const shouldShowAnimations = !(limitedAnswers && !keepCryOnError) && 
                                  !(limitedAnswers && keepCryOnError && isCorrect);
-
     if (shouldShowAnimations) {
       setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
       
@@ -429,6 +431,12 @@ function GameScreen({
     scrollToTop();
   }, []);
 
+  useEffect(() => {
+    if (gameOver) {
+      setEndTime(Date.now());
+    }
+  }, [gameOver]);
+
   if (gameOver) {
     return (
       <GameOverScreen
@@ -444,6 +452,8 @@ function GameScreen({
         }}
         selectedGameMode={selectedGameMode}
         pokemonList={pokemonList} 
+        startTime={startTime}
+        endTime={endTime}
       />
     );
   }
