@@ -4,6 +4,11 @@ import './PokemonCard.css';
 function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGameOver }) {
   const cardRef = useRef(null);
   const [isShaking, setIsShaking] = useState(false);
+  const [isShiny, setIsShiny] = useState(false);
+
+  useEffect(() => {
+    setIsShiny(Math.random() < 1/8192);
+  }, []);
 
   useEffect(() => {
     if (isAnimating) {
@@ -36,6 +41,9 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGa
 
   const visibilityClass = isVisible ? '' : 'hidden';
   const shakeClass = isShaking ? 'shake-animation' : '';
+  const spritePath = isShiny 
+    ? `${process.env.PUBLIC_URL}/media/sprites/shiny/${pokemon.id}.png`
+    : `${process.env.PUBLIC_URL}/media/sprites/${pokemon.id}.png`;
 
   return (
     <div 
@@ -44,7 +52,7 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGa
       onClick={handleClick}
     >
       <img 
-        src={`${process.env.PUBLIC_URL}/media/sprites/${pokemon.id}.png`} 
+        src={spritePath} 
         alt={pokemon.name} 
         className="pokemon-image"
       />
