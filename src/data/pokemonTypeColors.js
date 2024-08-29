@@ -14,7 +14,7 @@ const pokemonTypeColors = {
   rock: '#B6A136',
   ghost: '#735797',
   dragon: '#6F35FC',
-  dark: '#705746',
+  dark: '#A89A8C',
   steel: '#B7B7CE',
   fairy: '#D685AD',
 };

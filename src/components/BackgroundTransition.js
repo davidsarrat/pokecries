@@ -12,7 +12,7 @@ const BackgroundTransition = () => {
         newColor = getRandomColor();
       } while (newColor === currentColor);
       setCurrentColor(newColor);
-    }, 5000); // Change color every 5 seconds
+    }, 10000);
 
     return () => clearInterval(interval);
   }, [currentColor]);
