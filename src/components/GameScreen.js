@@ -55,10 +55,10 @@ function GameScreen({
   const [endTime, setEndTime] = useState(null);
 
   const resetSearch = useCallback(() => {
-    if (navbarRef.current) {
+    if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
       navbarRef.current.resetSearch();
+      setFilteredPokemonList(pokemonList);
     }
-    setFilteredPokemonList(pokemonList);
   }, [pokemonList]);
 
   const showToast = (content, type) => {

@@ -33,7 +33,8 @@ const Navbar = forwardRef(({
     resetSearch: () => {
       setSearchTerm('');
       onSearch('');
-    }
+    },
+    getSearchTerm: () => searchTerm
   }));
 
   const handleSearch = (e) => {
