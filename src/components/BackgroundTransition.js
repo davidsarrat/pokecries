@@ -17,12 +17,16 @@ const BackgroundTransition = () => {
     return () => clearInterval(interval);
   }, [currentColor]);
 
+  useEffect(() => {
+    document.documentElement.style.setProperty('--current-color', currentColor);
+  }, [currentColor]);
+
   function getRandomColor() {
     const colors = Object.values(pokemonTypeColors);
     return colors[Math.floor(Math.random() * colors.length)];
   }
 
-  return <div className="background-transition" style={{ backgroundColor: currentColor }} />;
+  return <div className="background-transition" />;
 };
 
 export default BackgroundTransition;

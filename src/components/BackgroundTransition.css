@@ -6,4 +6,13 @@
   height: 100%;
   z-index: -1;
   transition: background-color 10s ease-in-out;
+  background-color: var(--current-color) !important;
+}
+
+@media not all and (min-resolution:.001dpcm) { 
+  @supports (-webkit-appearance:none) {
+    .background-transition {
+      background-color: var(--current-color) !important;
+    }
+  }
 }
