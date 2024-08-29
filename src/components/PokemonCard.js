@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './PokemonCard.css';
 
-function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGameOver }) {
+function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGameOver, totalAvailablePokemon }) {
   const cardRef = useRef(null);
   const [isShaking, setIsShaking] = useState(false);
   const [isShiny, setIsShiny] = useState(false);
 
   useEffect(() => {
-    setIsShiny(Math.random() < 1/8192);
-  }, []);
+    setIsShiny(Math.random() < (1/10) / totalAvailablePokemon);
+  }, [totalAvailablePokemon]);
 
   useEffect(() => {
     if (isAnimating) {

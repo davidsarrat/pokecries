@@ -510,6 +510,7 @@ function GameScreen({
             currentPokemon={currentPokemon}
             animatingCards={animatingCards}
             isGameOver={false}
+            totalAvailablePokemon={pokemonList.length}
           />
         </div>
       </div>
