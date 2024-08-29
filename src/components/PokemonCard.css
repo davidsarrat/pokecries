@@ -29,8 +29,8 @@
   font-weight: bold;
   pointer-events: none;
   white-space: nowrap;
-  overflow: visible; /* No ocultar el texto roto */
-  text-overflow: clip; /* No mostrar puntos suspensivos */
+  overflow: visible;
+  text-overflow: clip;
 }
 
 @media (hover: hover) and (pointer: fine) {

@@ -5,7 +5,7 @@
 
 .start-screen {
   position: relative;
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 3rem;
@@ -14,6 +14,7 @@
   width: 450px;
   text-align: center;
   margin: 2rem auto;
+  z-index: 2;
 }
 
 .title {
@@ -118,18 +119,18 @@
 @media (max-width: 768px) {
   .title {
     font-size: 4rem;
-    -webkit-text-stroke: 2px #3B4CCA; /* Aumenta el grosor del contorno */
-    text-stroke: 2px #3B4CCA; /* Aumenta el grosor del contorno */
+    -webkit-text-stroke: 2px #3B4CCA;
+    text-stroke: 2px #3B4CCA;
   }
 
   .title::before {
-    -webkit-text-stroke: 8px #3B4CCA; /* Aumenta el grosor del contorno */
-    text-stroke: 8px #3B4CCA; /* Aumenta el grosor del contorno */
+    -webkit-text-stroke: 8px #3B4CCA;
+    text-stroke: 8px #3B4CCA;
   }
 
   .title::after {
-    -webkit-text-stroke: 4px #1E3A8A; /* Aumenta el grosor del contorno */
-    text-stroke: 4px #1E3A8A; /* Aumenta el grosor del contorno */
+    -webkit-text-stroke: 4px #1E3A8A;
+    text-stroke: 4px #1E3A8A;
   }
 }
 
@@ -144,19 +145,19 @@
 
   .title {
     font-size: 3.5rem;
-    -webkit-text-stroke: 2px #3B4CCA; /* Aumenta el grosor del contorno */
-    text-stroke: 2px #3B4CCA; /* Aumenta el grosor del contorno */
+    -webkit-text-stroke: 2px #3B4CCA;
+    text-stroke: 2px #3B4CCA;
     white-space: nowrap;
   }
 
   .title::before {
-    -webkit-text-stroke: 7px #3B4CCA; /* Aumenta el grosor del contorno */
-    text-stroke: 7px #3B4CCA; /* Aumenta el grosor del contorno */
+    -webkit-text-stroke: 7px #3B4CCA;
+    text-stroke: 7px #3B4CCA;
   }
 
   .title::after {
-    -webkit-text-stroke: 3px #1E3A8A; /* Aumenta el grosor del contorno */
-    text-stroke: 3px #1E3A8A; /* Aumenta el grosor del contorno */
+    -webkit-text-stroke: 3px #1E3A8A;
+    text-stroke: 3px #1E3A8A;
   }
 }
 
