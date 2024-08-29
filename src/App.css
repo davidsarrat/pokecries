@@ -8,6 +8,8 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+  animation: backgroundTransition 240s ease-in-out infinite;
+  background-color: #A8A77A;
 }
 
 .App-logo {
@@ -45,6 +47,26 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+@keyframes backgroundTransition {
+  0%, 100% { background-color: #A8A77A; }
+  5.88% { background-color: #EE8130; }
+  11.76% { background-color: #6390F0; }
+  17.64% { background-color: #F7D02C; }
+  23.52% { background-color: #7AC74C; }
+  29.4% { background-color: #96D9D6; }
+  35.28% { background-color: #C22E28; }
+  41.16% { background-color: #A33EA1; }
+  47.04% { background-color: #E2BF65; }
+  52.92% { background-color: #A98FF3; }
+  58.8% { background-color: #F95587; }
+  64.68% { background-color: #A6B91A; }
+  70.56% { background-color: #B6A136; }
+  76.44% { background-color: #735797; }
+  82.32% { background-color: #6F35FC; }
+  88.2% { background-color: #A89A8C; }
+  94.08% { background-color: #B7B7CE; }
 }
 
 img {

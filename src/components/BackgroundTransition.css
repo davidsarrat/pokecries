@@ -5,7 +5,7 @@
   width: 100%;
   height: 100%;
   z-index: -1;
-  transition: background-color 10s ease-in-out;
+  animation: colorChange 1200s ease-in-out infinite;
   background-color: var(--current-color) !important;
 }
 
