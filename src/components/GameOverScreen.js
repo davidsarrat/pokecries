@@ -36,7 +36,6 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
   const minutes = Math.floor(totalTimeSeconds / 60);
   const seconds = (totalTimeSeconds % 60).toFixed(4);
 
-  // Remove duplicate Pokémon
   const uniqueFailedPokemon = Array.from(new Set(failedPokemon.map(p => p.id)))
     .map(id => failedPokemon.find(p => p.id === id));
 

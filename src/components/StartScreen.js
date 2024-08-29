@@ -29,7 +29,6 @@ function StartScreen() {
   const [isTimeAttack, setIsTimeAttack] = useState(false);
   const [dontRepeatPokemon, setDontRepeatPokemon] = useState(true);
 
-  // Load configuration from localStorage
   useEffect(() => {
     const savedConfig = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (savedConfig) {
@@ -47,7 +46,6 @@ function StartScreen() {
     }
   }, []);
 
-  // Save configuration to localStorage
   useEffect(() => {
     const config = {
       selectedGenerations,
@@ -138,7 +136,7 @@ function StartScreen() {
   if (gameStarted) {
     return (
       <GameScreen 
-        selectedGenerations={[...selectedGenerations].sort()} // Sort here
+        selectedGenerations={[...selectedGenerations].sort()}
         setSelectedGenerations={setSelectedGenerations}
         selectedGameMode={dontRepeatPokemon ? 'pokedex_completer' : 'freestyle'}
         onExit={handleExitGame}
