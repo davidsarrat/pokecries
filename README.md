@@ -1,70 +1,62 @@
-# Getting Started with Create React App
+# PokéCries
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+PokéCries is an interactive web game that challenges players to identify Pokémon by their cries. Test your knowledge across multiple generations in this highly customizable, responsive, and multiplatform experience.
 
-## Available Scripts
+## Play now!
 
-In the project directory, you can run:
+Visit [davidsarratgonzalez.github.io/pokecries](https://davidsarratgonzalez.github.io/pokecries) to start playing!
 
-### `npm start`
+## Game mode customization
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+PokéCries is designed to be highly adaptable, supporting various custom game modes that the community might want to play. This flexibility makes it ideal for:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Speedrunners aiming to beat personal or global records.
+- Creative players inventing new challenges or achievement systems.
+- Competitive players looking for unique ways to test their skills.
 
-### `npm test`
+The combination of game rules allows for countless gameplay variations, ensuring a fresh experience with each playthrough.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Game rules
 
-### `npm run build`
+PokéCries offers a variety of game rules to tailor your experience:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Multiple Generations**: Select Pokémon from Gen I to Gen V, mix and match to your preference.
+- **Don't Repeat Pokémon**: Ensures each Pokémon appears only once, with a maximum limit based on your selected generations.
+- **Timed Run**: Race against the clock with customizable time settings, with support for adding reward and penalty rules based on correct or incorrect answers.
+- **Limited Questions**: Set a specific number of rounds for quick games.
+- **Limited Answers**: Adjust the difficulty by limiting the number of possible answers per question.
+- **Keep Same Cry on Error**: Prevents advancing to the next Pokémon until the correct answer is given, especially designed for training and familiarization with the cries.
+- **Hardcore Mode**: One mistake and it's game over!
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Features
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+PokéCries includes several features to enhance your gameplay experience:
 
-### `npm run eject`
+- **Score Tracking**: Keep track of correct and incorrect answers.
+- **Round Counter**: Monitor your progress through the game.
+- **Timer**: For timed runs or to track your overall gameplay duration.
+- **Search Functionality**: Quickly find and select Pokémon by name.
+- **Visual Feedback**: Animations and toasts provide immediate response to your choices.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## Search functionality
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+The search functionality in PokéCries has been designed with a high focus on user experience and quality of life features.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- The search bar is activated whenever a keystroke is detected, without the need to focus on it, providing greater convenience, speed, and efficiency for the user.
+- As you type in the search bar, the options are filtered based on the Pokémon name.
+- If only one option remains available in the filter, pressing enter will select it.
+- If multiple options exist but a full name has been typed (regardless of capitalization or symbols), pressing enter will select it.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Responsive design
 
-## Learn More
+Enjoy PokéCries on any device - desktop, tablet, or mobile. The responsive design ensures a seamless experience across all platforms.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Disclaimer
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+PokéCries is a fan-made project and is not affiliated, associated, authorized, endorsed by, or in any way officially connected with The Pokémon Company, Nintendo, Game Freak, or Creatures. All Pokémon characters, names, images, and related materials are trademarks and copyrights of their respective owners.
 
-### Code Splitting
+This project does not generate any revenue and is created solely for educational and entertainment purposes. The use of Pokémon and related materials is intended for non-commercial, educational use only. No copyright infringement is intended.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## License
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+PokéCries is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
