@@ -173,18 +173,18 @@
 
   .game-over-title {
     font-size: 4rem;
-    -webkit-text-stroke: 1px #3B4CCA;
-    text-stroke: 1px #3B4CCA;
+    -webkit-text-stroke: 2px #3B4CCA;
+    text-stroke: 2px #3B4CCA;
   }
 
   .game-over-title::before {
-    -webkit-text-stroke: 6px #3B4CCA;
-    text-stroke: 6px #3B4CCA;
+    -webkit-text-stroke: 8px #3B4CCA;
+    text-stroke: 8px #3B4CCA;
   }
 
   .game-over-title::after {
-    -webkit-text-stroke: 3px #1E3A8A;
-    text-stroke: 3px #1E3A8A;
+    -webkit-text-stroke: 4px #1E3A8A;
+    text-stroke: 4px #1E3A8A;
   }
 
   .stat-label {
@@ -216,18 +216,18 @@
 
   .game-over-title {
     font-size: 3.5rem;
-    -webkit-text-stroke: 1px #3B4CCA;
-    text-stroke: 1px #3B4CCA;
+    -webkit-text-stroke: 2px #3B4CCA;
+    text-stroke: 2px #3B4CCA;
   }
 
   .game-over-title::before {
-    -webkit-text-stroke: 5px #3B4CCA;
-    text-stroke: 5px #3B4CCA;
+    -webkit-text-stroke: 7px #3B4CCA;
+    text-stroke: 7px #3B4CCA;
   }
 
   .game-over-title::after {
-    -webkit-text-stroke: 2px #1E3A8A;
-    text-stroke: 2px #1E3A8A;
+    -webkit-text-stroke: 3px #1E3A8A;
+    text-stroke: 3px #1E3A8A;
   }
 
   .failed-pokemon-grid {
@@ -242,5 +242,12 @@
   .play-again-button {
     font-size: 0.9rem;
     padding: 0.7rem 1.4rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .game-over-title {
+    font-size: 2.8rem;
+    white-space: normal;
   }
 }

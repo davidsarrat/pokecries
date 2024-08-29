@@ -34,16 +34,6 @@
   hyphens: auto;
 }
 
-.title::before {
-  content: attr(data-text);
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
 .title::before,
 .title::after {
   content: attr(data-text);
@@ -52,6 +42,7 @@
   top: 0;
   width: 100%;
   height: 100%;
+  z-index: -1;
 }
 
 .title::before {
@@ -127,18 +118,18 @@
 @media (max-width: 768px) {
   .title {
     font-size: 4rem;
-    -webkit-text-stroke: 1px #3B4CCA;
-    text-stroke: 1px #3B4CCA;
+    -webkit-text-stroke: 2px #3B4CCA; /* Aumenta el grosor del contorno */
+    text-stroke: 2px #3B4CCA; /* Aumenta el grosor del contorno */
   }
 
   .title::before {
-    -webkit-text-stroke: 6px #3B4CCA;
-    text-stroke: 6px #3B4CCA;
+    -webkit-text-stroke: 8px #3B4CCA; /* Aumenta el grosor del contorno */
+    text-stroke: 8px #3B4CCA; /* Aumenta el grosor del contorno */
   }
 
   .title::after {
-    -webkit-text-stroke: 3px #1E3A8A;
-    text-stroke: 3px #1E3A8A;
+    -webkit-text-stroke: 4px #1E3A8A; /* Aumenta el grosor del contorno */
+    text-stroke: 4px #1E3A8A; /* Aumenta el grosor del contorno */
   }
 }
 
@@ -153,19 +144,19 @@
 
   .title {
     font-size: 3.5rem;
-    -webkit-text-stroke: 1px #3B4CCA;
-    text-stroke: 1px #3B4CCA;
+    -webkit-text-stroke: 2px #3B4CCA; /* Aumenta el grosor del contorno */
+    text-stroke: 2px #3B4CCA; /* Aumenta el grosor del contorno */
     white-space: nowrap;
   }
 
   .title::before {
-    -webkit-text-stroke: 5px #3B4CCA;
-    text-stroke: 5px #3B4CCA;
+    -webkit-text-stroke: 7px #3B4CCA; /* Aumenta el grosor del contorno */
+    text-stroke: 7px #3B4CCA; /* Aumenta el grosor del contorno */
   }
 
   .title::after {
-    -webkit-text-stroke: 2px #1E3A8A;
-    text-stroke: 2px #1E3A8A;
+    -webkit-text-stroke: 3px #1E3A8A; /* Aumenta el grosor del contorno */
+    text-stroke: 3px #1E3A8A; /* Aumenta el grosor del contorno */
   }
 }
 
