@@ -29,8 +29,8 @@
   font-family: 'Pocket Monk', sans-serif;
   position: relative;
   letter-spacing: 2px;
-  -webkit-text-stroke: 2px #3B4CCA;
-  text-stroke: 2px #3B4CCA;
+  -webkit-text-stroke: 0.5px #3B4CCA;
+  text-stroke: 0.5px #3B4CCA;
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -46,14 +46,14 @@
 }
 
 .game-over-title::before {
-  -webkit-text-stroke: 10px #3B4CCA;
-  text-stroke: 10px #3B4CCA;
+  -webkit-text-stroke: 5px #3B4CCA;
+  text-stroke: 5px #3B4CCA;
   z-index: -2;
 }
 
 .game-over-title::after {
-  -webkit-text-stroke: 5px #1E3A8A;
-  text-stroke: 5px #1E3A8A;
+  -webkit-text-stroke: 2px #1E3A8A;
+  text-stroke: 2px #1E3A8A;
   z-index: -1;
 }
 
@@ -175,18 +175,18 @@
 
   .game-over-title {
     font-size: 4rem;
-    -webkit-text-stroke: 2px #3B4CCA;
-    text-stroke: 2px #3B4CCA;
+    -webkit-text-stroke: 0.5px #3B4CCA;
+    text-stroke: 0.5px #3B4CCA;
   }
 
   .game-over-title::before {
-    -webkit-text-stroke: 8px #3B4CCA;
-    text-stroke: 8px #3B4CCA;
+    -webkit-text-stroke: 4px #3B4CCA;
+    text-stroke: 4px #3B4CCA;
   }
 
   .game-over-title::after {
-    -webkit-text-stroke: 4px #1E3A8A;
-    text-stroke: 4px #1E3A8A;
+    -webkit-text-stroke: 1.5px #1E3A8A;
+    text-stroke: 1.5px #1E3A8A;
   }
 
   .stat-label {
@@ -218,18 +218,18 @@
 
   .game-over-title {
     font-size: 3.5rem;
-    -webkit-text-stroke: 2px #3B4CCA;
-    text-stroke: 2px #3B4CCA;
+    -webkit-text-stroke: 0.5px #3B4CCA;
+    text-stroke: 0.5px #3B4CCA;
   }
 
   .game-over-title::before {
-    -webkit-text-stroke: 7px #3B4CCA;
-    text-stroke: 7px #3B4CCA;
+    -webkit-text-stroke: 3px #3B4CCA;
+    text-stroke: 3px #3B4CCA;
   }
 
   .game-over-title::after {
-    -webkit-text-stroke: 3px #1E3A8A;
-    text-stroke: 3px #1E3A8A;
+    -webkit-text-stroke: 1px #1E3A8A;
+    text-stroke: 1px #1E3A8A;
   }
 
   .failed-pokemon-grid {

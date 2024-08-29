@@ -31,8 +31,7 @@
   -webkit-text-stroke: 2px #3B4CCA;
   text-stroke: 2px #3B4CCA;
   line-height: 1.2;
-  word-wrap: break-word;
-  hyphens: auto;
+  white-space: nowrap;
 }
 
 .title::before,
@@ -147,7 +146,7 @@
     font-size: 3.5rem;
     -webkit-text-stroke: 2px #3B4CCA;
     text-stroke: 2px #3B4CCA;
-    white-space: nowrap;
+    white-space: normal;
   }
 
   .title::before {
