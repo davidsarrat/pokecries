@@ -11,15 +11,12 @@ const Navbar = forwardRef(({
   isPlaying, 
   progressCount, 
   totalCount, 
-  totalPokemon, 
-  timer,
   showProgress, 
   timeLeft,
   showTimer,
   timeGained,
   timeLost,
   formatTime,
-  selectedGameMode,
   hardcoreMode
 }, ref) => {
   const [searchTerm, setSearchTerm] = useState('');

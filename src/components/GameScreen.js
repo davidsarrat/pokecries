@@ -10,19 +10,13 @@ import { scrollToTop } from '../utils/scrollUtils';
 
 function GameScreen({ 
   selectedGenerations, 
-  setSelectedGenerations,
   selectedGameMode, 
-  setSelectedGameMode,
   onExit, 
   isTimeAttack,
   timeAttackSettings,
-  setTimeAttackSettings,
   limitedAnswers, 
-  setLimitedAnswers,
   numberOfAnswers, 
-  setNumberOfAnswers,
   keepCryOnError,
-  setKeepCryOnError,
   hardcoreMode,
   limitedQuestions, 
   numberOfQuestions 
