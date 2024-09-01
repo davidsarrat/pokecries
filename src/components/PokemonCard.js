@@ -7,8 +7,10 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGa
   const [isShiny, setIsShiny] = useState(false);
 
   useEffect(() => {
-    setIsShiny(Math.random() < (1/10) / totalAvailablePokemon);
-  }, [totalAvailablePokemon]);
+    if (!isGameOver) {
+      setIsShiny(Math.random() < (1/10) / totalAvailablePokemon);
+    }
+  }, [totalAvailablePokemon, isGameOver]);
 
   useEffect(() => {
     if (isAnimating) {
@@ -41,7 +43,7 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGa
 
   const visibilityClass = isVisible ? '' : 'hidden';
   const shakeClass = isShaking ? 'shake-animation' : '';
-  const spritePath = isShiny 
+  const spritePath = isShiny && !isGameOver 
     ? `${process.env.PUBLIC_URL}/media/sprites/shiny/${pokemon.id}.png`
     : `${process.env.PUBLIC_URL}/media/sprites/${pokemon.id}.png`;
 
