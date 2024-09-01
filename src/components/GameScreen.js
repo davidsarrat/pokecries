@@ -13,7 +13,7 @@ function GameScreen({
   selectedGameMode, 
   onExit, 
   isTimeAttack,
-  timeAttackSettings,
+  timeAttackSettings, 
   limitedAnswers, 
   numberOfAnswers, 
   keepCryOnError,
@@ -127,6 +127,14 @@ function GameScreen({
     } while (excludePokemon && newPokemon.id === excludePokemon.id);
     return newPokemon;
   }, [pokemonList]);
+
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
 
   const moveToNextPokemon = useCallback(() => {
     if (limitedQuestions && progressCount + 1 >= numberOfQuestions) {
@@ -276,7 +284,7 @@ function GameScreen({
       .replace(/♂/g, 'm')
       .replace(/♀/g, 'f')
       .replace(/[^a-z0-9mf]/g, '');
-  
+
     const exactMatch = filteredPokemonList.find(pokemon => 
       pokemon.name.toLowerCase()
         .replace(/♂/g, 'm')
@@ -354,7 +362,7 @@ function GameScreen({
     setPokemonList(selectedPokemon);
     setFilteredPokemonList(selectedPokemon);
     
-    const shuffled = [...selectedPokemon].sort(() => Math.random() - 0.5);
+    const shuffled = shuffleArray([...selectedPokemon]);
     setShuffledPokemonList(shuffled);
     
     if (shuffled.length > 0) {
