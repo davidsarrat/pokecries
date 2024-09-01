@@ -48,6 +48,8 @@ function GameScreen({
   const [startTime, setStartTime] = useState(Date.now());
   const [endTime, setEndTime] = useState(null);
   const [allShiny, setAllShiny] = useState(false);
+  const [shinyPartyActivated, setShinyPartyActivated] = useState(false);
+  const [shinyAudio] = useState(new Audio(`${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`));
 
   const resetSearch = useCallback(() => {
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
@@ -286,8 +288,42 @@ function GameScreen({
       .replace(/♀/g, 'f')
       .replace(/[^a-z0-9mf]/g, '');
 
-    if (normalizedSearchTerm === 'sarrat') {
+    if (normalizedSearchTerm === 'sarrat' && !shinyPartyActivated) {
       setAllShiny(true);
+      setShinyPartyActivated(true);
+      
+      // Reproducir el sonido shiny
+      shinyAudio.play().catch(error => console.error("Error playing shiny sound:", error));
+      
+      const existingToasts = document.getElementsByClassName('Toastify__toast');
+      for (let i = 0; i < existingToasts.length; i++) {
+        existingToasts[i].style.display = 'none';
+      }
+
+      toast.dismiss();
+
+      toast(
+        <div>
+          <img 
+            src={`${process.env.PUBLIC_URL}/media/images/ludicolo.gif`}
+            alt="Shiny Ludicolo"
+            style={{width: '100%', height: '100%', objectFit: 'contain'}} 
+          />
+          <p>🎉 Welcome to the shiny party! 🎉</p>
+        </div>, 
+        {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: false,
+          progress: undefined,
+          closeButton: false,
+          className: 'custom-toast shiny-party-toast',
+          onMouseEnter: toast.dismiss,
+        }
+      );
       if (navbarRef.current) {
         navbarRef.current.resetSearch();
       }
@@ -319,7 +355,7 @@ function GameScreen({
     if (filteredVisiblePokemon.length === 1) {
       handlePokemonClick(filteredVisiblePokemon[0]);
     }
-  }, [filteredPokemonList, visiblePokemon, handlePokemonClick]);
+  }, [filteredPokemonList, visiblePokemon, handlePokemonClick, shinyPartyActivated, shinyAudio]);
 
   const handleKeyPress = useCallback((event) => {
     const char = event.key;

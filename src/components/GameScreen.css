@@ -303,3 +303,36 @@ body {
     padding-top: 0;
   }
 }
+
+.shiny-party-toast {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  pointer-events: none !important;
+}
+
+.shiny-party-toast img {
+  width: 80px !important;
+  height: 80px !important;
+  object-fit: contain;
+}
+
+.shiny-party-toast p {
+  margin-bottom: 0 !important;
+  margin-top: 8px !important;
+}
+
+@media (max-width: 1000px) {
+  .shiny-party-toast {
+    font-size: 12px !important;
+    padding: 8px !important;
+  }
+
+  .shiny-party-toast img {
+    width: 60px !important;
+    height: 60px !important;
+  }
+}
