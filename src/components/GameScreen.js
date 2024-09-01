@@ -47,6 +47,7 @@ function GameScreen({
   const [navbarHeight, setNavbarHeight] = useState(0);
   const [startTime, setStartTime] = useState(Date.now());
   const [endTime, setEndTime] = useState(null);
+  const [allShiny, setAllShiny] = useState(false);
 
   const resetSearch = useCallback(() => {
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
@@ -285,6 +286,14 @@ function GameScreen({
       .replace(/♀/g, 'f')
       .replace(/[^a-z0-9mf]/g, '');
 
+    if (normalizedSearchTerm === 'sarrat') {
+      setAllShiny(true);
+      if (navbarRef.current) {
+        navbarRef.current.resetSearch();
+      }
+      return;
+    }
+
     const exactMatch = filteredPokemonList.find(pokemon => 
       pokemon.name.toLowerCase()
         .replace(/♂/g, 'm')
@@ -513,6 +522,7 @@ function GameScreen({
             animatingCards={animatingCards}
             isGameOver={false}
             totalAvailablePokemon={pokemonList.length}
+            allShiny={allShiny}
           />
         </div>
       </div>

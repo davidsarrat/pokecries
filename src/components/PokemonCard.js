@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './PokemonCard.css';
 
-function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGameOver, totalAvailablePokemon }) {
+function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGameOver, totalAvailablePokemon, allShiny }) {
   const cardRef = useRef(null);
   const [isShaking, setIsShaking] = useState(false);
   const [isShiny, setIsShiny] = useState(false);
 
   useEffect(() => {
     if (!isGameOver) {
-      setIsShiny(Math.random() < (1/10) / totalAvailablePokemon);
+      setIsShiny(allShiny || Math.random() < (1/10) / totalAvailablePokemon);
     }
-  }, [totalAvailablePokemon, isGameOver]);
+  }, [totalAvailablePokemon, isGameOver, allShiny]);
 
   useEffect(() => {
     if (isAnimating) {
@@ -43,7 +43,7 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGa
 
   const visibilityClass = isVisible ? '' : 'hidden';
   const shakeClass = isShaking ? 'shake-animation' : '';
-  const spritePath = isShiny && !isGameOver 
+  const spritePath = (isShiny || allShiny) && !isGameOver 
     ? `${process.env.PUBLIC_URL}/media/sprites/shiny/${pokemon.id}.png`
     : `${process.env.PUBLIC_URL}/media/sprites/${pokemon.id}.png`;
 

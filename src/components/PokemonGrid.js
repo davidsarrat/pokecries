@@ -2,7 +2,7 @@ import React from 'react';
 import PokemonCard from './PokemonCard';
 import './PokemonGrid.css';
 
-function PokemonGrid({ pokemonList, visiblePokemon, onPokemonClick, currentPokemon, animatingCards, isGameOver, totalAvailablePokemon }) {
+function PokemonGrid({ pokemonList, visiblePokemon, onPokemonClick, currentPokemon, animatingCards, isGameOver, totalAvailablePokemon, allShiny }) {
   return (
     <div className="pokemon-grid">
       {pokemonList.map(pokemon => {
@@ -18,6 +18,7 @@ function PokemonGrid({ pokemonList, visiblePokemon, onPokemonClick, currentPokem
             isVisible={isVisible}
             isGameOver={isGameOver}
             totalAvailablePokemon={totalAvailablePokemon}
+            allShiny={allShiny}
           />
         );
       })}
