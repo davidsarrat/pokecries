@@ -50,6 +50,7 @@ function GameScreen({
   const [usedPokemonIds, setUsedPokemonIds] = useState(new Set());
   const [timer, setTimer] = useState(0);
   const [availablePokemonIndices, setAvailablePokemonIndices] = useState([]);
+  const [nextRandomPokemonId, setNextRandomPokemonId] = useState(null);
 
   const resetSearch = useCallback(() => {
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
@@ -132,9 +133,24 @@ function GameScreen({
       setAvailablePokemonIndices(prev => prev.filter((_, index) => index !== randomIndex));
       return pokemonList[pokemonIndex];
     } else {
-      return pokemonList[Math.floor(Math.random() * pokemonList.length)];
+      let randomPokemon;
+      if (nextRandomPokemonId) {
+        randomPokemon = pokemonList.find(p => p.id === nextRandomPokemonId);
+      } else {
+        do {
+          randomPokemon = pokemonList[Math.floor(Math.random() * pokemonList.length)];
+        } while (randomPokemon.id === currentPokemon?.id);
+      }
+      
+      let nextId;
+      do {
+        nextId = pokemonList[Math.floor(Math.random() * pokemonList.length)].id;
+      } while (nextId === randomPokemon.id);
+      setNextRandomPokemonId(nextId);
+      
+      return randomPokemon;
     }
-  }, [selectedGameMode, availablePokemonIndices, pokemonList, endGame]);
+  }, [selectedGameMode, availablePokemonIndices, pokemonList, currentPokemon, nextRandomPokemonId, endGame]);
 
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -472,6 +488,12 @@ function GameScreen({
   useEffect(() => {
     if (selectedGameMode === 'pokedex_completer') {
       setAvailablePokemonIndices([...Array(pokemonList.length).keys()]);
+    }
+  }, [selectedGameMode, pokemonList]);
+
+  useEffect(() => {
+    if (selectedGameMode !== 'pokedex_completer' && pokemonList.length > 0) {
+      setNextRandomPokemonId(pokemonList[Math.floor(Math.random() * pokemonList.length)].id);
     }
   }, [selectedGameMode, pokemonList]);
 
