@@ -146,22 +146,12 @@ function GameScreen({
       return;
     }
 
-    if (selectedGameMode === 'pokedex_completer' && !limitedQuestions && progressCount + 1 >= shuffledPokemonList.length) {
-      endGame();
-      return;
-    }
-
-    if (isTimeAttack || selectedGameMode === 'freestyle') {
-      const nextPokemon = getRandomPokemon();
-      if (nextPokemon) {
-        setCurrentPokemon(nextPokemon);
-        setProgressCount(prevCount => prevCount + 1);
-        setTimeout(() => {
-          setIsAutoPlaying(true);
-          playCurrentCry(nextPokemon, true);
-        }, 0);
+    if (selectedGameMode === 'pokedex_completer') {
+      if (progressCount + 1 >= shuffledPokemonList.length) {
+        endGame();
+        return;
       }
-    } else if (selectedGameMode === 'pokedex_completer') {
+
       let nextIndex = (currentPokemonIndex + 1) % shuffledPokemonList.length;
       let nextPokemon = shuffledPokemonList[nextIndex];
 
@@ -172,8 +162,21 @@ function GameScreen({
         setIsAutoPlaying(true);
         playCurrentCry(nextPokemon, true);
       }, 0);
+    } else {
+      // Modo freestyle o Time Attack sin evitar repeticiones
+      let nextPokemon;
+      do {
+        nextPokemon = pokemonList[Math.floor(Math.random() * pokemonList.length)];
+      } while (nextPokemon.id === currentPokemon.id);
+
+      setCurrentPokemon(nextPokemon);
+      setProgressCount(prevCount => prevCount + 1);
+      setTimeout(() => {
+        setIsAutoPlaying(true);
+        playCurrentCry(nextPokemon, true);
+      }, 0);
     }
-  }, [isTimeAttack, selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, getRandomPokemon, playCurrentCry, endGame, limitedQuestions, numberOfQuestions]);
+  }, [selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, pokemonList, currentPokemon, playCurrentCry, endGame, limitedQuestions, numberOfQuestions]);
 
   const handlePokemonClick = useCallback((clickedPokemon) => {
     const isCorrect = clickedPokemon.id === currentPokemon.id;
