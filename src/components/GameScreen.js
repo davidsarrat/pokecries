@@ -47,6 +47,8 @@ function GameScreen({
   const [allShiny, setAllShiny] = useState(false);
   const [shinyPartyActivated, setShinyPartyActivated] = useState(false);
   const [shinyAudio] = useState(new Audio(`${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`));
+  const [usedPokemonIds, setUsedPokemonIds] = useState(new Set());
+  const [timer, setTimer] = useState(0); // Nuevo estado para el contador de tiempo
 
   const resetSearch = useCallback(() => {
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
@@ -118,14 +120,17 @@ function GameScreen({
     }
   }, [currentPokemon]);
 
-  const getRandomPokemon = useCallback((excludePokemon = null) => {
-    let newPokemon;
-    do {
-      const randomIndex = Math.floor(Math.random() * pokemonList.length);
-      newPokemon = pokemonList[randomIndex];
-    } while (excludePokemon && newPokemon.id === excludePokemon.id);
+  const getRandomPokemon = useCallback(() => {
+    const availablePokemon = pokemonList.filter(p => !usedPokemonIds.has(p.id));
+    if (availablePokemon.length === 0) {
+      endGame();
+      return null;
+    }
+    const randomIndex = Math.floor(Math.random() * availablePokemon.length);
+    const newPokemon = availablePokemon[randomIndex];
+    setUsedPokemonIds(prev => new Set(prev).add(newPokemon.id));
     return newPokemon;
-  }, [pokemonList]);
+  }, [pokemonList, usedPokemonIds, endGame]);
 
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -137,19 +142,20 @@ function GameScreen({
 
   const moveToNextPokemon = useCallback(() => {
     if (limitedQuestions && progressCount + 1 >= numberOfQuestions) {
-      setCurrentPokemon(null);
       endGame();
       return;
     }
 
     if (isTimeAttack || selectedGameMode === 'freestyle') {
-      const nextPokemon = getRandomPokemon(currentPokemon);
-      setCurrentPokemon(nextPokemon);
-      setProgressCount(prevCount => prevCount + 1);
-      setTimeout(() => {
-        setIsAutoPlaying(true);
-        playCurrentCry(nextPokemon, true);
-      }, 0);
+      const nextPokemon = getRandomPokemon();
+      if (nextPokemon) {
+        setCurrentPokemon(nextPokemon);
+        setProgressCount(prevCount => prevCount + 1);
+        setTimeout(() => {
+          setIsAutoPlaying(true);
+          playCurrentCry(nextPokemon, true);
+        }, 0);
+      }
     } else if (selectedGameMode === 'pokedex_completer') {
       let nextIndex;
       let nextPokemon;
@@ -160,7 +166,7 @@ function GameScreen({
 
       const nextProgressCount = progressCount + 1;
       
-      if (nextProgressCount === shuffledPokemonList.length) {
+      if (nextProgressCount >= shuffledPokemonList.length) {
         endGame();
       } else {
         setCurrentPokemonIndex(nextIndex);
@@ -420,6 +426,16 @@ function GameScreen({
   }, [currentPokemon, playCurrentCry]);
 
   useEffect(() => {
+    if (!isTimeAttack && !isGameFinished) {
+      const intervalId = setInterval(() => {
+        setTimer(prevTimer => prevTimer + 1);
+      }, 1000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [isTimeAttack, isGameFinished]);
+
+  useEffect(() => {
     if (isTimeAttack && !isGameFinished) {
       const intervalId = setInterval(() => {
         setTimeLeftMs(prevTime => {
@@ -466,7 +482,7 @@ function GameScreen({
         stats={{
           correctCount,
           incorrectCount,
-          totalTime: formatTime(Date.now() - startTime)
+          totalTime: formatTime(isTimeAttack ? Date.now() - startTime : timer * 1000)
         }}
         failedPokemon={failedPokemon}
         onPlayAgain={() => {
@@ -502,12 +518,12 @@ function GameScreen({
         progressCount={progressCount}
         totalCount={limitedQuestions ? numberOfQuestions : (selectedGameMode === 'pokedex_completer' ? shuffledPokemonList.length : undefined)}
         showProgress={true}
-        timeLeft={isTimeAttack ? timeLeftMs : undefined}
-        showTimer={isTimeAttack || selectedGameMode === 'pokedex_completer' || selectedGameMode === 'freestyle'}
+        timeLeft={isTimeAttack ? timeLeftMs : timer * 1000}
+        showTimer={true}
         timeGained={timeGained}
         timeLost={timeLost}
         formatTime={formatTime}
-        timer={undefined}
+        timer={timer}
         selectedGameMode={selectedGameMode}
         hardcoreMode={hardcoreMode}
       />
