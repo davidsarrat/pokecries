@@ -157,6 +157,11 @@ function GameScreen({
         }, 0);
       }
     } else if (selectedGameMode === 'pokedex_completer') {
+      if (progressCount >= shuffledPokemonList.length - 1) {
+        endGame();
+        return;
+      }
+
       let nextIndex;
       let nextPokemon;
       do {
@@ -164,19 +169,13 @@ function GameScreen({
         nextPokemon = shuffledPokemonList[nextIndex];
       } while (nextPokemon.id === currentPokemon.id);
 
-      const nextProgressCount = progressCount + 1;
-      
-      if (nextProgressCount >= shuffledPokemonList.length) {
-        endGame();
-      } else {
-        setCurrentPokemonIndex(nextIndex);
-        setCurrentPokemon(nextPokemon);
-        setProgressCount(nextProgressCount);
-        setTimeout(() => {
-          setIsAutoPlaying(true);
-          playCurrentCry(nextPokemon, true);
-        }, 0);
-      }
+      setCurrentPokemonIndex(nextIndex);
+      setCurrentPokemon(nextPokemon);
+      setProgressCount(prevCount => prevCount + 1);
+      setTimeout(() => {
+        setIsAutoPlaying(true);
+        playCurrentCry(nextPokemon, true);
+      }, 0);
     }
   }, [isTimeAttack, selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, currentPokemon, getRandomPokemon, playCurrentCry, endGame, limitedQuestions, numberOfQuestions]);
 
