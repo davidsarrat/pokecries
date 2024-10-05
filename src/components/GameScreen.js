@@ -48,7 +48,8 @@ function GameScreen({
   const [shinyPartyActivated, setShinyPartyActivated] = useState(false);
   const [shinyAudio] = useState(new Audio(`${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`));
   const [usedPokemonIds, setUsedPokemonIds] = useState(new Set());
-  const [timer, setTimer] = useState(0); // Nuevo estado para el contador de tiempo
+  const [timer, setTimer] = useState(0);
+  const [availablePokemonIndices, setAvailablePokemonIndices] = useState([]);
 
   const resetSearch = useCallback(() => {
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
@@ -121,16 +122,19 @@ function GameScreen({
   }, [currentPokemon]);
 
   const getRandomPokemon = useCallback(() => {
-    const availablePokemon = pokemonList.filter(p => !usedPokemonIds.has(p.id));
-    if (availablePokemon.length === 0) {
-      endGame();
-      return null;
+    if (selectedGameMode === 'pokedex_completer') {
+      if (availablePokemonIndices.length === 0) {
+        endGame();
+        return null;
+      }
+      const randomIndex = Math.floor(Math.random() * availablePokemonIndices.length);
+      const pokemonIndex = availablePokemonIndices[randomIndex];
+      setAvailablePokemonIndices(prev => prev.filter((_, index) => index !== randomIndex));
+      return pokemonList[pokemonIndex];
+    } else {
+      return pokemonList[Math.floor(Math.random() * pokemonList.length)];
     }
-    const randomIndex = Math.floor(Math.random() * availablePokemon.length);
-    const newPokemon = availablePokemon[randomIndex];
-    setUsedPokemonIds(prev => new Set(prev).add(newPokemon.id));
-    return newPokemon;
-  }, [pokemonList, usedPokemonIds, endGame]);
+  }, [selectedGameMode, availablePokemonIndices, pokemonList, endGame]);
 
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -146,29 +150,13 @@ function GameScreen({
       return;
     }
 
-    if (selectedGameMode === 'pokedex_completer') {
-      if (progressCount + 1 >= shuffledPokemonList.length) {
-        endGame();
-        return;
-      }
+    if (selectedGameMode === 'pokedex_completer' && progressCount + 1 >= pokemonList.length) {
+      endGame();
+      return;
+    }
 
-      let nextIndex = (currentPokemonIndex + 1) % shuffledPokemonList.length;
-      let nextPokemon = shuffledPokemonList[nextIndex];
-
-      setCurrentPokemonIndex(nextIndex);
-      setCurrentPokemon(nextPokemon);
-      setProgressCount(prevCount => prevCount + 1);
-      setTimeout(() => {
-        setIsAutoPlaying(true);
-        playCurrentCry(nextPokemon, true);
-      }, 0);
-    } else {
-      // Modo freestyle o Time Attack sin evitar repeticiones
-      let nextPokemon;
-      do {
-        nextPokemon = pokemonList[Math.floor(Math.random() * pokemonList.length)];
-      } while (nextPokemon.id === currentPokemon.id);
-
+    const nextPokemon = getRandomPokemon();
+    if (nextPokemon) {
       setCurrentPokemon(nextPokemon);
       setProgressCount(prevCount => prevCount + 1);
       setTimeout(() => {
@@ -176,7 +164,7 @@ function GameScreen({
         playCurrentCry(nextPokemon, true);
       }, 0);
     }
-  }, [selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, pokemonList, currentPokemon, playCurrentCry, endGame, limitedQuestions, numberOfQuestions]);
+  }, [limitedQuestions, progressCount, numberOfQuestions, selectedGameMode, pokemonList.length, getRandomPokemon, playCurrentCry, endGame]);
 
   const handlePokemonClick = useCallback((clickedPokemon) => {
     const isCorrect = clickedPokemon.id === currentPokemon.id;
@@ -292,7 +280,6 @@ function GameScreen({
       setAllShiny(true);
       setShinyPartyActivated(true);
       
-      // Reproducir el sonido shiny
       shinyAudio.play().catch(error => console.error("Error playing shiny sound:", error));
       
       const existingToasts = document.getElementsByClassName('Toastify__toast');
@@ -411,11 +398,19 @@ function GameScreen({
     setShuffledPokemonList(shuffled);
     
     if (shuffled.length > 0) {
-      setCurrentPokemon(shuffled[0]);
+      const firstPokemon = shuffled[0];
+      setCurrentPokemon(firstPokemon);
       setCurrentPokemonIndex(0);
       setProgressCount(0);
+      
+      if (selectedGameMode === 'pokedex_completer') {
+        setAvailablePokemonIndices(prev => {
+          const indexToRemove = selectedPokemon.findIndex(p => p.id === firstPokemon.id);
+          return prev.filter((_, index) => index !== indexToRemove);
+        });
+      }
     }
-  }, [selectedGenerations]);
+  }, [selectedGenerations, selectedGameMode]);
 
   useEffect(() => {
     if (currentPokemon) {
@@ -473,6 +468,12 @@ function GameScreen({
       setEndTime(Date.now());
     }
   }, [gameOver]);
+
+  useEffect(() => {
+    if (selectedGameMode === 'pokedex_completer') {
+      setAvailablePokemonIndices([...Array(pokemonList.length).keys()]);
+    }
+  }, [selectedGameMode, pokemonList]);
 
   if (gameOver) {
     return (
