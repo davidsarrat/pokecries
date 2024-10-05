@@ -146,6 +146,11 @@ function GameScreen({
       return;
     }
 
+    if (selectedGameMode === 'pokedex_completer' && !limitedQuestions && progressCount + 1 >= shuffledPokemonList.length) {
+      endGame();
+      return;
+    }
+
     if (isTimeAttack || selectedGameMode === 'freestyle') {
       const nextPokemon = getRandomPokemon();
       if (nextPokemon) {
@@ -157,17 +162,8 @@ function GameScreen({
         }, 0);
       }
     } else if (selectedGameMode === 'pokedex_completer') {
-      if (progressCount >= shuffledPokemonList.length - 1) {
-        endGame();
-        return;
-      }
-
-      let nextIndex;
-      let nextPokemon;
-      do {
-        nextIndex = (currentPokemonIndex + 1) % shuffledPokemonList.length;
-        nextPokemon = shuffledPokemonList[nextIndex];
-      } while (nextPokemon.id === currentPokemon.id);
+      let nextIndex = (currentPokemonIndex + 1) % shuffledPokemonList.length;
+      let nextPokemon = shuffledPokemonList[nextIndex];
 
       setCurrentPokemonIndex(nextIndex);
       setCurrentPokemon(nextPokemon);
@@ -177,7 +173,7 @@ function GameScreen({
         playCurrentCry(nextPokemon, true);
       }, 0);
     }
-  }, [isTimeAttack, selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, currentPokemon, getRandomPokemon, playCurrentCry, endGame, limitedQuestions, numberOfQuestions]);
+  }, [isTimeAttack, selectedGameMode, shuffledPokemonList, progressCount, currentPokemonIndex, getRandomPokemon, playCurrentCry, endGame, limitedQuestions, numberOfQuestions]);
 
   const handlePokemonClick = useCallback((clickedPokemon) => {
     const isCorrect = clickedPokemon.id === currentPokemon.id;
