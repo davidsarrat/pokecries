@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './PokemonCard.css';
 
-function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGameOver, totalAvailablePokemon, allShiny }) {
+const PokemonCard = React.memo(function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGameOver, totalAvailablePokemon, allShiny }) {
   const cardRef = useRef(null);
   const [isShaking, setIsShaking] = useState(false);
   const [isShiny, setIsShiny] = useState(false);
@@ -12,34 +12,42 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGa
     }
   }, [totalAvailablePokemon, isGameOver, allShiny]);
 
-  useEffect(() => {
+  const handleAnimation = useCallback(() => {
     if (isAnimating) {
       const card = cardRef.current;
-      card.style.animation = 'none';
-      void card.offsetWidth;
-      card.style.animation = null;
-      card.classList.remove('correct-animation', 'incorrect-animation', 'shake-animation');
-      void card.offsetWidth;
-      if (isGameOver) {
-        card.classList.add('shake-animation');
-      } else {
-        card.classList.add(isCorrect ? 'correct-animation' : 'incorrect-animation');
+      if (card) {
+        card.style.animation = 'none';
+        void card.offsetWidth;
+        card.style.animation = null;
+        card.classList.remove('correct-animation', 'incorrect-animation', 'shake-animation');
+        void card.offsetWidth;
+        if (isGameOver) {
+          card.classList.add('shake-animation');
+        } else {
+          card.classList.add(isCorrect ? 'correct-animation' : 'incorrect-animation');
+        }
       }
     }
   }, [isAnimating, isCorrect, isGameOver]);
 
-  const handleClick = () => {
+  useEffect(() => {
+    handleAnimation();
+  }, [handleAnimation]);
+
+  const handleClick = useCallback(() => {
     const card = cardRef.current;
-    card.style.animation = 'none';
-    void card.offsetWidth;
-    card.style.animation = null;
-    card.classList.remove('correct-animation', 'incorrect-animation', 'shake-animation');
+    if (card) {
+      card.style.animation = 'none';
+      void card.offsetWidth;
+      card.style.animation = null;
+      card.classList.remove('correct-animation', 'incorrect-animation', 'shake-animation');
+    }
     onClick();
     if (isGameOver) {
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 500);
     }
-  };
+  }, [onClick, isGameOver]);
 
   const visibilityClass = isVisible ? '' : 'hidden';
   const shakeClass = isShaking ? 'shake-animation' : '';
@@ -61,6 +69,6 @@ function PokemonCard({ pokemon, onClick, isAnimating, isCorrect, isVisible, isGa
       <p className="pokemon-name">{pokemon.name}</p>
     </div>
   );
-}
+});
 
 export default PokemonCard;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import PokemonGrid from './PokemonGrid';
 import Navbar from './Navbar';
 import GameOverScreen from './GameOverScreen';
@@ -52,6 +52,9 @@ function GameScreen({
   const [availablePokemonIndices, setAvailablePokemonIndices] = useState([]);
   const [nextRandomPokemonId, setNextRandomPokemonId] = useState(null);
 
+  const memoizedPokemonList = useMemo(() => pokemonList, [pokemonList]);
+  const memoizedFilteredPokemonList = useMemo(() => filteredPokemonList, [filteredPokemonList]);
+
   const resetSearch = useCallback(() => {
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
       navbarRef.current.resetSearch();
@@ -89,38 +92,33 @@ function GameScreen({
 
   const playCurrentCry = useCallback((pokemon = currentPokemon, isAutoplay = false) => {
     if (pokemon) {
-      try {
-        if (audioRef.current) {
-          audioRef.current.pause();
-          audioRef.current.currentTime = 0;
-        }
-        audioRef.current = new Audio(`${process.env.PUBLIC_URL}/media/cries/${pokemon.id}.mp3`);
-        setIsPlaying(true);
-        audioRef.current.play()
-          .then(() => {
-            audioRef.current.addEventListener('ended', () => {
-              setIsPlaying(false);
-              if (isAutoplay) {
-                setIsAutoPlaying(false);
-              }
-            });
-          })
-          .catch(error => {
-            if (error.name !== 'AbortError') {
-              console.error('Error playing audio:', error);
-            }
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
+      audioRef.current = new Audio(`${process.env.PUBLIC_URL}/media/cries/${pokemon.id}.mp3`);
+      setIsPlaying(true);
+      audioRef.current.play()
+        .then(() => {
+          const handleEnded = () => {
             setIsPlaying(false);
             if (isAutoplay) {
               setIsAutoPlaying(false);
             }
-          });
-      } catch (error) {
-        console.error('Error setting up audio:', error);
-        setIsPlaying(false);
-        if (isAutoplay) {
-          setIsAutoPlaying(false);
-        }
-      }
+            audioRef.current.removeEventListener('ended', handleEnded);
+          };
+          audioRef.current.addEventListener('ended', handleEnded);
+        })
+        .catch(error => {
+          if (error.name !== 'AbortError') {
+            console.error('Error playing audio:', error);
+          }
+          setIsPlaying(false);
+          if (isAutoplay) {
+            setIsAutoPlaying(false);
+          }
+        });
     }
   }, [currentPokemon]);
 
@@ -499,6 +497,16 @@ function GameScreen({
     }
   }, [selectedGameMode, pokemonList]);
 
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
   if (gameOver) {
     return (
       <GameOverScreen
@@ -553,13 +561,13 @@ function GameScreen({
       <div className="game-content">
         <div className="game-screen">
           <PokemonGrid 
-            pokemonList={filteredPokemonList} 
+            pokemonList={memoizedFilteredPokemonList} 
             visiblePokemon={visiblePokemon}
             onPokemonClick={handlePokemonClick}
             currentPokemon={currentPokemon}
             animatingCards={animatingCards}
             isGameOver={false}
-            totalAvailablePokemon={pokemonList.length}
+            totalAvailablePokemon={memoizedPokemonList.length}
             allShiny={allShiny}
           />
         </div>
@@ -575,4 +583,4 @@ function GameScreen({
   );
 }
 
-export default GameScreen;
+export default React.memo(GameScreen);
