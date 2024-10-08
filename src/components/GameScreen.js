@@ -106,7 +106,9 @@ function GameScreen({
             });
           })
           .catch(error => {
-            console.error('Error playing audio:', error);
+            if (error.name !== 'AbortError') {
+              console.error('Error playing audio:', error);
+            }
             setIsPlaying(false);
             if (isAutoplay) {
               setIsAutoPlaying(false);
