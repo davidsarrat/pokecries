@@ -355,7 +355,7 @@ function GameScreen({
 
   const handleExitClick = () => {
     scrollToTop();
-    onExit();
+    endGame();
   };
 
   const formatTime = (time) => {
