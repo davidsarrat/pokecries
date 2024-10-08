@@ -134,23 +134,12 @@ function GameScreen({
       return pokemonList[pokemonIndex];
     } else {
       let randomPokemon;
-      if (nextRandomPokemonId) {
-        randomPokemon = pokemonList.find(p => p.id === nextRandomPokemonId);
-      } else {
-        do {
-          randomPokemon = pokemonList[Math.floor(Math.random() * pokemonList.length)];
-        } while (randomPokemon.id === currentPokemon?.id);
-      }
-      
-      let nextId;
       do {
-        nextId = pokemonList[Math.floor(Math.random() * pokemonList.length)].id;
-      } while (nextId === randomPokemon.id);
-      setNextRandomPokemonId(nextId);
-      
+        randomPokemon = pokemonList[Math.floor(Math.random() * pokemonList.length)];
+      } while (randomPokemon.id === currentPokemon?.id);
       return randomPokemon;
     }
-  }, [selectedGameMode, availablePokemonIndices, pokemonList, currentPokemon, nextRandomPokemonId, endGame]);
+  }, [selectedGameMode, availablePokemonIndices, pokemonList, currentPokemon, endGame]);
 
   const shuffleArray = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
@@ -249,14 +238,11 @@ function GameScreen({
           </div>,
           'error'
         );
-      }
-      
-      playCurrentCry();
-      
-      if (!keepCryOnError) {
         resetSearch();
         moveToNextPokemon();
       }
+      
+      playCurrentCry();
     }
 
     const shouldShowAnimations = !(limitedAnswers && !keepCryOnError) && 
