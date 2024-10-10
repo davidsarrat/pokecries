@@ -3,10 +3,11 @@ import PokemonCard from './PokemonCard';
 import './PokemonGrid.css';
 
 const PokemonGrid = React.memo(function PokemonGrid({ pokemonList, visiblePokemon, onPokemonClick, currentPokemon, animatingCards, isGameOver, totalAvailablePokemon, allShiny }) {
+  console.log("PokemonGrid rendering with visiblePokemon:", visiblePokemon);
+
   const memoizedPokemonCards = useMemo(() => {
-    return pokemonList.map(pokemon => {
+    return visiblePokemon.map(pokemon => {
       const animationInfo = animatingCards.get(pokemon.id);
-      const isVisible = visiblePokemon.some(p => p.id === pokemon.id);
       return (
         <PokemonCard
           key={pokemon.id}
@@ -14,14 +15,14 @@ const PokemonGrid = React.memo(function PokemonGrid({ pokemonList, visiblePokemo
           onClick={() => onPokemonClick(pokemon)}
           isAnimating={!!animationInfo}
           isCorrect={animationInfo?.isCorrect}
-          isVisible={isVisible}
+          isVisible={true}
           isGameOver={isGameOver}
           totalAvailablePokemon={totalAvailablePokemon}
           allShiny={allShiny}
         />
       );
     });
-  }, [pokemonList, visiblePokemon, onPokemonClick, animatingCards, isGameOver, totalAvailablePokemon, allShiny]);
+  }, [visiblePokemon, onPokemonClick, animatingCards, isGameOver, totalAvailablePokemon, allShiny]);
 
   return (
     <div className="pokemon-grid">
