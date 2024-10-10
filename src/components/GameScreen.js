@@ -623,8 +623,8 @@ function GameScreen({
       <div className="game-content">
         <div className="game-screen">
           <PokemonGrid 
-            pokemonList={memoizedFilteredPokemonList} 
-            visiblePokemon={filteredPokemonList}
+            pokemonList={memoizedPokemonList}
+            visiblePokemonIds={filteredPokemonList.map(p => p.id)}
             onPokemonClick={handlePokemonClick}
             currentPokemon={gameState.currentPokemon}
             animatingCards={animatingCards}
