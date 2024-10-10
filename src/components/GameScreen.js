@@ -23,11 +23,7 @@ function GameScreen({
 }) {
   const [pokemonList, setPokemonList] = useState([]);
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
-  const [correctCount, setCorrectCount] = useState(0);
-  const [incorrectCount, setIncorrectCount] = useState(0);
   const [shuffledPokemonList, setShuffledPokemonList] = useState([]);
-  const [currentPokemonIndex, setCurrentPokemonIndex] = useState(0);
-  const [progressCount, setProgressCount] = useState(0);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -39,17 +35,14 @@ function GameScreen({
   const [timeLeftMs, setTimeLeftMs] = useState((timeAttackSettings.minutes * 60 + timeAttackSettings.seconds) * 1000);
   const [timeGained, setTimeGained] = useState(0);
   const [timeLost, setTimeLost] = useState(0);
-  const [visiblePokemon, setVisiblePokemon] = useState([]);
   const [navbarHeight, setNavbarHeight] = useState(0);
   const [startTime] = useState(Date.now());
   const [endTime, setEndTime] = useState(null);
   const [allShiny, setAllShiny] = useState(false);
   const [shinyPartyActivated, setShinyPartyActivated] = useState(false);
   const [shinyAudio] = useState(new Audio(`${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`));
-  const [usedPokemonIds, setUsedPokemonIds] = useState(new Set());
   const [timer, setTimer] = useState(0);
   const [availablePokemonIndices, setAvailablePokemonIndices] = useState([]);
-  const [nextRandomPokemonId, setNextRandomPokemonId] = useState(null);
   const [isGameInitialized, setIsGameInitialized] = useState(false);
   const [gameState, setGameState] = useState({
     currentPokemon: null,
@@ -230,7 +223,7 @@ function GameScreen({
     }
 
     setIsGameInitialized(true);
-  }, [selectedGenerations, selectedGameMode, updateVisiblePokemon]);
+  }, [selectedGenerations, selectedGameMode, updateVisiblePokemon, isGameInitialized]);
 
   useEffect(() => {
     initializeGame();
@@ -531,12 +524,6 @@ function GameScreen({
   }, [selectedGameMode, pokemonList]);
 
   useEffect(() => {
-    if (selectedGameMode !== 'pokedex_completer' && pokemonList.length > 0) {
-      setNextRandomPokemonId(pokemonList[Math.floor(Math.random() * pokemonList.length)].id);
-    }
-  }, [selectedGameMode, pokemonList]);
-
-  useEffect(() => {
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -560,7 +547,10 @@ function GameScreen({
         }}
         failedPokemon={failedPokemon}
         onPlayAgain={() => {
-          setVisiblePokemon(pokemonList); 
+          setGameState(prevState => ({
+            ...prevState,
+            visiblePokemon: pokemonList,
+          }));
           onExit();
         }}
         selectedGameMode={selectedGameMode}
@@ -605,7 +595,7 @@ function GameScreen({
         <div className="game-screen">
           <PokemonGrid 
             pokemonList={memoizedFilteredPokemonList} 
-            visiblePokemon={filteredPokemonList.length > 0 ? filteredPokemonList : gameState.visiblePokemon}
+            visiblePokemon={filteredPokemonList}
             onPokemonClick={handlePokemonClick}
             currentPokemon={gameState.currentPokemon}
             animatingCards={animatingCards}
