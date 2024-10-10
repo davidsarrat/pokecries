@@ -4,7 +4,7 @@ import PokemonCard from './PokemonCard';
 import { scrollToTop } from '../utils/scrollUtils';
 
 function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, startTime, endTime }) {
-  const { correctCount, incorrectCount } = stats;
+  const { correctCount, incorrectCount, progressCount } = stats;
   const audioRef = useRef(null);
   const [playingPokemonId, setPlayingPokemonId] = useState(null);
 
@@ -53,7 +53,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
         </div>
         <div className="stat-item">
           <span className="stat-label">Rounds</span>
-          <span className="stat-value rounds">{correctCount + incorrectCount}</span>
+          <span className="stat-value rounds">{progressCount}</span>
         </div>
         <div className="stat-item">
           <span className="stat-label">Total Time</span>

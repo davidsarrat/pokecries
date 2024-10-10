@@ -12,8 +12,6 @@ const PokemonGrid = React.memo(function PokemonGrid({
   totalAvailablePokemon, 
   allShiny 
 }) {
-  console.log("PokemonGrid rendering with visiblePokemonIds:", visiblePokemonIds);
-
   const memoizedPokemonCards = useMemo(() => {
     return pokemonList.map(pokemon => {
       const animationInfo = animatingCards.get(pokemon.id);
