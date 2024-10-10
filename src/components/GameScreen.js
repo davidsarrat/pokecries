@@ -55,7 +55,6 @@ function GameScreen({
   const [isGameReady, setIsGameReady] = useState(false);
 
   const memoizedPokemonList = useMemo(() => pokemonList, [pokemonList]);
-  const memoizedFilteredPokemonList = useMemo(() => filteredPokemonList, [filteredPokemonList]);
 
   const resetSearch = useCallback(() => {
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
@@ -151,53 +150,25 @@ function GameScreen({
     return array;
   };
 
-  const updateVisiblePokemon = useCallback((nextPokemon) => {
-    if (updateInProgress.current) return;
-    updateInProgress.current = true;
+  const selectVisiblePokemon = useCallback((allPokemon, currentPokemon) => {
+    if (!limitedAnswers || numberOfAnswers >= allPokemon.length) {
+      return allPokemon;
+    } else {
+      const availablePokemon = allPokemon.filter(p => p.id !== currentPokemon.id);
+      const randomPokemon = [];
+      const usedIndices = new Set();
 
-    setGameState(prevState => {
-      const newProgressCount = prevState.progressCount + 1;
-      
-      // Comprobamos si el juego ha terminado
-      if ((limitedQuestions && newProgressCount >= numberOfQuestions) ||
-          (selectedGameMode === 'pokedex_completer' && newProgressCount >= pokemonList.length)) {
-        endGame();
-        return prevState; // No actualizamos el estado si el juego ha terminado
-      }
-
-      let newVisiblePokemon;
-      if (!limitedAnswers || numberOfAnswers >= pokemonList.length) {
-        newVisiblePokemon = pokemonList;
-      } else {
-        const availablePokemon = pokemonList.filter(p => p.id !== nextPokemon.id);
-        const randomPokemon = [];
-        const usedIndices = new Set();
-
-        while (randomPokemon.length < numberOfAnswers - 1) {
-          const randomIndex = Math.floor(Math.random() * availablePokemon.length);
-          if (!usedIndices.has(randomIndex)) {
-            usedIndices.add(randomIndex);
-            randomPokemon.push(availablePokemon[randomIndex]);
-          }
+      while (randomPokemon.length < numberOfAnswers - 1) {
+        const randomIndex = Math.floor(Math.random() * availablePokemon.length);
+        if (!usedIndices.has(randomIndex)) {
+          usedIndices.add(randomIndex);
+          randomPokemon.push(availablePokemon[randomIndex]);
         }
-
-        newVisiblePokemon = [...randomPokemon, nextPokemon].sort(() => 0.5 - Math.random());
       }
 
-      setFilteredPokemonList(newVisiblePokemon);
-
-      return {
-        ...prevState,
-        currentPokemon: nextPokemon,
-        visiblePokemon: newVisiblePokemon,
-        progressCount: newProgressCount,
-      };
-    });
-
-    setTimeout(() => {
-      updateInProgress.current = false;
-    }, 0);
-  }, [limitedAnswers, numberOfAnswers, pokemonList, limitedQuestions, numberOfQuestions, selectedGameMode, endGame]);
+      return [...randomPokemon, currentPokemon].sort(() => 0.5 - Math.random());
+    }
+  }, [limitedAnswers, numberOfAnswers]);
 
   const initializeGame = useCallback(() => {
     if (isGameInitialized) return;
@@ -212,30 +183,12 @@ function GameScreen({
     
     if (shuffled.length > 0) {
       const firstPokemon = shuffled[0];
-      let initialVisiblePokemon;
-
-      if (!limitedAnswers || numberOfAnswers >= selectedPokemon.length) {
-        initialVisiblePokemon = selectedPokemon;
-      } else {
-        const availablePokemon = selectedPokemon.filter(p => p.id !== firstPokemon.id);
-        const randomPokemon = [];
-        const usedIndices = new Set();
-
-        while (randomPokemon.length < numberOfAnswers - 1) {
-          const randomIndex = Math.floor(Math.random() * availablePokemon.length);
-          if (!usedIndices.has(randomIndex)) {
-            usedIndices.add(randomIndex);
-            randomPokemon.push(availablePokemon[randomIndex]);
-          }
-        }
-
-        initialVisiblePokemon = [...randomPokemon, firstPokemon].sort(() => 0.5 - Math.random());
-      }
+      const initialVisiblePokemon = selectVisiblePokemon(selectedPokemon, firstPokemon);
 
       setGameState({
         currentPokemon: firstPokemon,
         visiblePokemon: initialVisiblePokemon,
-        progressCount: -1, // Cambiamos esto a -1
+        progressCount: -1,
         correctCount: 0,
         incorrectCount: 0,
       });
@@ -252,17 +205,40 @@ function GameScreen({
 
     setIsGameInitialized(true);
     setIsGameReady(true);
-  }, [selectedGenerations, selectedGameMode, limitedAnswers, numberOfAnswers, isGameInitialized]);
+  }, [selectedGenerations, selectedGameMode, selectVisiblePokemon]);
 
   useEffect(() => {
     initializeGame();
   }, [initializeGame]);
 
-  useEffect(() => {
-    if (isGameInitialized && pokemonList.length > 0 && gameState.currentPokemon) {
-      updateVisiblePokemon(gameState.currentPokemon);
-    }
-  }, [isGameInitialized, pokemonList, gameState.currentPokemon, updateVisiblePokemon]);
+  const updateVisiblePokemon = useCallback((nextPokemon) => {
+    if (updateInProgress.current) return;
+    updateInProgress.current = true;
+
+    setGameState(prevState => {
+      const newProgressCount = prevState.progressCount + 1;
+      
+      if ((limitedQuestions && newProgressCount >= numberOfQuestions) ||
+          (selectedGameMode === 'pokedex_completer' && newProgressCount >= pokemonList.length)) {
+        endGame();
+        return prevState;
+      }
+
+      const newVisiblePokemon = selectVisiblePokemon(pokemonList, nextPokemon);
+      setFilteredPokemonList(newVisiblePokemon);
+
+      return {
+        ...prevState,
+        currentPokemon: nextPokemon,
+        visiblePokemon: newVisiblePokemon,
+        progressCount: newProgressCount,
+      };
+    });
+
+    setTimeout(() => {
+      updateInProgress.current = false;
+    }, 0);
+  }, [limitedQuestions, numberOfQuestions, selectedGameMode, pokemonList, endGame, selectVisiblePokemon]);
 
   const moveToNextPokemon = useCallback(() => {
     if (!isGameInitialized || updateInProgress.current) return;
