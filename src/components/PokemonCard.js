@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './PokemonCard.css';
 
 const PokemonCard = React.memo(function PokemonCard({ 
@@ -11,7 +11,23 @@ const PokemonCard = React.memo(function PokemonCard({
   totalAvailablePokemon, 
   allShiny 
 }) {
-  const cardClassName = `pokemon-card ${isVisible ? '' : 'hidden'} ${isAnimating ? (isCorrect ? 'correct-animation' : 'incorrect-animation') : ''}`;
+  const [isShaking, setIsShaking] = useState(false);
+
+  const handleClick = () => {
+    if (isGameOver) {
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
+    }
+    onClick();
+  };
+
+  const cardClassName = `
+    pokemon-card 
+    ${isVisible ? '' : 'hidden'} 
+    ${isAnimating && isCorrect && !isGameOver ? 'correct-animation' : ''}
+    ${isAnimating && !isCorrect && !isGameOver ? 'incorrect-animation' : ''}
+    ${isShaking ? 'shake-animation' : ''}
+  `;
   
   const spritePath = (allShiny && !isGameOver) 
     ? `${process.env.PUBLIC_URL}/media/sprites/shiny/${pokemon.id}.png`
@@ -20,7 +36,7 @@ const PokemonCard = React.memo(function PokemonCard({
   return (
     <div 
       className={cardClassName}
-      onClick={isVisible ? onClick : undefined}
+      onClick={isVisible || isGameOver ? handleClick : undefined}
     >
       <img 
         src={spritePath} 

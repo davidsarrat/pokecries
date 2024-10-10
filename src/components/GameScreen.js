@@ -282,6 +282,12 @@ function GameScreen({
       incorrectCount: !isCorrect ? prevState.incorrectCount + 1 : prevState.incorrectCount,
     }));
 
+    setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
+    
+    setTimeout(() => {
+      setAnimatingCards(new Map());
+    }, 500);
+
     if (isCorrect) {
       if (isTimeAttack) {
         const gainTimeMs = timeAttackSettings.gainTime * 1000;
@@ -344,18 +350,8 @@ function GameScreen({
       } else if (!isGameFinished) { 
         playCurrentCry();
       }
-      
-      const shouldShowAnimations = !(limitedAnswers && !keepCryOnError) && 
-                                   !(limitedAnswers && keepCryOnError && isCorrect);
-      if (shouldShowAnimations) {
-        setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
-        
-        setTimeout(() => {
-          setAnimatingCards(new Map());
-        }, 500);
-      }
     }
-  }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, limitedAnswers, moveToNextPokemon, playCurrentCry, resetSearch, isTimeAttack, timeAttackSettings, timeLeftMs, endGame, hardcoreMode, isGameFinished, showToast]);
+  }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, isTimeAttack, timeAttackSettings, timeLeftMs, endGame, hardcoreMode, isGameFinished]);
 
   const handleSearch = useCallback((searchTerm) => {
     const normalizedSearchTerm = searchTerm.toLowerCase()
