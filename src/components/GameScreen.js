@@ -607,6 +607,8 @@ function GameScreen({
             isGameOver={false}
             totalAvailablePokemon={memoizedPokemonList.length}
             allShiny={allShiny}
+            limitedAnswers={limitedAnswers}
+            numberOfAnswers={numberOfAnswers}
           />
         </div>
       </div>

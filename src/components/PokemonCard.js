@@ -9,7 +9,9 @@ const PokemonCard = React.memo(function PokemonCard({
   isVisible, 
   isGameOver, 
   totalAvailablePokemon, 
-  allShiny 
+  allShiny,
+  limitedAnswers,
+  numberOfAnswers
 }) {
   const [isShaking, setIsShaking] = useState(false);
 
@@ -21,11 +23,13 @@ const PokemonCard = React.memo(function PokemonCard({
     onClick();
   };
 
+  const showAnimations = !limitedAnswers || numberOfAnswers >= totalAvailablePokemon;
+
   const cardClassName = `
     pokemon-card 
     ${isVisible ? '' : 'hidden'} 
-    ${isAnimating && isCorrect && !isGameOver ? 'correct-animation' : ''}
-    ${isAnimating && !isCorrect && !isGameOver ? 'incorrect-animation' : ''}
+    ${showAnimations && isAnimating && isCorrect && !isGameOver ? 'correct-animation' : ''}
+    ${showAnimations && isAnimating && !isCorrect && !isGameOver ? 'incorrect-animation' : ''}
     ${isShaking ? 'shake-animation' : ''}
   `;
   

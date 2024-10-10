@@ -10,7 +10,9 @@ const PokemonGrid = React.memo(function PokemonGrid({
   animatingCards, 
   isGameOver, 
   totalAvailablePokemon, 
-  allShiny 
+  allShiny,
+  limitedAnswers,
+  numberOfAnswers
 }) {
   const memoizedPokemonCards = useMemo(() => {
     return pokemonList.map(pokemon => {
@@ -27,10 +29,12 @@ const PokemonGrid = React.memo(function PokemonGrid({
           isGameOver={isGameOver}
           totalAvailablePokemon={totalAvailablePokemon}
           allShiny={allShiny}
+          limitedAnswers={limitedAnswers}
+          numberOfAnswers={numberOfAnswers}
         />
       );
     });
-  }, [pokemonList, visiblePokemonIds, onPokemonClick, animatingCards, isGameOver, totalAvailablePokemon, allShiny]);
+  }, [pokemonList, visiblePokemonIds, onPokemonClick, animatingCards, isGameOver, totalAvailablePokemon, allShiny, limitedAnswers, numberOfAnswers]);
 
   return (
     <div className="pokemon-grid">
