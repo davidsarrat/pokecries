@@ -192,6 +192,8 @@ function GameScreen({
       progressCount: prevState.progressCount + 1,
     }));
 
+    setFilteredPokemonList(newVisiblePokemon);
+
     setTimeout(() => {
       updateInProgress.current = false;
     }, 0);
@@ -217,6 +219,8 @@ function GameScreen({
         progressCount: 0,
       }));
       
+      updateVisiblePokemon(firstPokemon);
+      
       if (selectedGameMode === 'pokedex_completer') {
         setAvailablePokemonIndices(prev => {
           const indexToRemove = selectedPokemon.findIndex(p => p.id === firstPokemon.id);
@@ -226,7 +230,7 @@ function GameScreen({
     }
 
     setIsGameInitialized(true);
-  }, [selectedGenerations, selectedGameMode]);
+  }, [selectedGenerations, selectedGameMode, updateVisiblePokemon]);
 
   useEffect(() => {
     initializeGame();
@@ -352,21 +356,23 @@ function GameScreen({
     }
   }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, limitedAnswers, moveToNextPokemon, playCurrentCry, resetSearch, isTimeAttack, timeAttackSettings, timeLeftMs, endGame, hardcoreMode]);
 
-  const handleSearch = (searchTerm) => {
+  const handleSearch = useCallback((searchTerm) => {
     const normalizedSearchTerm = searchTerm.toLowerCase()
       .replace(/♂/g, 'm')
       .replace(/♀/g, 'f')
       .replace(/[^a-z0-9mf]/g, '');
-    const filtered = pokemonList.filter(pokemon => 
+    
+    const filtered = gameState.visiblePokemon.filter(pokemon => 
       pokemon.name.toLowerCase()
         .replace(/♂/g, 'm')
         .replace(/♀/g, 'f')
         .replace(/[^a-z0-9mf]/g, '')
         .includes(normalizedSearchTerm)
     );
+    
     setFilteredPokemonList(filtered);
     scrollToTop();
-  };
+  }, [gameState.visiblePokemon]);
 
   const handleEnterPress = useCallback((searchTerm) => {
     const normalizedSearchTerm = searchTerm.toLowerCase()
@@ -541,7 +547,7 @@ function GameScreen({
   }, []);
 
   if (!isGameInitialized) {
-    return <div>Loading...</div>; // O cualquier otro componente de carga
+    return <div>Loading...</div>;
   }
 
   if (gameOver) {
@@ -599,7 +605,7 @@ function GameScreen({
         <div className="game-screen">
           <PokemonGrid 
             pokemonList={memoizedFilteredPokemonList} 
-            visiblePokemon={gameState.visiblePokemon}
+            visiblePokemon={filteredPokemonList.length > 0 ? filteredPokemonList : gameState.visiblePokemon}
             onPokemonClick={handlePokemonClick}
             currentPokemon={gameState.currentPokemon}
             animatingCards={animatingCards}
