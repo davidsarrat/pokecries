@@ -185,12 +185,22 @@ function GameScreen({
       return pokemonData[genKey] || [];
     });
     setPokemonList(selectedPokemon);
-    
+
+    if (selectedGameMode === 'pokedex_completer') {
+      setAvailablePokemonIndices([...Array(selectedPokemon.length).keys()]);
+    }
+
     const shuffled = shuffleArray([...selectedPokemon]);
     setShuffledPokemonList(shuffled);
-    
+
     if (shuffled.length > 0) {
       const firstPokemon = shuffled[0];
+
+      if (selectedGameMode === 'pokedex_completer') {
+        const indexToRemove = selectedPokemon.findIndex(p => p.id === firstPokemon.id);
+        setAvailablePokemonIndices(prev => prev.filter(index => index !== indexToRemove));
+      }
+
       const initialVisiblePokemon = selectVisiblePokemon(selectedPokemon, firstPokemon);
 
       setGameState({
@@ -200,15 +210,8 @@ function GameScreen({
         correctCount: 0,
         incorrectCount: 0,
       });
-      
+
       setFilteredPokemonList(initialVisiblePokemon);
-      
-      if (selectedGameMode === 'pokedex_completer') {
-        setAvailablePokemonIndices(prev => {
-          const indexToRemove = selectedPokemon.findIndex(p => p.id === firstPokemon.id);
-          return prev.filter((_, index) => index !== indexToRemove);
-        });
-      }
     }
 
     setIsGameInitialized(true);
@@ -520,12 +523,6 @@ function GameScreen({
       setEndTime(Date.now());
     }
   }, [gameOver]);
-
-  useEffect(() => {
-    if (selectedGameMode === 'pokedex_completer') {
-      setAvailablePokemonIndices([...Array(pokemonList.length).keys()]);
-    }
-  }, [selectedGameMode, pokemonList]);
 
   useEffect(() => {
     return () => {
