@@ -85,6 +85,9 @@ function GameScreen({
   };
 
   const endGame = useCallback(() => {
+    if (gameState.currentPokemon) {
+      setFailedPokemon(prev => [...prev, gameState.currentPokemon]);
+    }
     setIsGameFinished(true);
     setEndTime(Date.now());
     if (audioRef.current) {
@@ -456,6 +459,9 @@ function GameScreen({
   }, []);
 
   const handleExitClick = () => {
+    if (gameState.currentPokemon) {
+      setFailedPokemon(prev => [...prev, gameState.currentPokemon]);
+    }
     scrollToTop();
     endGame();
   };
