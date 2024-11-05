@@ -84,8 +84,8 @@ function GameScreen({
     });
   };
 
-  const endGame = useCallback(() => {
-    if (gameState.currentPokemon) {
+  const endGame = useCallback((addCurrentToFailed = false) => {
+    if (addCurrentToFailed && gameState.currentPokemon) {
       setFailedPokemon(prev => [...prev, gameState.currentPokemon]);
     }
     setIsGameFinished(true);
@@ -100,7 +100,7 @@ function GameScreen({
       ...prevState,
       currentPokemon: null
     }));
-  }, []);
+  }, [gameState.currentPokemon]);
 
   const playCurrentCry = useCallback((pokemon = gameState.currentPokemon, isAutoplay = false) => {
     if (pokemon && !isGameFinished) {
@@ -234,7 +234,7 @@ function GameScreen({
       
       if ((limitedQuestions && newProgressCount > numberOfQuestions) ||
           (selectedGameMode === 'pokedex_completer' && newProgressCount > pokemonList.length)) {
-        endGame();
+        endGame(false);
         return prevState;
       }
 
@@ -459,11 +459,8 @@ function GameScreen({
   }, []);
 
   const handleExitClick = () => {
-    if (gameState.currentPokemon) {
-      setFailedPokemon(prev => [...prev, gameState.currentPokemon]);
-    }
     scrollToTop();
-    endGame();
+    endGame(true);
   };
 
   const formatTime = (time) => {
@@ -496,7 +493,7 @@ function GameScreen({
           const newTime = prevTime - 1000;
           if (newTime <= 0) {
             clearInterval(intervalId);
-            endGame();
+            endGame(true);
             return 0;
           }
           return newTime;
