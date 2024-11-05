@@ -315,17 +315,24 @@ function GameScreen({
       moveToNextPokemon();
     } else {
       setFailedPokemon(prev => [...prev, gameState.currentPokemon]);
-      
-      showToast(
+
+      const toastContent = keepCryOnError ?
+        <div>
+          <img 
+            src={`${process.env.PUBLIC_URL}/media/sprites/0.png`} 
+            alt="Unknown Pokémon" 
+            style={{width: '100%', height: '100%', objectFit: 'contain'}} 
+          />
+        </div> :
         <div>
           <img 
             src={`${process.env.PUBLIC_URL}/media/sprites/${gameState.currentPokemon.id}.png`} 
             alt={gameState.currentPokemon.name}
             style={{width: '100%', height: '100%', objectFit: 'contain'}} 
           />
-        </div>,
-        'error'
-      );
+        </div>;
+
+      showToast(toastContent, 'error');
 
       if (hardcoreMode) {
         endGame();
