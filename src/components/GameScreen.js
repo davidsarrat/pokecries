@@ -341,18 +341,21 @@ function GameScreen({
       
       if (isTimeAttack) {
         const loseTimeMs = timeAttackSettings.loseTime * 1000;
+        const wouldEndGame = timeLeftMs - loseTimeMs <= 0;
+        
         setTimeLeftMs(prevTime => {
           const newTime = Math.max(0, prevTime - loseTimeMs);
           if (newTime <= 0) {
-            endGame();
+            endGame(true);
             return 0;
           }
           return newTime;
         });
+        
         setTimeLost(loseTimeMs);
         setTimeout(() => setTimeLost(0), 500);
         
-        if (timeLeftMs <= 0) {
+        if (wouldEndGame) {
           return;
         }
       }
