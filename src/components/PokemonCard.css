@@ -12,6 +12,7 @@
   align-items: center;
   justify-content: center;
   user-select: none;
+  transform: translateY(0);
 }
 
 .pokemon-image {
@@ -36,26 +37,11 @@
 @media (hover: hover) and (pointer: fine) {
   .pokemon-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
   }
-}
-
-@keyframes correct-animation {
-  0%, 100% { transform: translateY(0); background-color: #f0f0f0; }
-  50% { transform: translateY(-10px); background-color: rgba(76, 175, 80, 0.8); }
-}
-
-@keyframes incorrect-animation {
-  0%, 100% { transform: translateY(0); background-color: #f0f0f0; }
-  50% { transform: translateY(-10px); background-color: rgba(244, 67, 54, 0.8); }
-}
-
-.correct-animation {
-  animation: correct-animation 0.5s ease;
-}
-
-.incorrect-animation {
-  animation: incorrect-animation 0.5s ease;
+  
+  .pokemon-card.tap-animation:hover {
+    transform: translateY(-5px) scale(0.95);
+  }
 }
 
 .pokemon-card.hidden {
@@ -85,4 +71,26 @@
 
 .shake-animation {
   animation: shake 0.5s;
+}
+
+@keyframes tap {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(0) scale(0.95); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes tapHovered {
+  0% { transform: translateY(-5px) scale(1); }
+  50% { transform: translateY(-5px) scale(0.95); }
+  100% { transform: translateY(-5px) scale(1); }
+}
+
+.tap-animation {
+  animation: tap 0.15s ease-in-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .tap-animation:hover {
+    animation: tapHovered 0.15s ease-in-out;
+  }
 }

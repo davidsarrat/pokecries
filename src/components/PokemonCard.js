@@ -14,23 +14,24 @@ const PokemonCard = React.memo(function PokemonCard({
   numberOfAnswers
 }) {
   const [isShaking, setIsShaking] = useState(false);
+  const [isTapping, setIsTapping] = useState(false);
 
   const handleClick = () => {
     if (isGameOver) {
       setIsShaking(true);
       setTimeout(() => setIsShaking(false), 500);
+    } else {
+      setIsTapping(true);
+      setTimeout(() => setIsTapping(false), 150);
     }
     onClick();
   };
 
-  const showAnimations = !limitedAnswers || numberOfAnswers >= totalAvailablePokemon;
-
   const cardClassName = `
     pokemon-card 
     ${isVisible ? '' : 'hidden'} 
-    ${showAnimations && isAnimating && isCorrect && !isGameOver ? 'correct-animation' : ''}
-    ${showAnimations && isAnimating && !isCorrect && !isGameOver ? 'incorrect-animation' : ''}
     ${isShaking ? 'shake-animation' : ''}
+    ${isTapping ? 'tap-animation' : ''}
   `;
   
   const spritePath = (allShiny && !isGameOver) 
