@@ -133,6 +133,11 @@ function StartScreen() {
   const gifSrc = hardcoreMode ? `${process.env.PUBLIC_URL}/media/images/darkrai.gif` : `${process.env.PUBLIC_URL}/media/images/chatot.gif`;
   const gifClass = hardcoreMode ? "darkrai-gif" : "chatot-gif";
 
+  const handleTimeSettingChange = (field, value) => {
+    const parsedValue = value === '' ? 0 : Math.max(0, parseInt(value, 10));
+    setTimeAttackSettings(prev => ({ ...prev, [field]: parsedValue }));
+  };
+
   if (gameStarted) {
     return (
       <GameScreen 
@@ -191,19 +196,29 @@ function StartScreen() {
               <input 
                 type="number" 
                 value={timeAttackSettings.minutes === 0 ? '' : timeAttackSettings.minutes} 
-                onChange={(e) => setTimeAttackSettings(prev => ({ ...prev, minutes: e.target.value === '' ? 0 : parseInt(e.target.value, 10) }))} 
+                onChange={(e) => handleTimeSettingChange('minutes', e.target.value)} 
                 name="minutes"
                 min="0" 
+                onKeyDown={(e) => {
+                  if (e.key === '-' || e.key === 'e') {
+                    e.preventDefault();
+                  }
+                }}
                 placeholder="0"
               />
               <span>min</span>
               <input 
                 type="number" 
                 value={timeAttackSettings.seconds === 0 ? '' : timeAttackSettings.seconds} 
-                onChange={(e) => setTimeAttackSettings(prev => ({ ...prev, seconds: e.target.value === '' ? 0 : parseInt(e.target.value, 10) }))} 
+                onChange={(e) => handleTimeSettingChange('seconds', e.target.value)} 
                 name="seconds"
                 min="0" 
                 max="59"
+                onKeyDown={(e) => {
+                  if (e.key === '-' || e.key === 'e') {
+                    e.preventDefault();
+                  }
+                }}
                 placeholder="0"
               />
               <span>sec</span>
@@ -218,9 +233,14 @@ function StartScreen() {
               <input 
                 type="number" 
                 value={timeAttackSettings.gainTime === 0 ? '' : timeAttackSettings.gainTime} 
-                onChange={(e) => setTimeAttackSettings(prev => ({ ...prev, gainTime: e.target.value === '' ? 0 : parseInt(e.target.value, 10) }))} 
+                onChange={(e) => handleTimeSettingChange('gainTime', e.target.value)} 
                 name="gainTime"
                 min="0" 
+                onKeyDown={(e) => {
+                  if (e.key === '-' || e.key === 'e') {
+                    e.preventDefault();
+                  }
+                }}
                 placeholder="0"
               />
               <span>sec</span>
@@ -232,9 +252,14 @@ function StartScreen() {
               <input 
                 type="number" 
                 value={timeAttackSettings.loseTime === 0 ? '' : timeAttackSettings.loseTime} 
-                onChange={(e) => setTimeAttackSettings(prev => ({ ...prev, loseTime: e.target.value === '' ? 0 : parseInt(e.target.value, 10) }))} 
+                onChange={(e) => handleTimeSettingChange('loseTime', e.target.value)} 
                 name="loseTime"
                 min="0" 
+                onKeyDown={(e) => {
+                  if (e.key === '-' || e.key === 'e') {
+                    e.preventDefault();
+                  }
+                }}
                 placeholder="0"
               />
               <span>sec</span>
