@@ -69,8 +69,20 @@
   20%, 40%, 60%, 80% { transform: translateX(5px); }
 }
 
+@keyframes shakeHovered {
+  0%, 100% { transform: translateY(-5px) translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateY(-5px) translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateY(-5px) translateX(5px); }
+}
+
 .shake-animation {
   animation: shake 0.5s;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .shake-animation:hover {
+    animation: shakeHovered 0.5s;
+  }
 }
 
 @keyframes tap {
