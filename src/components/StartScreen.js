@@ -13,7 +13,7 @@ const LOCAL_STORAGE_KEY = 'pokecries_start_screen_config';
 function StartScreen() {
   const [selectedGenerations, setSelectedGenerations] = useState(['gen1']);
   const [gameStarted, setGameStarted] = useState(false);
-  const [timeAttackSettings, setTimeAttackSettings] = useState({
+  const [timedRunSettings, setTimedRunSettings] = useState({
     minutes: 2,
     seconds: 0,
     gainTime: 0,
@@ -26,7 +26,7 @@ function StartScreen() {
   const [limitedQuestions, setLimitedQuestions] = useState(true);
   const [numberOfQuestions, setNumberOfQuestions] = useState(10);
   const [hardcoreMode, setHardcoreMode] = useState(false);
-  const [isTimeAttack, setIsTimeAttack] = useState(false);
+  const [timedRun, setTimedRun] = useState(false);
   const [dontRepeatPokemon, setDontRepeatPokemon] = useState(true);
 
   useEffect(() => {
@@ -34,14 +34,14 @@ function StartScreen() {
     if (savedConfig) {
       const config = JSON.parse(savedConfig);
       setSelectedGenerations(config.selectedGenerations || ['gen1']);
-      setTimeAttackSettings(config.timeAttackSettings || { minutes: 2, seconds: 0, gainTime: 0, loseTime: 0 });
+      setTimedRunSettings(config.timedRunSettings || { minutes: 2, seconds: 0, gainTime: 0, loseTime: 0 });
       setLimitedAnswers(config.limitedAnswers !== undefined ? config.limitedAnswers : true);
       setNumberOfAnswers(config.numberOfAnswers !== undefined ? config.numberOfAnswers : 4);
       setKeepCryOnError(config.keepCryOnError !== undefined ? config.keepCryOnError : false);
       setLimitedQuestions(config.limitedQuestions !== undefined ? config.limitedQuestions : true);
       setNumberOfQuestions(config.numberOfQuestions !== undefined ? config.numberOfQuestions : 10);
       setHardcoreMode(config.hardcoreMode !== undefined ? config.hardcoreMode : false);
-      setIsTimeAttack(config.isTimeAttack !== undefined ? config.isTimeAttack : false);
+      setTimedRun(config.timedRun !== undefined ? config.timedRun : false);
       setDontRepeatPokemon(config.dontRepeatPokemon !== undefined ? config.dontRepeatPokemon : true);
     }
   }, []);
@@ -49,27 +49,27 @@ function StartScreen() {
   useEffect(() => {
     const config = {
       selectedGenerations,
-      timeAttackSettings,
+      timedRunSettings,
       limitedAnswers,
       numberOfAnswers,
       keepCryOnError,
       limitedQuestions,
       numberOfQuestions,
       hardcoreMode,
-      isTimeAttack,
+      timedRun,
       dontRepeatPokemon
     };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(config));
   }, [
     selectedGenerations,
-    timeAttackSettings,
+    timedRunSettings,
     limitedAnswers,
     numberOfAnswers,
     keepCryOnError,
     limitedQuestions,
     numberOfQuestions,
     hardcoreMode,
-    isTimeAttack,
+    timedRun,
     dontRepeatPokemon
   ]);
 
@@ -79,8 +79,8 @@ function StartScreen() {
     }, 0);
   }, [selectedGenerations]);
 
-  const isTimeAttackValid = () => {
-    const { minutes, seconds } = timeAttackSettings;
+  const isTimedRunValid = () => {
+    const { minutes, seconds } = timedRunSettings;
     return minutes > 0 || seconds > 0;
   };
 
@@ -90,7 +90,7 @@ function StartScreen() {
 
   const isStartButtonDisabled = () => {
     if (selectedGenerations.length === 0) return true;
-    if (isTimeAttack && !isTimeAttackValid()) return true;
+    if (timedRun && !isTimedRunValid()) return true;
     if (limitedAnswers && (numberOfAnswers === '' || numberOfAnswers < 2)) return true;
     if (limitedQuestions && (numberOfQuestions === '' || numberOfQuestions < 1)) return true;
     if (dontRepeatPokemon && limitedQuestions && numberOfQuestions > totalAvailablePokemon) return true;
@@ -102,7 +102,7 @@ function StartScreen() {
       setError('You must select at least one generation!');
       return;
     }
-    if (isTimeAttack && timeAttackSettings.minutes === 0 && timeAttackSettings.seconds === 0) {
+    if (timedRun && timedRunSettings.minutes === 0 && timedRunSettings.seconds === 0) {
       setError('Please set a time greater than 00:00 for timed runs!');
       return;
     }
@@ -135,7 +135,7 @@ function StartScreen() {
 
   const handleTimeSettingChange = (field, value) => {
     const parsedValue = value === '' ? 0 : Math.max(0, parseInt(value, 10));
-    setTimeAttackSettings(prev => ({ ...prev, [field]: parsedValue }));
+    setTimedRunSettings(prev => ({ ...prev, [field]: parsedValue }));
   };
 
   if (gameStarted) {
@@ -143,10 +143,10 @@ function StartScreen() {
       <GameScreen 
         selectedGenerations={[...selectedGenerations].sort()}
         setSelectedGenerations={setSelectedGenerations}
-        selectedGameMode={dontRepeatPokemon ? 'pokedex_completer' : 'freestyle'}
+        selectedGameMode={dontRepeatPokemon ? 'dontRepeatPokemon' : 'normal'}
         onExit={handleExitGame}
-        timeAttackSettings={timeAttackSettings}
-        setTimeAttackSettings={setTimeAttackSettings}
+        timedRun={timedRun}
+        timedRunSettings={timedRunSettings}
         limitedAnswers={limitedAnswers}
         setLimitedAnswers={setLimitedAnswers}
         numberOfAnswers={numberOfAnswers}
@@ -156,7 +156,7 @@ function StartScreen() {
         limitedQuestions={limitedQuestions}
         numberOfQuestions={numberOfQuestions}
         hardcoreMode={hardcoreMode}
-        isTimeAttack={isTimeAttack}
+        isTimeAttack={timedRun}
       />
     );
   }
@@ -182,20 +182,20 @@ function StartScreen() {
       <div className="time-attack-checkbox">
         <input
           type="checkbox"
-          id="timeAttack"
-          checked={isTimeAttack}
-          onChange={(e) => setIsTimeAttack(e.target.checked)}
+          id="timedRun"
+          checked={timedRun}
+          onChange={(e) => setTimedRun(e.target.checked)}
         />
-        <label htmlFor="timeAttack">Timed run</label>
+        <label htmlFor="timedRun">Timed run</label>
       </div>
-      {isTimeAttack && (
+      {timedRun && (
         <div className="time-attack-settings">
           <div className="time-setting">
             <label>Time:</label>
             <div className="time-inputs">
               <input 
                 type="number" 
-                value={timeAttackSettings.minutes === 0 ? '' : timeAttackSettings.minutes} 
+                value={timedRunSettings.minutes === 0 ? '' : timedRunSettings.minutes} 
                 onChange={(e) => handleTimeSettingChange('minutes', e.target.value)} 
                 name="minutes"
                 min="0" 
@@ -209,7 +209,7 @@ function StartScreen() {
               <span>min</span>
               <input 
                 type="number" 
-                value={timeAttackSettings.seconds === 0 ? '' : timeAttackSettings.seconds} 
+                value={timedRunSettings.seconds === 0 ? '' : timedRunSettings.seconds} 
                 onChange={(e) => handleTimeSettingChange('seconds', e.target.value)} 
                 name="seconds"
                 min="0" 
@@ -224,7 +224,7 @@ function StartScreen() {
               <span>sec</span>
             </div>
           </div>
-          {!isTimeAttackValid() && (
+          {!isTimedRunValid() && (
             <p className="error-message">Time must be greater than 00:00!</p>
           )}
           <div className="time-setting">
@@ -232,7 +232,7 @@ function StartScreen() {
             <div className="time-inputs">
               <input 
                 type="number" 
-                value={timeAttackSettings.gainTime === 0 ? '' : timeAttackSettings.gainTime} 
+                value={timedRunSettings.gainTime === 0 ? '' : timedRunSettings.gainTime} 
                 onChange={(e) => handleTimeSettingChange('gainTime', e.target.value)} 
                 name="gainTime"
                 min="0" 
@@ -251,7 +251,7 @@ function StartScreen() {
             <div className="time-inputs">
               <input 
                 type="number" 
-                value={timeAttackSettings.loseTime === 0 ? '' : timeAttackSettings.loseTime} 
+                value={timedRunSettings.loseTime === 0 ? '' : timedRunSettings.loseTime} 
                 onChange={(e) => handleTimeSettingChange('loseTime', e.target.value)} 
                 name="loseTime"
                 min="0" 
@@ -273,7 +273,7 @@ function StartScreen() {
         numberOfQuestions={numberOfQuestions}
         setNumberOfQuestions={setNumberOfQuestions}
         selectedGenerations={selectedGenerations}
-        selectedGameMode={dontRepeatPokemon ? 'pokedex_completer' : 'freestyle'}
+        selectedGameMode={dontRepeatPokemon ? 'dontRepeatPokemon' : 'normal'}
       />
       <LimitedAnswersSelector
         limitedAnswers={limitedAnswers}
