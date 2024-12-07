@@ -1,3 +1,10 @@
+.generation-selector {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .generation-selector h2 {
   font-size: 1.8rem;
   color: #4a4a4a;
@@ -54,25 +61,11 @@
   border-color: transparent;
 }
 
-.btn-group-vertical .btn:nth-child(1).active {
-  background: #ffc107;
-}
-
-.btn-group-vertical .btn:nth-child(2).active {
-  background: #dc3545;
-}
-
-.btn-group-vertical .btn:nth-child(3).active {
-  background: #28a745;
-}
-
-.btn-group-vertical .btn:nth-child(4).active {
-  background: #007bff;
-}
-
-.btn-group-vertical .btn:nth-child(5).active {
-  background: #6c757d;
-}
+.btn-group-vertical .btn:nth-child(1).active { background: #ffc107; }
+.btn-group-vertical .btn:nth-child(2).active { background: #dc3545; }
+.btn-group-vertical .btn:nth-child(3).active { background: #28a745; }
+.btn-group-vertical .btn:nth-child(4).active { background: #007bff; }
+.btn-group-vertical .btn:nth-child(5).active { background: #6c757d; }
 
 @media (hover: hover) and (pointer: fine) {
   .btn-group-vertical .btn:hover:not(.active) {
@@ -88,54 +81,6 @@
   }
 }
 
-@media (max-width: 576px) {
-  .generation-selector h2 {
-    font-size: 1.4rem;
-    margin-bottom: 1rem;
-  }
-
-  .btn-group-vertical .btn {
-    font-size: 0.5rem;
-    padding: 0.6rem 0.6rem 0.6rem 2.8rem;
-    justify-content: center;
-  }
-
-  .btn-group-vertical .btn .gen-icon {
-    height: 26px;
-    max-width: 30px;
-    left: 0.6rem;
-  }
-
-  .btn-group-vertical .btn span {
-    flex-grow: 1;
-    text-align: center;
-  }
-}
-
-@media (max-width: 400px) {
-  .btn-group-vertical {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .btn-group-vertical .btn {
-    font-size: 0.45rem;
-    padding: 0.5rem 0.5rem 0.5rem 2.5rem;
-  }
-
-  .btn-group-vertical .btn .gen-icon {
-    height: 24px;
-    max-width: 28px;
-    left: 0.5rem;
-  }
-}
-
-.generation-selector {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
 .error-message {
   color: #721c24;
   background-color: #f8d7da;
@@ -148,4 +93,35 @@
   width: 100%;
   text-align: center;
   font-size: 0.9rem;
+}
+
+@media (max-width: 576px) {
+  .generation-selector h2 {
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .btn-group-vertical .btn {
+    font-size: 0.5rem;
+    padding: 0.6rem 0.6rem 0.6rem 2.8rem;
+  }
+
+  .btn-group-vertical .btn .gen-icon {
+    height: 26px;
+    max-width: 30px;
+    left: 0.6rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .btn-group-vertical .btn {
+    font-size: 0.45rem;
+    padding: 0.5rem 0.5rem 0.5rem 2.5rem;
+  }
+
+  .btn-group-vertical .btn .gen-icon {
+    height: 24px;
+    max-width: 28px;
+    left: 0.5rem;
+  }
 }

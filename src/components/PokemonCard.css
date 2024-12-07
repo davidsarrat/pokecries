@@ -23,8 +23,7 @@
 }
 
 .pokemon-name {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 0;
   font-size: 0.8rem;
   color: #333;
   font-weight: bold;
@@ -41,6 +40,14 @@
   
   .pokemon-card.tap-animation:hover {
     transform: translateY(-5px) scale(0.95);
+  }
+
+  .shake-animation:hover {
+    animation: shakeHovered 0.5s;
+  }
+
+  .tap-animation:hover {
+    animation: tapHovered 0.15s ease-in-out;
   }
 }
 
@@ -79,16 +86,10 @@
   animation: shake 0.5s;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .shake-animation:hover {
-    animation: shakeHovered 0.5s;
-  }
-}
-
 @keyframes tap {
-  0% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(0) scale(0.95); }
-  100% { transform: translateY(0) scale(1); }
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
 }
 
 @keyframes tapHovered {
@@ -99,10 +100,4 @@
 
 .tap-animation {
   animation: tap 0.15s ease-in-out;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .tap-animation:hover {
-    animation: tapHovered 0.15s ease-in-out;
-  }
 }
