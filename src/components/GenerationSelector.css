@@ -20,13 +20,16 @@
 }
 
 .btn-group-vertical .btn {
+  --gen-accent: #3B4CCA;
+  --gen-accent-light: #7584de;
+  --gen-glow: rgba(59, 76, 202, 0.22);
   border-radius: 15px !important;
   padding: 0.55rem 0.75rem;
   font-size: 0.55rem;
   font-weight: 500;
-  transition: all 0.3s ease;
-  background-color: rgba(255, 255, 255, 0.7);
-  border: 2px solid #e0e0e0;
+  transition: transform 180ms ease, box-shadow 220ms ease, background-position 300ms ease, border-color 220ms ease;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.84), rgba(238, 242, 255, 0.68));
+  border: 1px solid rgba(255, 255, 255, 0.9);
   color: #4a4a4a;
   display: flex;
   align-items: center;
@@ -39,6 +42,29 @@
   overflow: hidden;
   text-overflow: ellipsis;
   min-height: 3.75rem;
+}
+
+.btn-group-vertical .btn:nth-child(1) { --gen-accent: #d99a00; --gen-accent-light: #ffd84d; --gen-glow: rgba(255, 193, 7, 0.3); }
+.btn-group-vertical .btn:nth-child(2) { --gen-accent: #c92f3e; --gen-accent-light: #ef7080; --gen-glow: rgba(220, 53, 69, 0.27); }
+.btn-group-vertical .btn:nth-child(3) { --gen-accent: #218c3b; --gen-accent-light: #5fc776; --gen-glow: rgba(40, 167, 69, 0.27); }
+.btn-group-vertical .btn:nth-child(4) { --gen-accent: #0869d1; --gen-accent-light: #54a1f5; --gen-glow: rgba(0, 123, 255, 0.27); }
+.btn-group-vertical .btn:nth-child(5) {
+  --gen-accent: #525c66;
+  --gen-accent-light: #8e99a4;
+  --gen-glow: rgba(71, 85, 105, 0.27);
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: calc(50% - 0.5rem);
+}
+
+.btn-group-vertical .btn::before {
+  background: linear-gradient(110deg, transparent 28%, rgba(255, 255, 255, 0.4) 48%, transparent 68%);
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-120%);
+  z-index: 0;
 }
 
 .start-screen.is-ready .btn-group-vertical .btn {
@@ -60,12 +86,26 @@
   width: 40px;
 }
 
+.btn-group-vertical .btn .gen-icon-gen2,
+.btn-group-vertical .btn .gen-icon-gen4,
+.btn-group-vertical .btn .gen-icon-gen5 {
+  transform: scale(1.18);
+  transform-origin: center;
+}
+
+.btn-group-vertical .btn .gen-icon-gen3 {
+  transform: scale(1.28);
+  transform-origin: center;
+}
+
 .gen-button-content {
   align-items: center;
   display: inline-flex;
   gap: 0.65rem;
   justify-content: flex-start;
   min-width: 7.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .btn-group-vertical .btn .gen-label {
@@ -74,19 +114,38 @@
 }
 
 .btn-group-vertical .btn.active {
+  background: linear-gradient(135deg, var(--gen-accent), var(--gen-accent-light));
+  background-position: 50% 50%;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 8px 20px var(--gen-glow);
   color: white;
-  border-color: transparent;
+  border-color: rgba(255, 255, 255, 0.68);
+  text-shadow: 0 1px 3px rgba(15, 23, 42, 0.28);
+  transform: translateY(-1px);
 }
 
-.btn-group-vertical .btn:nth-child(1).active { background: #ffc107; }
-.btn-group-vertical .btn:nth-child(2).active { background: #dc3545; }
-.btn-group-vertical .btn:nth-child(3).active { background: #28a745; }
-.btn-group-vertical .btn:nth-child(4).active { background: #007bff; }
-.btn-group-vertical .btn:nth-child(5).active { background: #6c757d; }
+.btn-group-vertical .btn.active::before {
+  animation: selected-button-sheen 560ms ease-out both;
+}
+
+.btn-group-vertical .btn:active {
+  box-shadow: inset 0 2px 5px rgba(15, 23, 42, 0.18), 0 3px 8px var(--gen-glow);
+  transform: translateY(1px) scale(0.975);
+  transition-duration: 70ms;
+}
+
+.btn-group-vertical .btn:focus-visible {
+  outline: 3px solid rgba(255, 203, 5, 0.86);
+  outline-offset: 3px;
+}
+
+@keyframes selected-button-sheen {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(120%); }
+}
 
 @media (hover: hover) and (pointer: fine) {
   .btn-group-vertical .btn:hover:not(.active) {
-    background-color: rgba(255, 255, 255, 0.9);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(238, 242, 255, 0.82));
     transform: translateY(-2px);
     box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
   }
@@ -94,7 +153,7 @@
 
 @media (hover: none) and (pointer: coarse) {
   .btn-group-vertical .btn:active:not(.active) {
-    background-color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.92);
   }
 }
 

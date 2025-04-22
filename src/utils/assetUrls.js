@@ -1,4 +1,5 @@
 const SPRITES_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/1435ac9b294901a0d3e8874aa69d76d038c1d65d/sprites/pokemon/versions/generation-v';
+const POKEMON_SPRITES_ROOT = 'https://raw.githubusercontent.com/PokeAPI/sprites/1435ac9b294901a0d3e8874aa69d76d038c1d65d/sprites/pokemon';
 const CRIES_BASE = 'https://raw.githubusercontent.com/PokeAPI/cries/ef687b18f0ce17169b4b4c09175819f7ade92f0f/cries/pokemon/legacy';
 const GENERATION_ICON_IDS = {
   gen1: '25',
@@ -8,11 +9,14 @@ const GENERATION_ICON_IDS = {
   gen5: '571',
 };
 const preloadRequests = new Map();
+const IMAGE_ASSET_PATTERN = /\.(?:gif|png|jpe?g|webp)$/i;
 
 export const pokemonSpriteUrl = (pokemonId, shiny = false) =>
   `${SPRITES_BASE}/black-white/${shiny ? 'shiny/' : ''}${pokemonId}.png`;
 
 export const pokemonCryUrl = (pokemonId) => `${CRIES_BASE}/${pokemonId}.ogg`;
+
+export const unknownPokemonSpriteUrl = () => `${POKEMON_SPRITES_ROOT}/0.png`;
 
 export const animatedPokemonSpriteUrl = (pokemonId, shiny = false) =>
   `${SPRITES_BASE}/black-white/animated/${shiny ? 'shiny/' : ''}${pokemonId}.gif`;
@@ -20,21 +24,38 @@ export const animatedPokemonSpriteUrl = (pokemonId, shiny = false) =>
 export const generationIconUrl = (generationKey) =>
   animatedPokemonSpriteUrl(GENERATION_ICON_IDS[generationKey]);
 
+export const pokemonSpriteAssetUrls = (pokemonId) => [
+  animatedPokemonSpriteUrl(pokemonId),
+  animatedPokemonSpriteUrl(pokemonId, true),
+];
+
 export const pokemonAssetUrls = (pokemonId) => [
-  pokemonSpriteUrl(pokemonId),
-  pokemonSpriteUrl(pokemonId, true),
+  ...pokemonSpriteAssetUrls(pokemonId),
   pokemonCryUrl(pokemonId),
 ];
 
 const preloadUrl = (url) => {
   if (!preloadRequests.has(url)) {
-    const request = fetch(url, {
-      cache: 'force-cache',
-      referrerPolicy: 'no-referrer',
-    }).then(async response => {
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      await response.arrayBuffer();
-    }).catch(error => {
+    const canPreloadAsImage = process.env.NODE_ENV !== 'test'
+      && typeof Image === 'function'
+      && IMAGE_ASSET_PATTERN.test(url);
+    const request = (canPreloadAsImage
+      ? new Promise((resolve, reject) => {
+        const image = new Image();
+        image.decoding = 'async';
+        image.referrerPolicy = 'no-referrer';
+        image.onload = resolve;
+        image.onerror = () => reject(new Error('Image preload failed'));
+        image.src = url;
+      })
+      : fetch(url, {
+        cache: 'force-cache',
+        referrerPolicy: 'no-referrer',
+      }).then(async response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        await response.arrayBuffer();
+      })
+    ).catch(error => {
       preloadRequests.delete(url);
       throw error;
     });

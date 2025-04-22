@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './PokemonCard.css';
-import { pokemonSpriteUrl } from '../utils/assetUrls';
+import { animatedPokemonSpriteUrl, pokemonSpriteUrl } from '../utils/assetUrls';
 import pokemonTypeColors from '../data/pokemonTypeColors';
 
 const colorWithOpacity = (hexColor, opacity) => {
@@ -17,6 +17,7 @@ const PokemonCard = React.memo(function PokemonCard({
   isCorrect, 
   isGameOver, 
   allShiny,
+  animated = true,
   types = []
 }) {
   const [isShaking, setIsShaking] = useState(false);
@@ -28,18 +29,22 @@ const PokemonCard = React.memo(function PokemonCard({
       setTimeout(() => setIsShaking(false), 500);
     } else {
       setIsTapping(true);
-      setTimeout(() => setIsTapping(false), 150);
+      setTimeout(() => setIsTapping(false), 380);
     }
-    onClick();
+    onClick(pokemon);
   };
 
   const cardClassName = `
     pokemon-card 
     ${isShaking ? 'shake-animation' : ''}
     ${isTapping ? 'tap-animation' : ''}
+    ${isAnimating ? (isCorrect ? 'answer-correct' : 'answer-wrong') : ''}
   `;
   
-  const spritePath = pokemonSpriteUrl(pokemon.id, allShiny && !isGameOver);
+  const isShiny = allShiny && !isGameOver;
+  const spritePath = animated
+    ? animatedPokemonSpriteUrl(pokemon.id, isShiny)
+    : pokemonSpriteUrl(pokemon.id, isShiny);
   const primaryColor = pokemonTypeColors[types[0]] || pokemonTypeColors.normal;
   const secondaryColor = pokemonTypeColors[types[1]] || primaryColor;
   const cardStyle = {
@@ -48,18 +53,25 @@ const PokemonCard = React.memo(function PokemonCard({
   };
 
   return (
-    <div 
+    <button
+      type="button"
       className={cardClassName}
       onClick={handleClick}
       style={cardStyle}
     >
-      <img 
-        src={spritePath} 
-        alt={pokemon.name} 
-        className="pokemon-image"
-      />
+      <span className="pokemon-sprite-frame">
+        <img
+          src={spritePath}
+          alt={pokemon.name}
+          className="pokemon-image"
+          onError={(event) => {
+            event.currentTarget.onerror = null;
+            event.currentTarget.src = pokemonSpriteUrl(pokemon.id, isShiny);
+          }}
+        />
+      </span>
       <p className="pokemon-name">{pokemon.name}</p>
-    </div>
+    </button>
   );
 });
 

@@ -5,6 +5,7 @@ import './Navbar.css';
 const Navbar = forwardRef(({ 
   onPlayCry, 
   correctCount, 
+  correctStreak,
   incorrectCount, 
   onSearch, 
   onEnterPress, 
@@ -77,9 +78,14 @@ const Navbar = forwardRef(({
         />
       </div>
       <div className="score-container">
-        <div className="score-item correct">
+        <div className={`score-item correct ${correctStreak >= 2 ? 'on-streak' : ''}`}>
           <FaCheck className="score-icon" />
-          <span>{correctCount}</span>
+          <span key={correctCount} className="score-pop">{correctCount}</span>
+          {correctStreak >= 2 && (
+            <span className="streak-indicator" aria-label={`${correctStreak} correct answers in a row`}>
+              🔥{correctStreak}
+            </span>
+          )}
         </div>
         <div className="score-item incorrect">
           {hardcoreMode ? (
@@ -90,14 +96,14 @@ const Navbar = forwardRef(({
           ) : (
             <>
               <FaTimes className="score-icon" />
-              <span>{incorrectCount}</span>
+              <span key={incorrectCount} className="score-pop">{incorrectCount}</span>
             </>
           )}
         </div>
         {showProgress && (
           <div className="score-item progress">
             <FaForward className="score-icon" />
-            <span>{progressCount}{totalCount ? `/${totalCount}` : ''}</span>
+            <span key={progressCount} className="score-pop">{progressCount}{totalCount ? `/${totalCount}` : ''}</span>
           </div>
         )}
         {showTimer && (

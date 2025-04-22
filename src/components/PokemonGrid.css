@@ -13,13 +13,23 @@
 }
 
 .pokemon-grid .pokemon-card {
-  flex: 0 1 100px;
+  flex: 0 1 110px;
 }
 
 .pokemon-grid[data-count="4"] {
   display: grid;
-  grid-template-columns: repeat(2, 100px);
+  grid-template-columns: repeat(2, 110px);
   width: auto;
+}
+
+.pokemon-grid.is-dense-grid .pokemon-card {
+  contain-intrinsic-size: auto 142px;
+  content-visibility: auto;
+}
+
+.pokemon-grid.is-dense-grid .pokemon-image,
+.pokemon-grid.is-dense-grid .pokemon-name {
+  animation: none;
 }
 
 @media (min-width: 1300px) {
@@ -35,10 +45,10 @@
   }
 
   .pokemon-grid .pokemon-card {
-    flex-basis: 85px;
+    flex-basis: 90px;
   }
 
   .pokemon-grid[data-count="4"] {
-    grid-template-columns: repeat(2, 85px);
+    grid-template-columns: repeat(2, 90px);
   }
 }

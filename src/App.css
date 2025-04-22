@@ -19,6 +19,12 @@
   -ms-user-select: none;
   animation: backgroundTransition 240s ease-in-out infinite;
   background-color: #A8A77A;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
 }
 
 .App-logo {
@@ -91,6 +97,26 @@
 @keyframes ui-nav-enter {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes screen-enter-right {
+  from { opacity: 0.72; transform: translateX(42px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes screen-exit-left {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0.72; transform: translateX(-48px); }
+}
+
+@keyframes screen-enter-left {
+  from { opacity: 0.72; transform: translateX(-42px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes screen-exit-right {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0.72; transform: translateX(48px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

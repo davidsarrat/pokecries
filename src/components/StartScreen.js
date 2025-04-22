@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import './StartScreen.css';
 import GenerationSelector from './GenerationSelector';
 import LimitedAnswersSelector from './LimitedAnswersSelector';
@@ -12,7 +12,6 @@ import { loadPokemonTypes } from '../utils/pokemonTypes';
 import {
   animatedPokemonSpriteUrl,
   generationIconUrl,
-  pokemonAssetUrls,
   preloadAssets,
 } from '../utils/assetUrls';
 
@@ -39,6 +38,9 @@ function StartScreen() {
   const [preloadProgress, setPreloadProgress] = useState(0);
   const [isPreloadComplete, setIsPreloadComplete] = useState(false);
   const [pokemonTypes, setPokemonTypes] = useState({});
+  const [isLeavingForGame, setIsLeavingForGame] = useState(false);
+  const [isReturningFromGame, setIsReturningFromGame] = useState(false);
+  const screenTransitionTimerRef = useRef(null);
 
   useEffect(() => {
     const savedConfig = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -97,21 +99,22 @@ function StartScreen() {
 
   useEffect(() => {
     scrollToTop();
+
+    return () => {
+      if (screenTransitionTimerRef.current) {
+        clearTimeout(screenTransitionTimerRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
     let isMounted = true;
     const previousOverflow = document.body.style.overflow;
-    const allPokemon = Object.values(pokemonData).flat();
-    const assetUrls = allPokemon.flatMap(pokemon => pokemonAssetUrls(pokemon.id));
-
-    assetUrls.push(
+    const assetUrls = [
       ...['gen1', 'gen2', 'gen3', 'gen4', 'gen5'].map(generationIconUrl),
       animatedPokemonSpriteUrl('441'),
       animatedPokemonSpriteUrl('491'),
-      animatedPokemonSpriteUrl('272', true),
-      `${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`
-    );
+    ];
 
     document.body.style.overflow = 'hidden';
 
@@ -166,6 +169,8 @@ function StartScreen() {
   };
 
   const handleStartGame = () => {
+    if (isLeavingForGame) return;
+
     if (selectedGenerations.length === 0) {
       setError('You must select at least one generation!');
       return;
@@ -190,10 +195,16 @@ function StartScreen() {
     scrollToTop();
     const generationsToUse = selectedGenerations.length > 0 ? selectedGenerations : ['gen1'];
     setSelectedGenerations(generationsToUse);
-    setGameStarted(true);
+    setIsReturningFromGame(false);
+    setIsLeavingForGame(true);
+    screenTransitionTimerRef.current = setTimeout(() => {
+      setGameStarted(true);
+      setIsLeavingForGame(false);
+    }, 240);
   };
 
   const handleExitGame = () => {
+    setIsReturningFromGame(true);
     setGameStarted(false);
   };
 
@@ -233,16 +244,16 @@ function StartScreen() {
   }
 
   return (
-    <div className={`start-screen ${isPreloadComplete ? 'is-ready' : ''}`}>
+    <div className={`start-screen ${isPreloadComplete ? 'is-ready' : ''} ${isLeavingForGame ? 'is-leaving-for-game' : ''} ${isReturningFromGame ? 'is-returning-from-game' : ''}`}>
       {!isPreloadComplete && (
         <div className="initial-loader" role="status" aria-live="polite">
           <div className="initial-loader-card">
             <div className="initial-loader-title">PokéCries</div>
-            <p>Preparing sprites and cries...</p>
+            <p>Loading the menu...</p>
             <div
               className="initial-loader-track"
               role="progressbar"
-              aria-label="Loading game assets"
+              aria-label="Loading menu assets"
               aria-valuemin="0"
               aria-valuemax="100"
               aria-valuenow={preloadProgress}
@@ -380,9 +391,9 @@ function StartScreen() {
       <button 
         className={startButtonClass}
         onClick={handleStartGame}
-        disabled={isStartButtonDisabled()}
+        disabled={isStartButtonDisabled() || isLeavingForGame}
       >
-        Start Game
+        <span className="start-button-label">Start Game</span>
         <img
           src={gifSrc}
           alt={hardcoreMode ? "Darkrai" : "Chatot"}

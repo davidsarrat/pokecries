@@ -1,13 +1,17 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
 import { scrollToTop } from '../utils/scrollUtils';
 import { pokemonCryUrl } from '../utils/assetUrls';
 
-function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, startTime, endTime, pokemonTypes = {} }) {
-  const { correctCount, incorrectCount, progressCount } = stats;
+const MAX_ANIMATED_RESULTS = 32;
+
+function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime, pokemonTypes = {} }) {
+  const { correctCount, incorrectCount, progressCount, bestStreak = 0 } = stats;
   const audioRef = useRef(null);
+  const transitionTimerRef = useRef(null);
   const [playingPokemonId, setPlayingPokemonId] = useState(null);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   useEffect(() => {
     scrollToTop();
@@ -18,9 +22,24 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
 
     document.body.style.touchAction = 'auto';
     document.documentElement.style.touchAction = 'auto';
+    return () => {
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = '';
+      }
+    };
   }, []);
 
-  const playPokemonCry = (pokemonId) => {
+  const handleBackToMenu = () => {
+    if (isLeaving) return;
+    scrollToTop();
+    setIsLeaving(true);
+    transitionTimerRef.current = setTimeout(onPlayAgain, 240);
+  };
+
+  const playPokemonCry = useCallback((pokemon) => {
+    const pokemonId = pokemon.id;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -31,7 +50,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
     audioRef.current.addEventListener('ended', () => {
       setPlayingPokemonId(null);
     });
-  };
+  }, []);
 
   const totalTimeSeconds = ((endTime - startTime) / 1000).toFixed(4);
   const minutes = Math.floor(totalTimeSeconds / 60);
@@ -41,7 +60,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
     .map(id => failedPokemon.find(p => p.id === id));
 
   return (
-    <div className="game-over-container">
+    <div className={`game-over-container ${isLeaving ? 'is-leaving' : ''}`}>
       <h1 className="game-over-title" data-text="Game Over!">Game Over!</h1>
       <div className="stats-container">
         <div className="stat-item">
@@ -57,6 +76,10 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
           <span className="stat-value rounds">{progressCount}</span>
         </div>
         <div className="stat-item">
+          <span className="stat-label">Best Streak</span>
+          <span className="stat-value streak">{bestStreak}</span>
+        </div>
+        <div className="stat-item">
           <span className="stat-label">Total Time</span>
           <span className="stat-value time">{minutes}:{seconds < 10 ? '0' : ''}{seconds}</span>
         </div>
@@ -65,14 +88,15 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
       {uniqueFailedPokemon.length > 0 && (
         <>
           <h2 className="failed-pokemon-title">Pokémon you missed:</h2>
-          <div className="failed-pokemon-grid">
+          <div className={`failed-pokemon-grid ${uniqueFailedPokemon.length > MAX_ANIMATED_RESULTS ? 'is-dense-grid' : ''}`}>
             {uniqueFailedPokemon.map(pokemon => (
               <PokemonCard
                 key={pokemon.id}
                 pokemon={pokemon}
-                onClick={() => playPokemonCry(pokemon.id)}
+                onClick={playPokemonCry}
                 isAnimating={playingPokemonId === pokemon.id}
                 isGameOver={true}
+                animated={uniqueFailedPokemon.length <= MAX_ANIMATED_RESULTS}
                 types={pokemonTypes[pokemon.id]}
               />
             ))}
@@ -80,10 +104,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
         </>
       )}
       
-      <button className="play-again-button" onClick={() => {
-        scrollToTop();
-        onPlayAgain();
-      }}>
+      <button className="play-again-button" onClick={handleBackToMenu} disabled={isLeaving}>
         Back to Main Menu
       </button>
 

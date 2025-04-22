@@ -3,8 +3,10 @@ import {
   generationIconUrl,
   pokemonAssetUrls,
   pokemonCryUrl,
+  pokemonSpriteAssetUrls,
   pokemonSpriteUrl,
   preloadAssets,
+  unknownPokemonSpriteUrl,
 } from './assetUrls';
 
 test('builds pinned external asset URLs', () => {
@@ -14,7 +16,12 @@ test('builds pinned external asset URLs', () => {
   expect(animatedPokemonSpriteUrl('441')).toMatch(/animated\/441\.gif$/);
   expect(animatedPokemonSpriteUrl('272', true)).toMatch(/animated\/shiny\/272\.gif$/);
   expect(generationIconUrl('gen2')).toMatch(/animated\/250\.gif$/);
+  expect(unknownPokemonSpriteUrl()).toMatch(/sprites\/pokemon\/0\.png$/);
   expect(pokemonAssetUrls('25')).toHaveLength(3);
+  expect(pokemonSpriteAssetUrls('25')).toEqual([
+    expect.stringMatching(/animated\/25\.gif$/),
+    expect.stringMatching(/animated\/shiny\/25\.gif$/),
+  ]);
 });
 
 test('preloads every unique asset and reports completion', async () => {

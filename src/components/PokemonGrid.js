@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import PokemonCard from './PokemonCard';
 import './PokemonGrid.css';
 
@@ -9,28 +9,38 @@ const PokemonGrid = React.memo(function PokemonGrid({
   animatingCards, 
   isGameOver, 
   allShiny,
+  animatedSprites = true,
+  denseGrid = false,
   pokemonTypes = {}
 }) {
+  const onPokemonClickRef = useRef(onPokemonClick);
+  onPokemonClickRef.current = onPokemonClick;
+  const handlePokemonClick = useCallback((pokemon) => {
+    onPokemonClickRef.current(pokemon);
+  }, []);
+
   const memoizedPokemonCards = useMemo(() => {
-    return pokemonList.filter(pokemon => visiblePokemonIds.includes(pokemon.id)).map(pokemon => {
+    const pokemonById = new Map(pokemonList.map(pokemon => [pokemon.id, pokemon]));
+    return visiblePokemonIds.map(id => pokemonById.get(id)).filter(Boolean).map(pokemon => {
       const animationInfo = animatingCards.get(pokemon.id);
       return (
         <PokemonCard
           key={pokemon.id}
           pokemon={pokemon}
-          onClick={() => onPokemonClick(pokemon)}
+          onClick={handlePokemonClick}
           isAnimating={!!animationInfo}
           isCorrect={animationInfo?.isCorrect}
           isGameOver={isGameOver}
           allShiny={allShiny}
+          animated={animatedSprites}
           types={pokemonTypes[pokemon.id]}
         />
       );
     });
-  }, [pokemonList, visiblePokemonIds, onPokemonClick, animatingCards, isGameOver, allShiny, pokemonTypes]);
+  }, [pokemonList, visiblePokemonIds, handlePokemonClick, animatingCards, isGameOver, allShiny, animatedSprites, pokemonTypes]);
 
   return (
-    <div className="pokemon-grid" data-count={memoizedPokemonCards.length}>
+    <div className={`pokemon-grid ${denseGrid ? 'is-dense-grid' : ''}`} data-count={memoizedPokemonCards.length}>
       {memoizedPokemonCards}
     </div>
   );
