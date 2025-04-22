@@ -8,6 +8,15 @@ import './GameScreen.css';
 import pokemonData from '../data/pokemon.json';
 import { scrollToTop } from '../utils/scrollUtils';
 
+const LoadingScreen = () => (
+  <div className="loading-container">
+    <div className="loading-content">
+      <div className="loading-spinner"></div>
+      <p>Loading game...</p>
+    </div>
+  </div>
+);
+
 function GameScreen({ 
   selectedGenerations, 
   selectedGameMode, 
@@ -27,6 +36,10 @@ function GameScreen({
   const [shuffledPokemonList, setShuffledPokemonList] = useState([]);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
+  const isAudioPlaying = useRef(false);
+  const didInitialize = useRef(false);
+  const shinyAudioRef = useRef(null);
+  const [isGameFullyLoaded, setIsGameFullyLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isGameFinished, setIsGameFinished] = useState(false);
   const [failedPokemon, setFailedPokemon] = useState([]);
@@ -37,11 +50,13 @@ function GameScreen({
   const [timeGained, setTimeGained] = useState(0);
   const [timeLost, setTimeLost] = useState(0);
   const [navbarHeight, setNavbarHeight] = useState(0);
-  const [startTime] = useState(Date.now());
+  
+  const [gameStartTime, setGameStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
+  const [gameDuration, setGameDuration] = useState(0);
+  
   const [allShiny, setAllShiny] = useState(false);
   const [shinyPartyActivated, setShinyPartyActivated] = useState(false);
-  const shinyAudioRef = useRef(null);
   const [timer, setTimer] = useState(0);
   const [availablePokemonIndices, setAvailablePokemonIndices] = useState([]);
   const [isGameInitialized, setIsGameInitialized] = useState(false);
@@ -54,9 +69,6 @@ function GameScreen({
   });
   const updateInProgress = useRef(false);
   const [isGameReady, setIsGameReady] = useState(true);
-  const isAudioPlaying = useRef(false);
-  const didInitialize = useRef(false);
-  const [isGameFullyLoaded, setIsGameFullyLoaded] = useState(false);
 
   const memoizedPokemonList = useMemo(() => pokemonList, [pokemonList]);
 
@@ -93,7 +105,16 @@ function GameScreen({
       setFailedPokemon(prev => [...prev, gameState.currentPokemon]);
     }
     setIsGameFinished(true);
-    setEndTime(Date.now());
+    
+    const currentEndTime = Date.now();
+    setEndTime(currentEndTime);
+    
+    if (gameStartTime) {
+      const duration = currentEndTime - gameStartTime;
+      setGameDuration(duration);
+      console.log(`Game ended. Duration: ${Math.floor(duration / 1000)} seconds`);
+    }
+    
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.src = '';
@@ -104,7 +125,7 @@ function GameScreen({
       ...prevState,
       currentPokemon: null
     }));
-  }, [gameState.currentPokemon]);
+  }, [gameState.currentPokemon, gameStartTime]);
 
   const playCurrentCry = useCallback((pokemon = gameState.currentPokemon, isAutoplay = false) => {
     const pokemonToPlay = pokemon || gameState.currentPokemon;
@@ -276,20 +297,25 @@ function GameScreen({
         audioTriggered = true;
         console.log("Playing first Pokémon cry:", firstPokemon.name);
         
-        setTimeout(() => {
-          if (!isGameFinished) {
-            setIsAutoPlaying(true);
-            playCurrentCry(firstPokemon, true);
-            
-            setTimeout(() => {
-              console.log("Juego completamente cargado, iniciando temporizador");
-              setIsGameFullyLoaded(true);
-            }, 300);
-          }
-        }, 100);
+        setIsAutoPlaying(true);
+        
+        const audio = new Audio(`${process.env.PUBLIC_URL}/media/cries/${firstPokemon.id}.mp3`);
+        
+        audio.addEventListener('canplaythrough', () => {
+          playCurrentCry(firstPokemon, true);
+          console.log("Game fully loaded, starting timer");
+          setIsGameFullyLoaded(true);
+        });
+        
+        audio.addEventListener('error', () => {
+          console.error("Error loading first Pokémon cry, starting game anyway");
+          setIsGameFullyLoaded(true);
+        });
+        
+        audio.load();
       }
     });
-  }, [selectedGenerations, selectedGameMode, selectVisiblePokemon, playCurrentCry, isGameFinished]);
+  }, [selectedGenerations, selectedGameMode, selectVisiblePokemon, playCurrentCry]);
 
   useEffect(() => {
     if (!didInitialize.current) {
@@ -304,10 +330,8 @@ function GameScreen({
         }
       }
       
-      // Marcar como inicializado
       didInitialize.current = true;
       
-      // Iniciar el juego después de asegurar generaciones
       initializeGame();
     }
   }, []);
@@ -609,21 +633,39 @@ function GameScreen({
 
   useEffect(() => {
     if (isGameFullyLoaded && !timedRun && !isGameFinished) {
-      console.log("Iniciando temporizador normal");
+      console.log("Starting normal timer");
       setTimer(0);
       
+      if (!gameStartTime) {
+        const startTime = Date.now();
+        setGameStartTime(startTime);
+        console.log(`Game started at: ${new Date(startTime).toISOString()}`);
+      }
+      
       const intervalId = setInterval(() => {
-        setTimer(prevTimer => prevTimer + 1);
+        if (gameStartTime) {
+          const elapsedSeconds = Math.floor((Date.now() - gameStartTime) / 1000);
+          setTimer(elapsedSeconds);
+        } else {
+          setTimer(prevTimer => prevTimer + 1);
+        }
       }, 1000);
 
       return () => clearInterval(intervalId);
     }
-  }, [isGameFullyLoaded, timedRun, isGameFinished]);
+  }, [isGameFullyLoaded, timedRun, isGameFinished, gameStartTime]);
 
   useEffect(() => {
     if (isGameFullyLoaded && timedRun && !isGameFinished) {
-      console.log("Iniciando temporizador de modo tiempo");
+      console.log("Starting timed run timer");
+      
       setTimeLeftMs((timedRunSettings.minutes * 60 + timedRunSettings.seconds) * 1000);
+      
+      if (!gameStartTime) {
+        const startTime = Date.now();
+        setGameStartTime(startTime);
+        console.log(`Game started at: ${new Date(startTime).toISOString()}`);
+      }
       
       const intervalId = setInterval(() => {
         setTimeLeftMs(prevTime => {
@@ -688,14 +730,62 @@ function GameScreen({
     };
   }, []);
 
+  useEffect(() => {
+    const styleSheet = document.createElement('style');
+    styleSheet.type = 'text/css';
+    styleSheet.innerHTML = `
+      .loading-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+      }
+      .loading-content {
+        text-align: center;
+        padding: 20px 30px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      }
+      .loading-spinner {
+        width: 50px;
+        height: 50px;
+        margin: 0 auto 20px;
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(styleSheet);
+    
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
+
   if (!isGameReady) {
     return <div className="game-container"></div>;
+  }
+
+  if (!isGameFullyLoaded && isGameReady) {
+    return <LoadingScreen />;
   }
 
   if (pokemonList.length === 0) {
     return (
       <div className="game-container">
-        <p className="error-message">Cargando datos de Pokémon... Si este mensaje persiste, vuelve a la pantalla inicial.</p>
+        <p className="error-message">Loading Pokémon data... If this message persists, please return to the start screen.</p>
       </div>
     );
   }
@@ -706,7 +796,7 @@ function GameScreen({
         stats={{
           correctCount: gameState.correctCount,
           incorrectCount: gameState.incorrectCount,
-          totalTime: formatTime(timedRun ? Date.now() - startTime : timer * 1000),
+          totalTime: formatTime(timedRun ? timeLeftMs : gameDuration),
           progressCount: gameState.progressCount
         }}
         failedPokemon={failedPokemon}
@@ -719,7 +809,7 @@ function GameScreen({
         }}
         selectedGameMode={selectedGameMode}
         pokemonList={pokemonList} 
-        startTime={startTime}
+        startTime={gameStartTime}
         endTime={endTime}
       />
     );
