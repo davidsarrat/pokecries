@@ -135,6 +135,50 @@ test('keeps background preloads from occupying every asset slot', async () => {
   }
 });
 
+test('downloads background images without creating or decoding image elements', async () => {
+  const originalImage = global.Image;
+  const originalFetch = global.fetch;
+  const originalNodeEnv = process.env.NODE_ENV;
+  const images = [];
+
+  class MockImage {
+    constructor() {
+      this.decode = jest.fn().mockResolvedValue(undefined);
+      images.push(this);
+    }
+
+    set src(value) {
+      this.currentSrc = value;
+      Promise.resolve().then(() => this.onload());
+    }
+  }
+
+  process.env.NODE_ENV = 'development';
+  global.Image = MockImage;
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(0)),
+  });
+
+  try {
+    await preloadAssets(['background-lifecycle.gif'], undefined, { priority: 10 });
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(images).toHaveLength(0);
+
+    await preloadAssets(['critical-lifecycle.gif'], undefined, { priority: 100 });
+
+    expect(images).toHaveLength(1);
+    expect(images[0].decode).toHaveBeenCalledTimes(1);
+    expect(images[0].onload).toBeNull();
+    expect(images[0].onerror).toBeNull();
+  } finally {
+    resetRuntimeAssetCache();
+    global.Image = originalImage;
+    global.fetch = originalFetch;
+    process.env.NODE_ENV = originalNodeEnv;
+  }
+});
+
 test('bounds queued preload work on slow connections', async () => {
   const originalFetch = global.fetch;
   global.fetch = jest.fn().mockImplementation(async () => {

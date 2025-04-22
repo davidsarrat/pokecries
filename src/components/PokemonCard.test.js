@@ -61,15 +61,21 @@ test('starts pointer feedback at the exact pressed position', () => {
   );
 
   const card = screen.getByRole('button');
-  jest.spyOn(card, 'getBoundingClientRect').mockReturnValue({ left: 20, top: 30 });
-  fireEvent(card, new MouseEvent('pointerdown', {
+  const geometrySpy = jest.spyOn(card, 'getBoundingClientRect');
+  const pointerEvent = new MouseEvent('pointerdown', {
     bubbles: true,
     clientX: 45,
     clientY: 75,
-  }));
+  });
+  Object.defineProperties(pointerEvent, {
+    offsetX: { value: 25 },
+    offsetY: { value: 45 },
+  });
+  fireEvent(card, pointerEvent);
 
   expect(card.style.getPropertyValue('--tap-x')).toBe('25px');
   expect(card.style.getPropertyValue('--tap-y')).toBe('45px');
+  expect(geometrySpy).not.toHaveBeenCalled();
 });
 
 test('keeps the missed form and shiny state on the game-over card', () => {
@@ -78,6 +84,23 @@ test('keeps the missed form and shiny state on the game-over card', () => {
       pokemon={{ id: 422, name: 'Shellos', spriteVariant: 'east', isShiny: true }}
       onClick={() => {}}
       isGameOver={true}
+      animated={true}
+    />
+  );
+
+  expect(screen.getByRole('img')).toHaveAttribute(
+    'src',
+    expect.stringMatching(/animated\/shiny\/422-east\.gif$/)
+  );
+});
+
+test('renders a naturally shiny form during the game', () => {
+  render(
+    <PokemonCard
+      pokemon={{ id: 422, name: 'Shellos', spriteVariant: 'east', isShiny: true }}
+      onClick={() => true}
+      isGameOver={false}
+      allShiny={false}
       animated={true}
     />
   );

@@ -37,8 +37,14 @@ const PokemonCard = React.memo(function PokemonCard({
   };
 
   const setTapOrigin = (event) => {
-    if (!Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) return;
     const card = event.currentTarget;
+    const { offsetX, offsetY } = event.nativeEvent || {};
+    if (Number.isFinite(offsetX) && Number.isFinite(offsetY)) {
+      card.style.setProperty('--tap-x', `${offsetX}px`);
+      card.style.setProperty('--tap-y', `${offsetY}px`);
+      return;
+    }
+    if (!Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) return;
     const bounds = card.getBoundingClientRect();
     card.style.setProperty('--tap-x', `${event.clientX - bounds.left}px`);
     card.style.setProperty('--tap-y', `${event.clientY - bounds.top}px`);
@@ -68,7 +74,7 @@ const PokemonCard = React.memo(function PokemonCard({
     ${answerFeedback ? `answer-${answerFeedback}` : ''}
   `;
   
-  const isShiny = isGameOver ? Boolean(pokemon.isShiny) : allShiny;
+  const isShiny = Boolean(allShiny || pokemon.isShiny);
   const spritePath = animated
     ? animatedPokemonSpriteUrl(pokemon.id, isShiny, pokemon.spriteVariant)
     : pokemonSpriteUrl(pokemon.id, isShiny, pokemon.spriteVariant);

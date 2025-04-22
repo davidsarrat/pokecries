@@ -19,7 +19,11 @@ import {
 } from '../utils/assetUrls';
 import { createGamePlan } from '../utils/gamePlan';
 import { EAGER_DENSE_POKEMON, shouldAnimatePokemon } from '../utils/renderPerformance';
-import { selectPokemonSpriteVariant } from '../data/pokemonSpriteVariants';
+import {
+  selectFullListShinyIndex,
+  selectPokemonSpriteVariant,
+  selectRandomPokemonShiny,
+} from '../data/pokemonSpriteVariants';
 
 const INITIAL_PLAN_SIZE = 10;
 const PLAN_REFILL_THRESHOLD = 3;
@@ -34,13 +38,30 @@ const normalizePokemonName = name => name.toLowerCase()
   .replace(/♀/g, 'f')
   .replace(/[^a-z0-9mf]/g, '');
 
-const withRandomSpriteVariant = pokemon => {
+const withSpriteAppearance = (pokemon, isShiny) => {
   const spriteVariant = selectPokemonSpriteVariant(pokemon.id);
-  return spriteVariant ? { ...pokemon, spriteVariant } : pokemon;
+  if (!spriteVariant && !isShiny) return pokemon;
+
+  return {
+    ...pokemon,
+    ...(spriteVariant ? { spriteVariant } : {}),
+    isShiny,
+  };
 };
 
-const randomizeRoundSpriteVariants = rounds => rounds.map(round => {
-  const visiblePokemon = round.visiblePokemon.map(withRandomSpriteVariant);
+const withRandomSpriteAppearance = pokemon => (
+  withSpriteAppearance(pokemon, selectRandomPokemonShiny())
+);
+
+const createFullListSpriteAppearances = pokemonList => {
+  const shinyIndex = selectFullListShinyIndex(pokemonList.length);
+  return pokemonList.map((pokemon, index) => (
+    withSpriteAppearance(pokemon, index === shinyIndex)
+  ));
+};
+
+const randomizeRoundSpriteAppearances = rounds => rounds.map(round => {
+  const visiblePokemon = round.visiblePokemon.map(withRandomSpriteAppearance);
   return {
     ...round,
     pokemon: visiblePokemon.find(pokemon => pokemon.id === round.pokemon.id),
@@ -56,13 +77,21 @@ const staticSpriteUrl = (pokemon, shiny = false) => (
   pokemonSpriteUrl(pokemon.id, shiny, pokemon.spriteVariant)
 );
 
+const isPokemonShiny = (pokemon, allShiny = false) => (
+  Boolean(allShiny || pokemon?.isShiny)
+);
+
 const getCriticalRoundAssetUrls = round => {
   const animateCards = shouldAnimatePokemon(round.visiblePokemon.length);
   return [
     pokemonCryUrl(round.pokemon.id),
-    ...(!animateCards ? [animatedSpriteUrl(round.pokemon)] : []),
+    ...(!animateCards
+      ? [animatedSpriteUrl(round.pokemon, isPokemonShiny(round.pokemon))]
+      : []),
     ...round.visiblePokemon.map(pokemon => (
-      animateCards ? animatedSpriteUrl(pokemon) : staticSpriteUrl(pokemon)
+      animateCards
+        ? animatedSpriteUrl(pokemon, isPokemonShiny(pokemon))
+        : staticSpriteUrl(pokemon, isPokemonShiny(pokemon))
     )),
   ];
 };
@@ -75,7 +104,9 @@ const getDeferredRoundAssetUrls = round => (
 
 const getCryAssetUrls = rounds => rounds.map(round => pokemonCryUrl(round.pokemon.id));
 
-const getTargetAssetUrls = round => [animatedSpriteUrl(round.pokemon)];
+const getTargetAssetUrls = round => [
+  animatedSpriteUrl(round.pokemon, isPokemonShiny(round.pokemon)),
+];
 
 const getPlannedAssetUrls = rounds => [
   ...rounds.flatMap(getCriticalRoundAssetUrls),
@@ -86,10 +117,10 @@ const getInitialRoundAssetUrls = (round, hasFullAnswerSet) => (
   hasFullAnswerSet
     ? [
       pokemonCryUrl(round.pokemon.id),
-      animatedSpriteUrl(round.pokemon),
+      animatedSpriteUrl(round.pokemon, isPokemonShiny(round.pokemon)),
       ...round.visiblePokemon
         .slice(0, EAGER_DENSE_POKEMON)
-        .map(pokemon => staticSpriteUrl(pokemon)),
+        .map(pokemon => staticSpriteUrl(pokemon, isPokemonShiny(pokemon))),
     ]
     : getCriticalRoundAssetUrls(round)
 );
@@ -280,7 +311,7 @@ function GameScreen({
 
   const addFailedPokemon = useCallback((pokemon) => {
     if (!pokemon) return;
-    const failedEntry = { ...pokemon, isShiny: allShiny };
+    const failedEntry = { ...pokemon, isShiny: isPokemonShiny(pokemon, allShiny) };
     preloadAssets(
       [staticSpriteUrl(failedEntry, failedEntry.isShiny)],
       undefined,
@@ -448,7 +479,7 @@ function GameScreen({
     const hasFullAnswerSet = !limitedAnswers
       || Number(numberOfAnswers) >= selectedPokemon.length;
     const plannedPokemon = hasFullAnswerSet
-      ? selectedPokemon.map(withRandomSpriteVariant)
+      ? createFullListSpriteAppearances(selectedPokemon)
       : selectedPokemon;
     setPokemonList(plannedPokemon);
 
@@ -466,7 +497,7 @@ function GameScreen({
     });
     const plan = hasFullAnswerSet
       ? basePlan
-      : randomizeRoundSpriteVariants(basePlan);
+      : randomizeRoundSpriteAppearances(basePlan);
     const firstRound = plan[0];
 
     gamePlanRef.current = plan;
@@ -559,7 +590,7 @@ function GameScreen({
         || Number(numberOfAnswers) >= pokemonList.length;
       const extraRounds = hasFullAnswerSet
         ? baseExtraRounds
-        : randomizeRoundSpriteVariants(baseExtraRounds);
+        : randomizeRoundSpriteAppearances(baseExtraRounds);
       gamePlanRef.current = [...gamePlanRef.current, ...extraRounds];
     }
 
@@ -581,16 +612,19 @@ function GameScreen({
         console.warn(`Could not preload ${failedUrls.length} upcoming assets.`);
       }
     };
-    preloadAssets(
-      getCryAssetUrls(upcomingCryRounds),
-      undefined,
-      { priority: 90 }
-    ).then(reportUpcomingFailures);
-    preloadAssets(
-      upcomingAssetUrls,
-      undefined,
-      { priority: 50 }
-    ).then(reportUpcomingFailures);
+    Promise.resolve().then(() => {
+      if (!isMountedRef.current) return;
+      preloadAssets(
+        getCryAssetUrls(upcomingCryRounds),
+        undefined,
+        { priority: 90 }
+      ).then(reportUpcomingFailures);
+      preloadAssets(
+        upcomingAssetUrls,
+        undefined,
+        { priority: 50 }
+      ).then(reportUpcomingFailures);
+    });
 
     return gamePlanRef.current[planIndex] || null;
   }, [limitedQuestions, selectedGameMode, pokemonList, limitedAnswers, numberOfAnswers]);
@@ -671,8 +705,8 @@ function GameScreen({
 
     const nextRound = ensurePlannedRound(gameState.progressCount);
     if (nextRound) {
-      updateVisiblePokemon(nextRound);
       playCurrentCry(nextRound.pokemon, true);
+      updateVisiblePokemon(nextRound);
     }
   }, [isGameInitialized, limitedQuestions, gameState.progressCount, numberOfQuestions, 
       selectedGameMode, pokemonList.length, ensurePlannedRound, playCurrentCry,
@@ -809,11 +843,17 @@ function GameScreen({
       const toastContent = (
         <div className="answer-toast-content">
           <img 
-            src={animatedSpriteUrl(gameState.currentPokemon, allShiny)}
+            src={animatedSpriteUrl(
+              gameState.currentPokemon,
+              isPokemonShiny(gameState.currentPokemon, allShiny)
+            )}
             alt={gameState.currentPokemon.name}
             onError={(event) => {
               event.currentTarget.onerror = null;
-              event.currentTarget.src = staticSpriteUrl(gameState.currentPokemon, allShiny);
+              event.currentTarget.src = staticSpriteUrl(
+                gameState.currentPokemon,
+                isPokemonShiny(gameState.currentPokemon, allShiny)
+              );
             }}
           />
         </div>
@@ -834,11 +874,17 @@ function GameScreen({
         </div> :
         <div className="answer-toast-content">
           <img 
-            src={animatedSpriteUrl(gameState.currentPokemon, allShiny)}
+            src={animatedSpriteUrl(
+              gameState.currentPokemon,
+              isPokemonShiny(gameState.currentPokemon, allShiny)
+            )}
             alt={gameState.currentPokemon.name}
             onError={(event) => {
               event.currentTarget.onerror = null;
-              event.currentTarget.src = staticSpriteUrl(gameState.currentPokemon, allShiny);
+              event.currentTarget.src = staticSpriteUrl(
+                gameState.currentPokemon,
+                isPokemonShiny(gameState.currentPokemon, allShiny)
+              );
             }}
           />
         </div>;
@@ -968,11 +1014,17 @@ function GameScreen({
       const toastContent = (
         <div className="answer-toast-content">
           <img
-            src={animatedSpriteUrl(gameState.currentPokemon, allShiny)}
+            src={animatedSpriteUrl(
+              gameState.currentPokemon,
+              isPokemonShiny(gameState.currentPokemon, allShiny)
+            )}
             alt={gameState.currentPokemon.name}
             onError={(event) => {
               event.currentTarget.onerror = null;
-              event.currentTarget.src = staticSpriteUrl(gameState.currentPokemon, allShiny);
+              event.currentTarget.src = staticSpriteUrl(
+                gameState.currentPokemon,
+                isPokemonShiny(gameState.currentPokemon, allShiny)
+              );
             }}
           />
         </div>

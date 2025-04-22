@@ -82,6 +82,8 @@ const publicFormName = form => (
 
 const pokeApiFormName = form => form.replace(/_/g, '-');
 
+export const RANDOM_SHINY_RATE = 1 / 1000;
+
 export const getPokemonSpriteVariants = (pokemonId) => {
   const id = String(pokemonId);
   const variants = ['base'];
@@ -95,6 +97,17 @@ export const selectPokemonSpriteVariant = (pokemonId, random = Math.random) => {
   if (variants.length === 1) return undefined;
   const index = Math.min(variants.length - 1, Math.floor(random() * variants.length));
   return variants[index];
+};
+
+export const selectRandomPokemonShiny = (random = Math.random) => (
+  random() < RANDOM_SHINY_RATE
+);
+
+export const selectFullListShinyIndex = (pokemonCount, random = Math.random) => {
+  if (pokemonCount <= 0) return -1;
+  const hasShiny = random() < Math.min(1, pokemonCount * RANDOM_SHINY_RATE);
+  if (!hasShiny) return -1;
+  return Math.min(pokemonCount - 1, Math.floor(random() * pokemonCount));
 };
 
 export const getPokemonSpriteVariantData = (pokemonId, variant) => {

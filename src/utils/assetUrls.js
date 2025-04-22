@@ -27,7 +27,7 @@ const preloadQueue = [];
 const MAX_RETAINED_ASSETS = 128;
 const MAX_RETAINED_AUDIO = 24;
 const MAX_CONCURRENT_PRELOADS = 8;
-const MAX_CONCURRENT_BACKGROUND_PRELOADS = 2;
+const MAX_CONCURRENT_BACKGROUND_PRELOADS = 1;
 const MAX_QUEUED_PRELOADS = 64;
 const BACKGROUND_PRIORITY = 10;
 const CRITICAL_PRIORITY = 100;
@@ -258,7 +258,8 @@ export const resetRuntimeAssetCache = () => {
 const preloadUrl = (url, priority) => {
   if (preloadRequests.has(url)) return refreshCacheEntry(preloadRequests, url);
 
-  const canPreloadAsImage = process.env.NODE_ENV !== 'test'
+  const canPreloadAsImage = priority > BACKGROUND_PRIORITY
+    && process.env.NODE_ENV !== 'test'
     && typeof Image === 'function'
     && IMAGE_ASSET_PATTERN.test(url);
   const canPreloadAsAudio = process.env.NODE_ENV !== 'test'
@@ -271,12 +272,18 @@ const preloadUrl = (url, priority) => {
       image.decoding = 'async';
       image.referrerPolicy = 'no-referrer';
       image.onload = () => {
+        image.onload = null;
+        image.onerror = null;
         const decodeRequest = typeof image.decode === 'function'
           ? image.decode().catch(() => undefined)
           : Promise.resolve();
-        decodeRequest.then(() => resolve(image));
+        decodeRequest.then(resolve);
       };
-      image.onerror = () => reject(new Error('Image preload failed'));
+      image.onerror = () => {
+        image.onload = null;
+        image.onerror = null;
+        reject(new Error('Image preload failed'));
+      };
       image.src = url;
     })
     : canPreloadAsAudio
