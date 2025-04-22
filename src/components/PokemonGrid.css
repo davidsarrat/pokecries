@@ -32,13 +32,38 @@
 }
 
 .pokemon-grid.is-dense-grid .pokemon-card {
+  background-size: 100% 100%;
+  contain: layout style;
   contain-intrinsic-size: auto 142px;
   content-visibility: auto;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.pokemon-grid.is-dense-grid .pokemon-card::before {
+  display: none;
 }
 
 .pokemon-grid.is-dense-grid .pokemon-image,
 .pokemon-grid.is-dense-grid .pokemon-name {
   animation: none;
+}
+
+.pokemon-grid.is-dense-grid .pokemon-image {
+  filter: none;
+  transition: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pokemon-grid.is-dense-grid .pokemon-card:hover {
+    background-position: 0 50%;
+    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .pokemon-grid.is-dense-grid .pokemon-card:hover .pokemon-image {
+    filter: none;
+    transform: none;
+  }
 }
 
 @media (min-width: 1300px) {

@@ -12,10 +12,10 @@ const generations = [
 
 function GenerationSelector({ selectedGenerations, setSelectedGenerations, onPokemonCry }) {
   const toggleGeneration = (genKey, pokemonId) => {
-    onPokemonCry(pokemonId);
     if (selectedGenerations.includes(genKey)) {
       setSelectedGenerations(selectedGenerations.filter(g => g !== genKey));
     } else {
+      onPokemonCry(pokemonId);
       setSelectedGenerations([...selectedGenerations, genKey]);
     }
   };

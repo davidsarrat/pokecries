@@ -83,6 +83,7 @@ const PokemonCard = React.memo(function PokemonCard({
           src={spritePath}
           alt={pokemon.name}
           className="pokemon-image"
+          decoding="async"
           onError={(event) => {
             event.currentTarget.onerror = null;
             event.currentTarget.src = pokemonSpriteUrl(pokemon.id, isShiny);

@@ -52,6 +52,10 @@ test('plays and immediately replaces menu cries from generation and hardcore con
   expect(getPokemonCryAudio).toHaveBeenLastCalledWith('250');
   expect(mockMenuAudio.play).toHaveBeenCalledTimes(1);
 
+  fireEvent.click(screen.getByRole('button', { name: 'Gen II icon Gen II' }));
+  expect(getPokemonCryAudio).toHaveBeenCalledTimes(1);
+  expect(mockMenuAudio.play).toHaveBeenCalledTimes(1);
+
   fireEvent.click(screen.getByRole('checkbox', { name: /hardcore/i }));
   expect(getPokemonCryAudio).toHaveBeenLastCalledWith('491');
   expect(mockMenuAudio.pause).toHaveBeenCalledTimes(1);

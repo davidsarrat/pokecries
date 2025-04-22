@@ -25,6 +25,11 @@ const PRELOAD_AHEAD_ROUNDS = 3;
 const PRELOAD_AHEAD_CRIES = 10;
 const SHINY_PARTY_TOAST_ID = 'shiny-party';
 
+const normalizePokemonName = name => name.toLowerCase()
+  .replace(/♂/g, 'm')
+  .replace(/♀/g, 'f')
+  .replace(/[^a-z0-9mf]/g, '');
+
 const getCriticalRoundAssetUrls = round => {
   const animateCards = shouldAnimatePokemon(round.visiblePokemon.length);
   return [
@@ -97,6 +102,7 @@ function GameScreen({
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
   const audioPlaybackSequenceRef = useRef(0);
+  const pokemonClickHandlerRef = useRef(null);
   const firstPokemonRef = useRef(null);
   const gamePlanRef = useRef([]);
   const gamePlanStartIndexRef = useRef(0);
@@ -149,7 +155,15 @@ function GameScreen({
     () => filteredPokemonList.map(pokemon => pokemon.id),
     [filteredPokemonList]
   );
+  const pokemonSearchIndex = useMemo(
+    () => new Map(pokemonList.map(pokemon => [pokemon.id, normalizePokemonName(pokemon.name)])),
+    [pokemonList]
+  );
   const denseGrid = !shouldAnimatePokemon(gameState.visiblePokemon.length);
+  const handlePokemonGridClick = useCallback(
+    pokemon => pokemonClickHandlerRef.current?.(pokemon),
+    []
+  );
 
   const resetSearch = useCallback(() => {
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
@@ -725,27 +739,17 @@ function GameScreen({
   }, [addFailedPokemon, isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, timedRun, timedRunSettings, endGame, hardcoreMode, isGameFinished, showToast, rememberLastAnswerToast, addTime, subtractTime, correctStreak]);
 
   const handleSearch = useCallback((searchTerm) => {
-    const normalizedSearchTerm = searchTerm.toLowerCase()
-      .replace(/♂/g, 'm')
-      .replace(/♀/g, 'f')
-      .replace(/[^a-z0-9mf]/g, '');
+    const normalizedSearchTerm = normalizePokemonName(searchTerm);
     
     const filtered = gameState.visiblePokemon.filter(pokemon => 
-      pokemon.name.toLowerCase()
-        .replace(/♂/g, 'm')
-        .replace(/♀/g, 'f')
-        .replace(/[^a-z0-9mf]/g, '')
-        .includes(normalizedSearchTerm)
+      pokemonSearchIndex.get(pokemon.id)?.includes(normalizedSearchTerm)
     );
     
     setFilteredPokemonList(filtered);
-  }, [gameState.visiblePokemon]);
+  }, [gameState.visiblePokemon, pokemonSearchIndex]);
 
   const handleEnterPress = useCallback((searchTerm) => {
-    const normalizedSearchTerm = searchTerm.toLowerCase()
-      .replace(/♂/g, 'm')
-      .replace(/♀/g, 'f')
-      .replace(/[^a-z0-9mf]/g, '');
+    const normalizedSearchTerm = normalizePokemonName(searchTerm);
 
     if (normalizedSearchTerm === 'sarrat' && !shinyPartyActivated) {
       setAllShiny(true);
@@ -760,18 +764,19 @@ function GameScreen({
       clearAnswerToast();
 
       toast(
-        <div>
+        <div className="shiny-party-content">
+          <span className="shiny-party-label">Shiny Party</span>
           <img 
             src={animatedPokemonSpriteUrl('272', true)}
             alt="Shiny Ludicolo"
             className="shiny-party-pokemon"
             style={{width: '100%', height: '100%', objectFit: 'contain'}} 
           />
-          <p>🎉 Welcome to the shiny party! 🎉</p>
+          <p>Welcome to the shiny party!</p>
         </div>, 
         {
           position: "top-right",
-          autoClose: 1500,
+          autoClose: 2000,
           hideProgressBar: true,
           closeOnClick: true,
           pauseOnHover: false,
@@ -779,7 +784,6 @@ function GameScreen({
           progress: undefined,
           closeButton: false,
           className: 'custom-toast shiny-party-toast',
-          onMouseEnter: toast.dismiss,
           toastId: SHINY_PARTY_TOAST_ID,
         }
       );
@@ -789,12 +793,8 @@ function GameScreen({
       return;
     }
 
-    const exactMatch = filteredPokemonList.find(pokemon => 
-      pokemon.name.toLowerCase()
-        .replace(/♂/g, 'm')
-        .replace(/♀/g, 'f')
-        .replace(/[^a-z0-9mf]/g, '') === normalizedSearchTerm &&
-      gameState.visiblePokemon.some(visible => visible.id === pokemon.id)
+    const exactMatch = filteredPokemonList.find(
+      pokemon => pokemonSearchIndex.get(pokemon.id) === normalizedSearchTerm
     );
 
     if (exactMatch) {
@@ -802,19 +802,12 @@ function GameScreen({
       return;
     }
 
-    const filteredVisiblePokemon = filteredPokemonList.filter(pokemon => 
-      pokemon.name.toLowerCase()
-        .replace(/♂/g, 'm')
-        .replace(/♀/g, 'f')
-        .replace(/[^a-z0-9mf]/g, '')
-        .includes(normalizedSearchTerm) && 
-      gameState.visiblePokemon.some(visible => visible.id === pokemon.id)
-    );
-
-    if (filteredVisiblePokemon.length === 1) {
-      handlePokemonClick(filteredVisiblePokemon[0]);
+    if (filteredPokemonList.length === 1) {
+      handlePokemonClick(filteredPokemonList[0]);
     }
-  }, [clearAnswerToast, filteredPokemonList, gameState.visiblePokemon, handlePokemonClick, shinyPartyActivated]);
+  }, [clearAnswerToast, filteredPokemonList, handlePokemonClick, pokemonSearchIndex, shinyPartyActivated]);
+
+  pokemonClickHandlerRef.current = handlePokemonClick;
 
   const handleKeyPress = useCallback((event) => {
     const char = event.key;
@@ -1010,11 +1003,11 @@ function GameScreen({
         hardcoreMode={hardcoreMode}
       />
       <div className="game-content">
-        <div className="game-screen" data-card-count={filteredPokemonList.length}>
+        <div className={`game-screen ${denseGrid ? 'is-dense-game-screen' : ''}`} data-card-count={filteredPokemonList.length}>
           <PokemonGrid
             pokemonList={pokemonList}
             visiblePokemonIds={visiblePokemonIds}
-            onPokemonClick={handlePokemonClick}
+            onPokemonClick={handlePokemonGridClick}
             isGameOver={false}
             allShiny={allShiny}
             animatedSprites={!denseGrid}
