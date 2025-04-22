@@ -14,6 +14,7 @@ import {
   pokemonSpriteUrl,
   preloadAssets,
   resetRuntimeAssetCache,
+  restartPokemonCry,
   unknownPokemonSpriteUrl,
 } from '../utils/assetUrls';
 import { createGamePlan } from '../utils/gamePlan';
@@ -278,7 +279,6 @@ function GameScreen({
     }
     if (audioRef.current) {
       audioRef.current.pause();
-      if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
       audioRef.current.onended = null;
       audioRef.current.onerror = null;
       audioRef.current.onplaying = null;
@@ -359,7 +359,6 @@ function GameScreen({
       setIsPlaying(false);
       isAudioPlaying.current = false;
       if (isAutoplay) setIsAutoPlaying(false);
-      if (audio.readyState > 0) audio.currentTime = 0;
       audio.onended = null;
       audio.onerror = null;
       audio.onplaying = null;
@@ -375,7 +374,7 @@ function GameScreen({
       const audio = getPokemonCryAudio(pokemonToPlay.id, { forceReload: reloadAudio });
       let retired = false;
       audioRef.current = audio;
-      if (audio.readyState > 0) audio.currentTime = 0;
+      restartPokemonCry(audio, pokemonToPlay.id);
 
       const clearRecoveryTimer = () => {
         if (audioRecoveryTimerRef.current) {
@@ -435,7 +434,7 @@ function GameScreen({
     const activeAudio = audioRef.current;
     const shouldReload = Boolean(
       activeAudio
-      && (activeAudio.error || activeAudio.readyState < 3 || activeAudio.networkState === 3)
+      && (activeAudio.error || activeAudio.networkState === 3)
     );
     playCurrentCry(gameState.currentPokemon, false, shouldReload);
   }, [gameState.currentPokemon, playCurrentCry]);

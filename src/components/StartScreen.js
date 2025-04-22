@@ -15,6 +15,7 @@ import {
   getPokemonCryAudio,
   pokemonCryUrl,
   preloadAssets,
+  restartPokemonCry,
 } from '../utils/assetUrls';
 
 const LOCAL_STORAGE_KEY = 'pokecries_start_screen_config';
@@ -59,7 +60,6 @@ function StartScreen() {
     if (!menuAudioRef.current) return;
 
     menuAudioRef.current.pause();
-    if (menuAudioRef.current.readyState > 0) menuAudioRef.current.currentTime = 0;
     menuAudioRef.current.onended = null;
     menuAudioRef.current.onerror = null;
     menuAudioRef.current = null;
@@ -72,7 +72,7 @@ function StartScreen() {
     const attemptPlayback = (forceReload) => {
       const audio = getPokemonCryAudio(pokemonId, { forceReload });
       let retired = false;
-      if (audio.readyState > 0) audio.currentTime = 0;
+      restartPokemonCry(audio, pokemonId);
       menuAudioRef.current = audio;
 
       const clearHandlers = () => {

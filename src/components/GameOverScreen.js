@@ -2,7 +2,12 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import './GameOverScreen.css';
 import PokemonGrid, { getBalancedColumnCount } from './PokemonGrid';
 import { scrollToTop } from '../utils/scrollUtils';
-import { getPokemonCryAudio, pokemonCryUrl, preloadAssets } from '../utils/assetUrls';
+import {
+  getPokemonCryAudio,
+  pokemonCryUrl,
+  preloadAssets,
+  restartPokemonCry,
+} from '../utils/assetUrls';
 import {
   getEagerDensePokemonCount,
   shouldAnimatePokemon,
@@ -35,7 +40,6 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
       audioPlaybackSequenceRef.current += 1;
       if (audioRef.current) {
         audioRef.current.pause();
-        if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
         audioRef.current.onended = null;
         audioRef.current.onerror = null;
         audioRef.current.onplaying = null;
@@ -79,7 +83,6 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
     }
     if (audioRef.current) {
       audioRef.current.pause();
-      if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
       audioRef.current.onended = null;
       audioRef.current.onerror = null;
       audioRef.current.onplaying = null;
@@ -112,7 +115,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
       const audio = getPokemonCryAudio(pokemonId, { forceReload });
       let retired = false;
       audioRef.current = audio;
-      if (audio.readyState > 0) audio.currentTime = 0;
+      restartPokemonCry(audio, pokemonId);
 
       const clearRecoveryTimer = () => {
         if (audioRecoveryTimerRef.current) {

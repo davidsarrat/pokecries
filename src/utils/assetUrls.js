@@ -13,6 +13,16 @@ const LEGACY_CRY_FILENAMES = {
   642: '642_incarnate',
   645: '645_incarnate',
 };
+const GEN5_CRIES_AT_11025_HZ = new Set([503, 601, 638, 644]);
+const GEN5_CRIES_AT_12000_HZ = new Set([518, 545, 547, 576, 609, 635, 637, 642, 643]);
+const GEN5_CRIES_AT_22050_HZ = new Set([
+  494, 496, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 524, 529,
+  531, 535, 536, 537, 538, 539, 557, 559, 560, 564, 568, 575, 580, 581,
+  582, 583, 584, 587, 588, 589, 590, 591, 593, 598, 602, 603, 605, 613,
+  614, 616, 617, 620, 622, 624, 625, 628, 632, 634, 636, 640, 647,
+]);
+const GEN5_CRIES_AT_32000_HZ = new Set([516, 532, 543, 566, 597, 627]);
+const GEN5_CRIES_AT_44100_HZ = new Set([498, 519, 550, 574, 595]);
 const GENERATION_ICON_IDS = {
   gen1: '25',
   gen2: '250',
@@ -62,6 +72,20 @@ export const pokemonCryUrl = (pokemonId) => {
   const id = String(pokemonId);
   const filename = LEGACY_CRY_FILENAMES[id] || id.padStart(3, '0');
   return `${LEGACY_CRIES_BASE}/${filename}.mp3`;
+};
+
+export const pokemonCryPlaybackOffset = (pokemonId) => {
+  const id = Number(pokemonId);
+  if (id <= 386 || id === 438 || id === 446 || GEN5_CRIES_AT_11025_HZ.has(id)) return 0.095;
+  if (id <= 493 || GEN5_CRIES_AT_12000_HZ.has(id)) return 0.087;
+  if (GEN5_CRIES_AT_22050_HZ.has(id)) return 0.045;
+  if (GEN5_CRIES_AT_32000_HZ.has(id)) return 0.029;
+  if (GEN5_CRIES_AT_44100_HZ.has(id)) return 0.02;
+  return 0.064;
+};
+
+export const restartPokemonCry = (audio, pokemonId) => {
+  if (audio.readyState > 0) audio.currentTime = pokemonCryPlaybackOffset(pokemonId);
 };
 
 const refreshCacheEntry = (cache, key) => {

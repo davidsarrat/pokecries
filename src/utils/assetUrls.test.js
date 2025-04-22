@@ -3,12 +3,14 @@ import {
   generationIconUrl,
   getPokemonCryAudio,
   pokemonAssetUrls,
+  pokemonCryPlaybackOffset,
   pokemonCryUrl,
   pokemonSpriteAssetUrls,
   pokemonSpriteUrl,
   pokemonVariantSpriteAssetUrls,
   preloadAssets,
   resetRuntimeAssetCache,
+  restartPokemonCry,
   unknownPokemonSpriteUrl,
 } from './assetUrls';
 
@@ -40,6 +42,21 @@ test('builds pinned external asset URLs', () => {
   ]);
   expect(pokemonVariantSpriteAssetUrls('493')).toHaveLength(34);
   expect(pokemonVariantSpriteAssetUrls('1')).toEqual([]);
+});
+
+test('skips only the encoder delay of each legacy cry sample-rate group', () => {
+  expect(pokemonCryPlaybackOffset('25')).toBe(0.095);
+  expect(pokemonCryPlaybackOffset('432')).toBe(0.087);
+  expect(pokemonCryPlaybackOffset('503')).toBe(0.095);
+  expect(pokemonCryPlaybackOffset('518')).toBe(0.087);
+  expect(pokemonCryPlaybackOffset('571')).toBe(0.064);
+  expect(pokemonCryPlaybackOffset('640')).toBe(0.045);
+  expect(pokemonCryPlaybackOffset('516')).toBe(0.029);
+  expect(pokemonCryPlaybackOffset('550')).toBe(0.02);
+
+  const audio = { currentTime: 0, readyState: 4 };
+  restartPokemonCry(audio, '25');
+  expect(audio.currentTime).toBe(0.095);
 });
 
 test('preloads every unique asset and reports completion', async () => {
