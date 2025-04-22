@@ -129,7 +129,7 @@ test('keeps background preloads from occupying every asset slot', async () => {
       undefined,
       { priority: 10 }
     );
-    expect(peakRequests).toBeLessThanOrEqual(2);
+    expect(peakRequests).toBeLessThanOrEqual(1);
   } finally {
     global.fetch = originalFetch;
   }

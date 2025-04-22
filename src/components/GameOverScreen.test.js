@@ -1,11 +1,13 @@
-import { act, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import GameOverScreen from './GameOverScreen';
-import { pokemonCryUrl, preloadAssets } from '../utils/assetUrls';
+import { getPokemonCryAudio, pokemonCryUrl, preloadAssets } from '../utils/assetUrls';
+import { getEagerDensePokemonCount } from '../utils/renderPerformance';
 
 jest.mock('../utils/assetUrls', () => {
   const actual = jest.requireActual('../utils/assetUrls');
   return {
     ...actual,
+    getPokemonCryAudio: jest.fn(),
     preloadAssets: jest.fn().mockResolvedValue([]),
   };
 });
@@ -33,7 +35,9 @@ test('preloads the first result cries at high priority', async () => {
 
   await waitFor(() => {
     expect(preloadAssets).toHaveBeenCalledWith(
-      failedPokemon.slice(0, 24).map(pokemon => pokemonCryUrl(pokemon.id)),
+      failedPokemon
+        .slice(0, getEagerDensePokemonCount())
+        .map(pokemon => pokemonCryUrl(pokemon.id)),
       undefined,
       { priority: 100 }
     );
@@ -103,4 +107,55 @@ test('renders the exact missed form and shiny state', () => {
     'src',
     expect.stringMatching(/animated\/shiny\/422-east\.gif$/)
   );
+});
+
+test('starts a selected result cry and immediately cuts the previous one', async () => {
+  jest.useFakeTimers();
+  preloadAssets.mockResolvedValue([]);
+  const createAudio = () => ({
+    currentTime: 0,
+    error: null,
+    networkState: 1,
+    onended: null,
+    onerror: null,
+    onplaying: null,
+    onstalled: null,
+    onwaiting: null,
+    pause: jest.fn(),
+    play: jest.fn().mockResolvedValue(undefined),
+    readyState: 4,
+  });
+  const firstAudio = createAudio();
+  const secondAudio = createAudio();
+  getPokemonCryAudio
+    .mockReset()
+    .mockReturnValueOnce(firstAudio)
+    .mockReturnValueOnce(secondAudio);
+
+  try {
+    const { container } = render(
+      <GameOverScreen
+        stats={{ correctCount: 0, incorrectCount: 2, progressCount: 2 }}
+        failedPokemon={[
+          { id: 25, name: 'Pikachu' },
+          { id: 250, name: 'Ho-Oh' },
+        ]}
+        onPlayAgain={() => {}}
+        startTime={0}
+        endTime={1000}
+      />
+    );
+    const cards = container.querySelectorAll('.pokemon-card');
+
+    fireEvent.click(cards[0]);
+    fireEvent.click(cards[1]);
+    await act(async () => Promise.resolve());
+
+    expect(firstAudio.play).toHaveBeenCalledTimes(1);
+    expect(firstAudio.pause).toHaveBeenCalledTimes(1);
+    expect(secondAudio.play).toHaveBeenCalledTimes(1);
+  } finally {
+    act(() => jest.runOnlyPendingTimers());
+    jest.useRealTimers();
+  }
 });

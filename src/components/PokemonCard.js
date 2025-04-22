@@ -1,13 +1,45 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import './PokemonCard.css';
 import { animatedPokemonSpriteUrl, pokemonSpriteUrl } from '../utils/assetUrls';
 import pokemonTypeColors from '../data/pokemonTypeColors';
+
+const tapTimers = new WeakMap();
+const answerTimers = new WeakMap();
 
 const colorWithOpacity = (hexColor, opacity) => {
   const red = parseInt(hexColor.slice(1, 3), 16);
   const green = parseInt(hexColor.slice(3, 5), 16);
   const blue = parseInt(hexColor.slice(5, 7), 16);
   return `rgba(${red}, ${green}, ${blue}, ${opacity})`;
+};
+
+const cardStyles = new Map();
+
+const getCardStyle = (types) => {
+  const primaryColor = pokemonTypeColors[types[0]] || pokemonTypeColors.normal;
+  const secondaryColor = pokemonTypeColors[types[1]] || primaryColor;
+  const cacheKey = `${primaryColor}:${secondaryColor}`;
+
+  if (!cardStyles.has(cacheKey)) {
+    cardStyles.set(cacheKey, {
+      '--card-type-primary': colorWithOpacity(primaryColor, 0.18),
+      '--card-type-secondary': colorWithOpacity(secondaryColor, 0.12),
+    });
+  }
+
+  return cardStyles.get(cacheKey);
+};
+
+const showTemporaryClass = (card, className, duration, timers) => {
+  const previousTimer = timers.get(card);
+  if (previousTimer) clearTimeout(previousTimer);
+
+  card.classList.add(className);
+  const timer = setTimeout(() => {
+    card.classList.remove(className);
+    timers.delete(card);
+  }, duration);
+  timers.set(card, timer);
 };
 
 const PokemonCard = React.memo(function PokemonCard({ 
@@ -20,20 +52,8 @@ const PokemonCard = React.memo(function PokemonCard({
   showAnswerFeedback = true,
   types = []
 }) {
-  const [isTapping, setIsTapping] = useState(false);
-  const [answerFeedback, setAnswerFeedback] = useState(null);
-  const tapTimeoutRef = useRef(null);
-  const answerTimeoutRef = useRef(null);
-
-  useEffect(() => () => {
-    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
-    if (answerTimeoutRef.current) clearTimeout(answerTimeoutRef.current);
-  }, []);
-
-  const triggerTap = () => {
-    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
-    setIsTapping(true);
-    tapTimeoutRef.current = setTimeout(() => setIsTapping(false), 380);
+  const triggerTap = (card) => {
+    showTemporaryClass(card, 'tap-animation', 380, tapTimers);
   };
 
   const setTapOrigin = (event) => {
@@ -50,45 +70,39 @@ const PokemonCard = React.memo(function PokemonCard({
     card.style.setProperty('--tap-y', `${event.clientY - bounds.top}px`);
   };
 
-  const handleClick = () => {
+  const handleClick = (event) => {
+    const card = event.currentTarget;
     if (isGameOver) {
-      triggerTap();
       onClick(pokemon);
+      triggerTap(card);
       return;
     }
 
     const isCorrect = onClick(pokemon);
     if (typeof isCorrect !== 'boolean') return;
 
-    triggerTap();
+    triggerTap(card);
     if (showAnswerFeedback) {
-      if (answerTimeoutRef.current) clearTimeout(answerTimeoutRef.current);
-      setAnswerFeedback(isCorrect ? 'correct' : 'wrong');
-      answerTimeoutRef.current = setTimeout(() => setAnswerFeedback(null), 500);
+      card.classList.remove('answer-correct', 'answer-wrong');
+      showTemporaryClass(
+        card,
+        isCorrect ? 'answer-correct' : 'answer-wrong',
+        500,
+        answerTimers
+      );
     }
   };
-
-  const cardClassName = `
-    pokemon-card 
-    ${isTapping ? 'tap-animation' : ''}
-    ${answerFeedback ? `answer-${answerFeedback}` : ''}
-  `;
   
   const isShiny = Boolean(allShiny || pokemon.isShiny);
   const spritePath = animated
     ? animatedPokemonSpriteUrl(pokemon.id, isShiny, pokemon.spriteVariant)
     : pokemonSpriteUrl(pokemon.id, isShiny, pokemon.spriteVariant);
-  const primaryColor = pokemonTypeColors[types[0]] || pokemonTypeColors.normal;
-  const secondaryColor = pokemonTypeColors[types[1]] || primaryColor;
-  const cardStyle = {
-    '--card-type-primary': colorWithOpacity(primaryColor, 0.18),
-    '--card-type-secondary': colorWithOpacity(secondaryColor, 0.12),
-  };
+  const cardStyle = getCardStyle(types);
 
   return (
     <button
       type="button"
-      className={cardClassName}
+      className="pokemon-card"
       data-pokemon-id={pokemon.id}
       onClick={handleClick}
       onPointerDown={setTapOrigin}

@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import PokemonCard from './PokemonCard';
 import './PokemonGrid.css';
-import { EAGER_DENSE_POKEMON } from '../utils/renderPerformance';
+import { getEagerDensePokemonCount } from '../utils/renderPerformance';
 
 export const getBalancedColumnCount = (count) => {
   if (count <= 1) return 1;
@@ -66,8 +66,12 @@ const PokemonGrid = React.memo(function PokemonGrid({
     return onPokemonClickRef.current(pokemon);
   }, []);
 
+  const pokemonById = useMemo(
+    () => new Map(pokemonList.map(pokemon => [pokemon.id, pokemon])),
+    [pokemonList]
+  );
+  const eagerDensePokemonCount = getEagerDensePokemonCount();
   const memoizedPokemonCards = useMemo(() => {
-    const pokemonById = new Map(pokemonList.map(pokemon => [pokemon.id, pokemon]));
     return visiblePokemonIds.map(id => pokemonById.get(id)).filter(Boolean).map((pokemon, index) => {
       return (
         <PokemonCard
@@ -77,13 +81,13 @@ const PokemonGrid = React.memo(function PokemonGrid({
           isGameOver={isGameOver}
           allShiny={allShiny}
           animated={animatedSprites}
-          imageLoading={denseGrid && index >= EAGER_DENSE_POKEMON ? 'lazy' : 'eager'}
+          imageLoading={denseGrid && index >= eagerDensePokemonCount ? 'lazy' : 'eager'}
           showAnswerFeedback={showAnswerFeedback}
           types={pokemonTypes[pokemon.id]}
         />
       );
     });
-  }, [pokemonList, visiblePokemonIds, handlePokemonClick, isGameOver, allShiny, animatedSprites, showAnswerFeedback, denseGrid, pokemonTypes]);
+  }, [pokemonById, visiblePokemonIds, handlePokemonClick, isGameOver, allShiny, animatedSprites, showAnswerFeedback, denseGrid, pokemonTypes, eagerDensePokemonCount]);
   const balancedColumns = getBalancedColumnCount(memoizedPokemonCards.length);
   const gridStyle = {
     '--balanced-grid-width': `${balancedColumns * 110 + Math.max(0, balancedColumns - 1) * 12 + 32}px`,

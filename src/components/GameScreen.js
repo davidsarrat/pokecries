@@ -12,13 +12,15 @@ import {
   getPokemonCryAudio,
   pokemonCryUrl,
   pokemonSpriteUrl,
-  pokemonVariantSpriteAssetUrls,
   preloadAssets,
   resetRuntimeAssetCache,
   unknownPokemonSpriteUrl,
 } from '../utils/assetUrls';
 import { createGamePlan } from '../utils/gamePlan';
-import { EAGER_DENSE_POKEMON, shouldAnimatePokemon } from '../utils/renderPerformance';
+import {
+  getEagerDensePokemonCount,
+  shouldAnimatePokemon,
+} from '../utils/renderPerformance';
 import {
   selectFullListShinyIndex,
   selectPokemonSpriteVariant,
@@ -31,7 +33,6 @@ const PRELOAD_AHEAD_ROUNDS = 3;
 const PRELOAD_AHEAD_CRIES = 10;
 const AUDIO_START_TIMEOUT_MS = 1800;
 const SHINY_PARTY_TOAST_ID = 'shiny-party';
-const VARIANT_PRELOAD_BATCH_SIZE = 24;
 
 const normalizePokemonName = name => name.toLowerCase()
   .replace(/♂/g, 'm')
@@ -96,22 +97,13 @@ const getCriticalRoundAssetUrls = round => {
   ];
 };
 
-const getDeferredRoundAssetUrls = round => (
-  shouldAnimatePokemon(round.visiblePokemon.length)
-    ? round.visiblePokemon.map(pokemon => animatedSpriteUrl(pokemon, true))
-    : []
-);
-
 const getCryAssetUrls = rounds => rounds.map(round => pokemonCryUrl(round.pokemon.id));
 
 const getTargetAssetUrls = round => [
   animatedSpriteUrl(round.pokemon, isPokemonShiny(round.pokemon)),
 ];
 
-const getPlannedAssetUrls = rounds => [
-  ...rounds.flatMap(getCriticalRoundAssetUrls),
-  ...rounds.flatMap(getDeferredRoundAssetUrls),
-];
+const getPlannedAssetUrls = rounds => rounds.flatMap(getCriticalRoundAssetUrls);
 
 const getInitialRoundAssetUrls = (round, hasFullAnswerSet) => (
   hasFullAnswerSet
@@ -119,24 +111,11 @@ const getInitialRoundAssetUrls = (round, hasFullAnswerSet) => (
       pokemonCryUrl(round.pokemon.id),
       animatedSpriteUrl(round.pokemon, isPokemonShiny(round.pokemon)),
       ...round.visiblePokemon
-        .slice(0, EAGER_DENSE_POKEMON)
+        .slice(0, getEagerDensePokemonCount())
         .map(pokemon => staticSpriteUrl(pokemon, isPokemonShiny(pokemon))),
     ]
     : getCriticalRoundAssetUrls(round)
 );
-
-const preloadVariantAssets = async (urls, isActive) => {
-  let failedCount = 0;
-  for (let index = 0; index < urls.length && isActive(); index += VARIANT_PRELOAD_BATCH_SIZE) {
-    const failedUrls = await preloadAssets(
-      urls.slice(index, index + VARIANT_PRELOAD_BATCH_SIZE),
-      undefined,
-      { priority: 10 }
-    );
-    failedCount += failedUrls.length;
-  }
-  return failedCount;
-};
 
 const CountdownScreen = ({ count, isPreparing, progress }) => (
   <div className="countdown-container" role="status" aria-live="polite">
@@ -196,6 +175,7 @@ function GameScreen({
   const answerToastExitTimerRef = useRef(null);
   const answerToastHideTimerRef = useRef(null);
   const answerToastSequenceRef = useRef(0);
+  const roundUnlockTimerRef = useRef(null);
   const isAudioPlaying = useRef(false);
   const didInitialize = useRef(false);
   const shinyAudioRef = useRef(null);
@@ -532,10 +512,7 @@ function GameScreen({
       const upcomingCryRounds = plan.slice(1, 1 + PRELOAD_AHEAD_CRIES);
       const upcomingAssetUrls = hasFullAnswerSet
         ? upcomingRounds.flatMap(getTargetAssetUrls)
-        : [
-          ...upcomingRounds.flatMap(getCriticalRoundAssetUrls),
-          ...upcomingRounds.flatMap(getDeferredRoundAssetUrls),
-        ];
+        : upcomingRounds.flatMap(getCriticalRoundAssetUrls);
       const reportBackgroundFailures = backgroundFailures => {
         if (backgroundFailures.length > 0) {
           console.warn(`Could not preload ${backgroundFailures.length} background assets.`);
@@ -548,20 +525,9 @@ function GameScreen({
       ).then(reportBackgroundFailures);
       preloadAssets([
         ...upcomingAssetUrls,
-        ...getDeferredRoundAssetUrls(firstRound),
         animatedPokemonSpriteUrl('272', true),
         `${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`,
       ], undefined, { priority: 10 }).then(reportBackgroundFailures);
-
-      const animateVariantSprites = shouldAnimatePokemon(firstRound.visiblePokemon.length);
-      const variantAssetUrls = selectedPokemon.flatMap(pokemon => (
-        pokemonVariantSpriteAssetUrls(pokemon.id, { animated: animateVariantSprites })
-      ));
-      preloadVariantAssets(variantAssetUrls, () => isMountedRef.current).then(failedCount => {
-        if (failedCount > 0 && isMountedRef.current) {
-          console.warn(`Could not preload ${failedCount} form sprites.`);
-        }
-      });
     });
   }, [isGameInitialized, selectedGenerations, selectedGameMode, limitedQuestions, numberOfQuestions, limitedAnswers, numberOfAnswers, keepCryOnError]);
 
@@ -666,16 +632,9 @@ function GameScreen({
     if (updateInProgress.current) return;
     updateInProgress.current = true;
 
+    setFilteredPokemonList(nextRound.visiblePokemon);
     setGameState(prevState => {
       const newProgressCount = prevState.progressCount + 1;
-      
-      if ((limitedQuestions && newProgressCount > numberOfQuestions) ||
-          (selectedGameMode === 'dontRepeatPokemon' && newProgressCount > pokemonList.length)) {
-        endGame(false);
-        return prevState;
-      }
-
-      setFilteredPokemonList(nextRound.visiblePokemon);
 
       return {
         ...prevState,
@@ -685,10 +644,12 @@ function GameScreen({
       };
     });
 
-    setTimeout(() => {
+    if (roundUnlockTimerRef.current) clearTimeout(roundUnlockTimerRef.current);
+    roundUnlockTimerRef.current = setTimeout(() => {
       updateInProgress.current = false;
+      roundUnlockTimerRef.current = null;
     }, 0);
-  }, [limitedQuestions, numberOfQuestions, selectedGameMode, pokemonList, endGame]);
+  }, []);
 
   const moveToNextPokemon = useCallback(() => {
     if (!isGameInitialized || updateInProgress.current) return;
@@ -1096,6 +1057,7 @@ function GameScreen({
       if (timeLostTimeoutRef.current) clearTimeout(timeLostTimeoutRef.current);
       if (answerToastExitTimerRef.current) clearTimeout(answerToastExitTimerRef.current);
       if (answerToastHideTimerRef.current) clearTimeout(answerToastHideTimerRef.current);
+      if (roundUnlockTimerRef.current) clearTimeout(roundUnlockTimerRef.current);
 
       stopCurrentCry();
       

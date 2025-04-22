@@ -3,9 +3,11 @@ import './GameOverScreen.css';
 import PokemonGrid, { getBalancedColumnCount } from './PokemonGrid';
 import { scrollToTop } from '../utils/scrollUtils';
 import { getPokemonCryAudio, pokemonCryUrl, preloadAssets } from '../utils/assetUrls';
-import { shouldAnimatePokemon } from '../utils/renderPerformance';
+import {
+  getEagerDensePokemonCount,
+  shouldAnimatePokemon,
+} from '../utils/renderPerformance';
 
-const RESULT_CRY_PRELOAD_LIMIT = 24;
 const AUDIO_START_TIMEOUT_MS = 1800;
 
 function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime, pokemonTypes = {}, lastAnswerToast }) {
@@ -177,7 +179,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
     : undefined;
   useEffect(() => {
     const resultCryUrls = uniqueFailedPokemon
-      .slice(0, RESULT_CRY_PRELOAD_LIMIT)
+      .slice(0, getEagerDensePokemonCount())
       .map(pokemon => pokemonCryUrl(pokemon.id));
     if (resultCryUrls.length === 0) return;
 

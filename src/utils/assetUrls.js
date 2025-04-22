@@ -25,7 +25,7 @@ const audioAssets = new Map();
 const pendingPreloads = new Set();
 const preloadQueue = [];
 const MAX_RETAINED_ASSETS = 128;
-const MAX_RETAINED_AUDIO = 24;
+const MAX_RETAINED_AUDIO = 48;
 const MAX_CONCURRENT_PRELOADS = 8;
 const MAX_CONCURRENT_BACKGROUND_PRELOADS = 1;
 const MAX_QUEUED_PRELOADS = 64;
@@ -290,7 +290,7 @@ const preloadUrl = (url, priority) => {
       ? new Promise((resolve, reject) => {
         const audio = getAudioAsset(url);
         if (audio.readyState >= 3) {
-          resolve(audio);
+          resolve();
           return;
         }
 
@@ -301,7 +301,7 @@ const preloadUrl = (url, priority) => {
         const handleReady = () => {
           cleanup();
           trimAudioCache();
-          resolve(audio);
+          resolve();
         };
         const handleError = () => {
           cleanup();

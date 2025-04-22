@@ -61,38 +61,56 @@ function StartScreen() {
     menuAudioRef.current.pause();
     if (menuAudioRef.current.readyState > 0) menuAudioRef.current.currentTime = 0;
     menuAudioRef.current.onended = null;
+    menuAudioRef.current.onerror = null;
     menuAudioRef.current = null;
   }, []);
 
   const playMenuCry = useCallback((pokemonId) => {
     stopMenuCry();
     const playbackSequence = menuAudioSequenceRef.current;
-    const audio = getPokemonCryAudio(pokemonId);
-    if (audio.readyState > 0) audio.currentTime = 0;
-    menuAudioRef.current = audio;
 
-    audio.onended = () => {
-      if (
+    const attemptPlayback = (forceReload) => {
+      const audio = getPokemonCryAudio(pokemonId, { forceReload });
+      let retired = false;
+      if (audio.readyState > 0) audio.currentTime = 0;
+      menuAudioRef.current = audio;
+
+      const clearHandlers = () => {
+        audio.onended = null;
+        audio.onerror = null;
+      };
+      const isCurrentPlayback = () => (
         menuAudioSequenceRef.current === playbackSequence
         && menuAudioRef.current === audio
-      ) {
+      );
+      const finishPlayback = () => {
+        if (retired || !isCurrentPlayback()) return;
+        retired = true;
+        clearHandlers();
         menuAudioRef.current = null;
-        audio.onended = null;
-      }
+      };
+      const recoverOrFinish = (error) => {
+        if (retired || !isCurrentPlayback()) return;
+        retired = true;
+        clearHandlers();
+        audio.pause();
+
+        if (!forceReload) {
+          attemptPlayback(true);
+        } else {
+          menuAudioRef.current = null;
+          if (error.name !== 'AbortError') {
+            console.error('Error playing menu audio:', error);
+          }
+        }
+      };
+
+      audio.onended = finishPlayback;
+      audio.onerror = () => recoverOrFinish(audio.error || new Error('Menu cry failed'));
+      Promise.resolve(audio.play()).catch(recoverOrFinish);
     };
 
-    audio.play().catch(error => {
-      if (
-        menuAudioSequenceRef.current === playbackSequence
-        && menuAudioRef.current === audio
-      ) {
-        menuAudioRef.current = null;
-        audio.onended = null;
-        if (error.name !== 'AbortError') {
-          console.error('Error playing menu audio:', error);
-        }
-      }
-    });
+    attemptPlayback(false);
   }, [stopMenuCry]);
 
   useEffect(() => {
@@ -259,8 +277,8 @@ function StartScreen() {
   };
 
   const handleHardcoreModeChange = (enabled) => {
-    setHardcoreMode(enabled);
     playMenuCry(enabled ? '491' : '441');
+    setHardcoreMode(enabled);
   };
 
   const startButtonClass = hardcoreMode ? 'start-button hardcore' : 'start-button';
