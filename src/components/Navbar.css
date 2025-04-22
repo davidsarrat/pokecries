@@ -1,4 +1,5 @@
 .navbar {
+  animation: ui-nav-enter 360ms ease-out both;
   position: sticky;
   top: 0;
   width: 100%;
@@ -153,7 +154,9 @@
   }
 
   .search-container {
+    left: auto;
     margin: 0.5rem 0;
+    position: relative;
   }
 
   .search-icon {
@@ -167,5 +170,22 @@
 
   .score-item {
     flex: 1 1 calc(50% - 0.25rem);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1000px) {
+  .navbar {
+    display: grid;
+    grid-template-columns: minmax(150px, 0.8fr) minmax(280px, 1.2fr);
+  }
+
+  .search-container {
+    margin: 0;
+  }
+
+  .score-container {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

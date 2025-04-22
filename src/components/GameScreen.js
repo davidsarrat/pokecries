@@ -13,11 +13,11 @@ import {
   pokemonSpriteUrl,
 } from '../utils/assetUrls';
 
-const LoadingScreen = () => (
-  <div className="loading-container">
-    <div className="loading-content">
-      <div className="loading-spinner"></div>
-      <p>Loading game...</p>
+const CountdownScreen = ({ count }) => (
+  <div className="countdown-container" role="status" aria-live="polite">
+    <div className="countdown-content">
+      <p>Get ready</p>
+      <span key={count} className="countdown-number">{count}</span>
     </div>
   </div>
 );
@@ -34,17 +34,21 @@ function GameScreen({
   hardcoreMode,
   limitedQuestions, 
   numberOfQuestions,
-  setSelectedGenerations
+  setSelectedGenerations,
+  pokemonTypes = {}
 }) {
   const [pokemonList, setPokemonList] = useState([]);
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
   const [shuffledPokemonList, setShuffledPokemonList] = useState([]);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
+  const firstPokemonRef = useRef(null);
   const isAudioPlaying = useRef(false);
   const didInitialize = useRef(false);
   const shinyAudioRef = useRef(null);
   const [isGameFullyLoaded, setIsGameFullyLoaded] = useState(false);
+  const [isCountdownReady, setIsCountdownReady] = useState(false);
+  const [countdown, setCountdown] = useState(3);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isGameFinished, setIsGameFinished] = useState(false);
   const [failedPokemon, setFailedPokemon] = useState([]);
@@ -77,6 +81,7 @@ function GameScreen({
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
       navbarRef.current.resetSearch();
       setFilteredPokemonList(pokemonList);
+      scrollToTop();
     }
   }, [pokemonList]);
 
@@ -257,6 +262,7 @@ function GameScreen({
 
       if (shuffled.length > 0 && !audioTriggered) {
         const firstPokemon = shuffled[0];
+        firstPokemonRef.current = firstPokemon;
 
         if (selectedGameMode === 'dontRepeatPokemon') {
           const indexToRemove = selectedPokemon.findIndex(p => p.id === firstPokemon.id);
@@ -284,24 +290,27 @@ function GameScreen({
         
         audioTriggered = true;
         
-        setIsAutoPlaying(true);
-        
-        const audio = new Audio(pokemonCryUrl(firstPokemon.id));
-        
-        audio.addEventListener('canplaythrough', () => {
-          playCurrentCry(firstPokemon, true);
-          setIsGameFullyLoaded(true);
-        });
-        
-        audio.addEventListener('error', () => {
-          console.error("Error loading first Pokémon cry, starting game anyway");
-          setIsGameFullyLoaded(true);
-        });
-        
-        audio.load();
+        setIsCountdownReady(true);
       }
     });
-  }, [isGameInitialized, selectedGenerations, selectedGameMode, selectVisiblePokemon, playCurrentCry]);
+  }, [isGameInitialized, selectedGenerations, selectedGameMode, selectVisiblePokemon]);
+
+  useEffect(() => {
+    if (!isCountdownReady || isGameFullyLoaded) return undefined;
+
+    const timeoutId = setTimeout(() => {
+      if (countdown > 1) {
+        setCountdown(value => value - 1);
+        return;
+      }
+
+      setCountdown(0);
+      playCurrentCry(firstPokemonRef.current, true);
+      setIsGameFullyLoaded(true);
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [countdown, isCountdownReady, isGameFullyLoaded, playCurrentCry]);
 
   useEffect(() => {
     if (!didInitialize.current) {
@@ -605,7 +614,6 @@ function GameScreen({
     );
     
     setFilteredPokemonList(filtered);
-    scrollToTop();
   }, [gameState.visiblePokemon]);
 
   const handleEnterPress = useCallback((searchTerm) => {
@@ -636,6 +644,7 @@ function GameScreen({
           <img 
             src={animatedPokemonSpriteUrl('272', true)}
             alt="Shiny Ludicolo"
+            className="shiny-party-pokemon"
             style={{width: '100%', height: '100%', objectFit: 'contain'}} 
           />
           <p>🎉 Welcome to the shiny party! 🎉</p>
@@ -768,7 +777,7 @@ function GameScreen({
   }
 
   if (!isGameFullyLoaded && isGameReady) {
-    return <LoadingScreen />;
+    return <CountdownScreen count={countdown} />;
   }
 
   if (pokemonList.length === 0) {
@@ -798,6 +807,7 @@ function GameScreen({
         }}
         selectedGameMode={selectedGameMode}
         pokemonList={pokemonList} 
+        pokemonTypes={pokemonTypes}
         startTime={gameStartTime}
         endTime={endTime}
       />
@@ -842,7 +852,7 @@ function GameScreen({
         hardcoreMode={hardcoreMode}
       />
       <div className="game-content">
-        <div className="game-screen">
+        <div className="game-screen" data-card-count={filteredPokemonList.length}>
           <PokemonGrid 
             pokemonList={pokemonList}
             visiblePokemonIds={filteredPokemonList.map(p => p.id)}
@@ -850,6 +860,7 @@ function GameScreen({
             animatingCards={animatingCards}
             isGameOver={false}
             allShiny={allShiny}
+            pokemonTypes={pokemonTypes}
           />
         </div>
       </div>

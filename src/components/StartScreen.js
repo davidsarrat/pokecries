@@ -8,8 +8,10 @@ import { scrollToTop } from '../utils/scrollUtils';
 import LimitedQuestionsSelector from './LimitedQuestionsSelector';
 import pokemonData from '../data/pokemon.json';
 import LegalNotice from './LegalNotice';
+import { loadPokemonTypes } from '../utils/pokemonTypes';
 import {
   animatedPokemonSpriteUrl,
+  generationIconUrl,
   pokemonAssetUrls,
   preloadAssets,
 } from '../utils/assetUrls';
@@ -34,6 +36,9 @@ function StartScreen() {
   const [hardcoreMode, setHardcoreMode] = useState(false);
   const [timedRun, setTimedRun] = useState(false);
   const [dontRepeatPokemon, setDontRepeatPokemon] = useState(true);
+  const [preloadProgress, setPreloadProgress] = useState(0);
+  const [isPreloadComplete, setIsPreloadComplete] = useState(false);
+  const [pokemonTypes, setPokemonTypes] = useState({});
 
   useEffect(() => {
     const savedConfig = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -95,29 +100,61 @@ function StartScreen() {
   }, []);
 
   useEffect(() => {
-    const preloadSelectedAssets = () => {
-      const selectedPokemon = selectedGenerations.flatMap(genKey => pokemonData[genKey] || []);
-      const assetUrls = selectedPokemon.flatMap(pokemon => pokemonAssetUrls(pokemon.id));
-      assetUrls.push(
-        animatedPokemonSpriteUrl('272', true),
-        `${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`
-      );
+    let isMounted = true;
+    const previousOverflow = document.body.style.overflow;
+    const allPokemon = Object.values(pokemonData).flat();
+    const assetUrls = allPokemon.flatMap(pokemon => pokemonAssetUrls(pokemon.id));
 
-      preloadAssets(assetUrls).then(failedUrls => {
-        if (failedUrls.length > 0) {
-          console.warn(`Could not preload ${failedUrls.length} assets; the game will load them on demand.`);
-        }
+    assetUrls.push(
+      ...['gen1', 'gen2', 'gen3', 'gen4', 'gen5'].map(generationIconUrl),
+      animatedPokemonSpriteUrl('441'),
+      animatedPokemonSpriteUrl('491'),
+      animatedPokemonSpriteUrl('272', true),
+      `${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`
+    );
+
+    document.body.style.overflow = 'hidden';
+
+    const loadAssets = async () => {
+      const fontReady = document.fonts?.load
+        ? Promise.all([
+          document.fonts.load('76px "Pocket Monk"'),
+          document.fonts.load('12px "Press Start 2P"'),
+        ]).catch(error => {
+          console.warn('Could not preload the game typefaces.', error);
+        })
+        : Promise.resolve();
+      const typesReady = loadPokemonTypes().catch(error => {
+        console.warn('Could not load Pokémon type colors.', error);
+        return {};
       });
+      const [failedUrls, loadedPokemonTypes] = await Promise.all([
+        preloadAssets(assetUrls, progress => {
+          if (isMounted) setPreloadProgress(progress);
+        }),
+        typesReady,
+        fontReady,
+      ]);
+
+      if (failedUrls.length > 0) {
+        console.warn(`Could not preload ${failedUrls.length} assets; the game will load them on demand.`);
+      }
+
+      if (isMounted) {
+        setPokemonTypes(loadedPokemonTypes);
+        setPreloadProgress(100);
+        setIsPreloadComplete(true);
+        document.body.style.overflow = previousOverflow;
+      }
     };
 
-    if ('requestIdleCallback' in window) {
-      const requestId = window.requestIdleCallback(preloadSelectedAssets, { timeout: 1000 });
-      return () => window.cancelIdleCallback(requestId);
-    }
+    loadAssets();
 
-    const timeoutId = window.setTimeout(preloadSelectedAssets, 100);
-    return () => window.clearTimeout(timeoutId);
-  }, [selectedGenerations]);
+    return () => {
+      isMounted = false;
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
 
   const isStartButtonDisabled = () => {
     if (selectedGenerations.length === 0) return true;
@@ -190,12 +227,32 @@ function StartScreen() {
         numberOfQuestions={numberOfQuestions}
         hardcoreMode={hardcoreMode}
         isTimeAttack={timedRun}
+        pokemonTypes={pokemonTypes}
       />
     );
   }
 
   return (
-    <div className="start-screen">
+    <div className={`start-screen ${isPreloadComplete ? 'is-ready' : ''}`}>
+      {!isPreloadComplete && (
+        <div className="initial-loader" role="status" aria-live="polite">
+          <div className="initial-loader-card">
+            <div className="initial-loader-title">PokéCries</div>
+            <p>Preparing sprites and cries...</p>
+            <div
+              className="initial-loader-track"
+              role="progressbar"
+              aria-label="Loading game assets"
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={preloadProgress}
+            >
+              <div className="initial-loader-progress" style={{ width: `${preloadProgress}%` }} />
+            </div>
+            <span className="initial-loader-percentage">{preloadProgress}%</span>
+          </div>
+        </div>
+      )}
       <h1 className="title" data-text="PokéCries">PokéCries</h1>
       <p className="subtitle">Can you guess the Pokémon by its cry?</p>
       <GenerationSelector 

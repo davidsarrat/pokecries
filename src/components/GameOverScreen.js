@@ -4,7 +4,7 @@ import PokemonCard from './PokemonCard';
 import { scrollToTop } from '../utils/scrollUtils';
 import { pokemonCryUrl } from '../utils/assetUrls';
 
-function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, startTime, endTime }) {
+function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, startTime, endTime, pokemonTypes = {} }) {
   const { correctCount, incorrectCount, progressCount } = stats;
   const audioRef = useRef(null);
   const [playingPokemonId, setPlayingPokemonId] = useState(null);
@@ -73,6 +73,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
                 onClick={() => playPokemonCry(pokemon.id)}
                 isAnimating={playingPokemonId === pokemon.id}
                 isGameOver={true}
+                types={pokemonTypes[pokemon.id]}
               />
             ))}
           </div>

@@ -1,11 +1,11 @@
 const SPRITES_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/1435ac9b294901a0d3e8874aa69d76d038c1d65d/sprites/pokemon/versions/generation-v';
 const CRIES_BASE = 'https://raw.githubusercontent.com/PokeAPI/cries/ef687b18f0ce17169b4b4c09175819f7ade92f0f/cries/pokemon/legacy';
-const GENERATION_ICON_URLS = {
-  gen1: 'https://images.wikidexcdn.net/mwuploads/wikidex/b/bf/latest/20081214235115/Pikachu_icon.gif',
-  gen2: 'https://images.wikidexcdn.net/mwuploads/wikidex/d/d7/latest/20091208194409/Ho-Oh_icon.gif',
-  gen3: 'https://images.wikidexcdn.net/mwuploads/wikidex/3/32/latest/20091209210959/Rayquaza_icon.gif',
-  gen4: 'https://images.wikidexcdn.net/mwuploads/wikidex/d/d8/latest/20091209223655/Lucario_icon.gif',
-  gen5: 'https://images.wikidexcdn.net/mwuploads/wikidex/5/5b/latest/20101005232130/Zoroark_icon.gif',
+const GENERATION_ICON_IDS = {
+  gen1: '25',
+  gen2: '250',
+  gen3: '384',
+  gen4: '448',
+  gen5: '571',
 };
 const preloadRequests = new Map();
 
@@ -17,7 +17,8 @@ export const pokemonCryUrl = (pokemonId) => `${CRIES_BASE}/${pokemonId}.ogg`;
 export const animatedPokemonSpriteUrl = (pokemonId, shiny = false) =>
   `${SPRITES_BASE}/black-white/animated/${shiny ? 'shiny/' : ''}${pokemonId}.gif`;
 
-export const generationIconUrl = (generationKey) => GENERATION_ICON_URLS[generationKey];
+export const generationIconUrl = (generationKey) =>
+  animatedPokemonSpriteUrl(GENERATION_ICON_IDS[generationKey]);
 
 export const pokemonAssetUrls = (pokemonId) => [
   pokemonSpriteUrl(pokemonId),

@@ -1,11 +1,14 @@
 @font-face {
   font-family: 'Pocket Monk';
-  src: url('https://static.wfonts.com/data/2016/06/28/pocket-monk/Pocket_Monk.woff') format('woff');
+  src:
+    url('https://fonts.cdnfonts.com/s/32237/Pocket%20Monk.woff') format('woff'),
+    url('https://static.wfonts.com/data/2016/06/28/pocket-monk/Pocket_Monk.woff') format('woff');
   font-display: swap;
 }
 
 .App {
   text-align: center;
+  min-height: 100vh;
   min-height: 100svh;
   display: flex;
   justify-content: center;
@@ -75,6 +78,32 @@
   94.08% { background-color: #B7B7CE; }
 }
 
+@keyframes ui-panel-enter {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes ui-control-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ui-nav-enter {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 .legal-notice {
   margin-top: 0.75rem;
   text-align: left;
@@ -84,7 +113,9 @@
 .legal-notice summary {
   color: #334155;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 400;
   text-align: center;
 }
 

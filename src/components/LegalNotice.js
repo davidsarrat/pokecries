@@ -23,8 +23,7 @@ function LegalNotice() {
           {' '}Pokémon and Pokémon character names are trademarks of Nintendo.
         </p>
         <p>
-          Generation menu icons are hosted by{' '}
-          <a href="https://www.wikidex.net/" target="_blank" rel="noopener noreferrer">WikiDex</a>.
+          Generation menu icons are also provided by PokéAPI.
           {' '}The Pocket Monk typeface is by{' '}
           <a href="https://chequered.ink/" target="_blank" rel="noopener noreferrer">Chequered Ink</a>
           {' '}and is used under its non-commercial terms.

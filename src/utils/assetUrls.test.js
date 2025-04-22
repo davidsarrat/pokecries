@@ -13,7 +13,7 @@ test('builds pinned external asset URLs', () => {
   expect(pokemonCryUrl('25')).toMatch(/PokeAPI\/cries\/[a-f0-9]{40}\/.*\/25\.ogg$/);
   expect(animatedPokemonSpriteUrl('441')).toMatch(/animated\/441\.gif$/);
   expect(animatedPokemonSpriteUrl('272', true)).toMatch(/animated\/shiny\/272\.gif$/);
-  expect(generationIconUrl('gen2')).toMatch(/Ho-Oh_icon\.gif$/);
+  expect(generationIconUrl('gen2')).toMatch(/animated\/250\.gif$/);
   expect(pokemonAssetUrls('25')).toHaveLength(3);
 });
 

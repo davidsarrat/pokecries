@@ -16,6 +16,7 @@
 }
 
 .number-of-answers {
+  animation: ui-control-enter 280ms ease-out both;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -61,6 +62,6 @@
   }
 
   .number-of-answers input {
-    width: 40px;
+    width: 56px;
   }
 }

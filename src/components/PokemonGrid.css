@@ -4,8 +4,10 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: center;
-  width: 100%;
-  max-width: 1200px;
+  width: auto;
+  width: fit-content;
+  max-width: 100%;
+  max-width: min(1200px, 100%);
   margin: 0 auto;
   padding: 1rem;
 }

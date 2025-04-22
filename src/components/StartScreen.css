@@ -1,15 +1,89 @@
 .start-screen {
   position: relative;
-  background-color: rgba(255, 255, 255);
-  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.78);
   border-radius: 20px;
   padding: 3rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  max-width: 90%;
-  width: 450px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18), 0 4px 14px rgba(15, 23, 42, 0.08);
+  max-width: none;
+  width: min(450px, calc(100% - 1.5rem));
   text-align: center;
   margin: 2rem auto;
   z-index: 2;
+}
+
+.start-screen.is-ready {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  animation: ui-panel-enter 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.initial-loader {
+  align-items: center;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  background: rgba(15, 23, 42, 0.16);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1.5rem;
+  position: fixed;
+  touch-action: none;
+  z-index: 3000;
+}
+
+.initial-loader-card {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 24px;
+  box-shadow: 0 28px 70px rgba(15, 23, 42, 0.28);
+  max-width: 420px;
+  padding: clamp(2rem, 7vw, 3rem);
+  text-align: center;
+  width: 100%;
+}
+
+.initial-loader-title {
+  color: #FFCB05;
+  font-family: 'Pocket Monk', sans-serif;
+  font-size: clamp(3rem, 14vw, 4.8rem);
+  letter-spacing: 2px;
+  line-height: 1.1;
+  margin-bottom: 1.25rem;
+  -webkit-text-stroke: 2px #3B4CCA;
+  text-stroke: 2px #3B4CCA;
+}
+
+.initial-loader-card p {
+  color: #475569;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.initial-loader-track {
+  background: #dbe3ee;
+  border-radius: 999px;
+  box-shadow: inset 0 1px 3px rgba(15, 23, 42, 0.18);
+  height: 12px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.initial-loader-progress {
+  background: linear-gradient(90deg, #3B4CCA 0%, #6175de 72%, #FFCB05 100%);
+  border-radius: inherit;
+  box-shadow: 0 0 12px rgba(59, 76, 202, 0.35);
+  height: 100%;
+  min-width: 3px;
+  transition: width 160ms ease-out;
+}
+
+.initial-loader-percentage {
+  color: #3B4CCA;
+  display: block;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 0.58rem;
+  margin-top: 0.8rem;
 }
 
 .title {
@@ -157,8 +231,13 @@
 
 @media (max-width: 400px) {
   .title {
-    font-size: 2.8rem;
+    font-size: clamp(2.55rem, 12.5vw, 2.8rem);
     white-space: normal;
+  }
+
+  .start-screen {
+    padding-left: 1.75rem;
+    padding-right: 1.75rem;
   }
 }
 
@@ -199,6 +278,7 @@
 }
 
 .time-attack-settings {
+  animation: ui-control-enter 280ms ease-out both;
   padding: 0;
 }
 
@@ -276,6 +356,11 @@
     margin-top: 1.5rem;
     margin-bottom: 0.8rem;
   }
+}
+
+.darkrai-gif,
+.chatot-gif {
+  filter: drop-shadow(0 5px 4px rgba(15, 23, 42, 0.28));
 }
 
 .darkrai-gif {
