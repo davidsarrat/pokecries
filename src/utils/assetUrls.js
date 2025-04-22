@@ -1,9 +1,18 @@
-import pokemonData from '../data/pokemon.json';
+import {
+  getPokemonSpriteVariantData,
+  getPokemonSpriteVariants,
+} from '../data/pokemonSpriteVariants';
 
 const SPRITES_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/1435ac9b294901a0d3e8874aa69d76d038c1d65d/sprites/pokemon/versions/generation-v';
 const POKEMON_SPRITES_ROOT = 'https://raw.githubusercontent.com/PokeAPI/sprites/1435ac9b294901a0d3e8874aa69d76d038c1d65d/sprites/pokemon';
-const CRIES_BASE = 'https://raw.githubusercontent.com/PokeAPI/cries/ef687b18f0ce17169b4b4c09175819f7ade92f0f/cries/pokemon/legacy';
-const SHOWDOWN_CRIES_BASE = 'https://play.pokemonshowdown.com/audio/cries';
+const SHOWDOWN_STATIC_SPRITES_BASE = 'https://play.pokemonshowdown.com/sprites';
+const LEGACY_CRIES_BASE = 'https://cdn.jsdelivr.net/gh/pkelly10439594/pokemon-cries@ac7823370ac9090aa0f7d05c97fec58f1afc17a7/public/cries/old';
+const LEGACY_CRY_FILENAMES = {
+  492: '492_land',
+  641: '641_incarnate',
+  642: '642_incarnate',
+  645: '645_incarnate',
+};
 const GENERATION_ICON_IDS = {
   gen1: '25',
   gen2: '250',
@@ -29,29 +38,30 @@ let activePreloads = 0;
 let activeBackgroundPreloads = 0;
 let preloadSequence = 0;
 
-const pokemonNamesById = new Map(
-  Object.values(pokemonData).flat().map(pokemon => [String(pokemon.id), pokemon.name])
-);
-
-const showdownCrySlug = name => name.toLowerCase()
-  .replace(/♀/g, 'f')
-  .replace(/♂/g, 'm')
-  .replace(/[^a-z0-9]/g, '');
-
 const createPreloadCancelledError = () => {
   const error = new Error('Asset preload cancelled');
   error.name = PRELOAD_CANCELLED_ERROR_NAME;
   return error;
 };
 
-export const pokemonSpriteUrl = (pokemonId, shiny = false) =>
-  `${SPRITES_BASE}/black-white/${shiny ? 'shiny/' : ''}${pokemonId}.png`;
+export const pokemonSpriteUrl = (pokemonId, shiny = false, variant) => {
+  const variantData = getPokemonSpriteVariantData(pokemonId, variant);
+  if (variantData?.kind === 'female') {
+    return `${SPRITES_BASE}/black-white/${shiny ? 'shiny/' : ''}female/${pokemonId}.png`;
+  }
+  if (variantData?.kind === 'form' && String(pokemonId) === '201') {
+    return `${SPRITES_BASE}/black-white/${shiny ? 'shiny/' : ''}${variantData.animatedFilename}.png`;
+  }
+  if (variantData?.kind === 'form') {
+    return `${SHOWDOWN_STATIC_SPRITES_BASE}/${shiny ? 'gen5-shiny' : 'gen5'}/${variantData.publicSlug}.png`;
+  }
+  return `${SPRITES_BASE}/black-white/${shiny ? 'shiny/' : ''}${pokemonId}.png`;
+};
 
 export const pokemonCryUrl = (pokemonId) => {
-  const pokemonName = pokemonNamesById.get(String(pokemonId));
-  return pokemonName
-    ? `${SHOWDOWN_CRIES_BASE}/${showdownCrySlug(pokemonName)}.mp3`
-    : `${CRIES_BASE}/${pokemonId}.ogg`;
+  const id = String(pokemonId);
+  const filename = LEGACY_CRY_FILENAMES[id] || id.padStart(3, '0');
+  return `${LEGACY_CRIES_BASE}/${filename}.mp3`;
 };
 
 const refreshCacheEntry = (cache, key) => {
@@ -130,8 +140,17 @@ export const getPokemonCryAudio = (pokemonId, { forceReload = false } = {}) => {
 
 export const unknownPokemonSpriteUrl = () => `${POKEMON_SPRITES_ROOT}/0.png`;
 
-export const animatedPokemonSpriteUrl = (pokemonId, shiny = false) =>
-  `${SPRITES_BASE}/black-white/animated/${shiny ? 'shiny/' : ''}${pokemonId}.gif`;
+export const animatedPokemonSpriteUrl = (pokemonId, shiny = false, variant) => {
+  const resolvedVariant = variant || (String(pokemonId) === '493' ? 'base' : undefined);
+  const variantData = getPokemonSpriteVariantData(pokemonId, resolvedVariant);
+  if (variantData?.kind === 'female') {
+    return `${SPRITES_BASE}/black-white/animated/${shiny ? 'shiny/' : ''}female/${pokemonId}.gif`;
+  }
+  if (variantData) {
+    return `${SPRITES_BASE}/black-white/animated/${shiny ? 'shiny/' : ''}${variantData.animatedFilename}.gif`;
+  }
+  return `${SPRITES_BASE}/black-white/animated/${shiny ? 'shiny/' : ''}${pokemonId}.gif`;
+};
 
 export const generationIconUrl = (generationKey) =>
   animatedPokemonSpriteUrl(GENERATION_ICON_IDS[generationKey]);
@@ -140,6 +159,16 @@ export const pokemonSpriteAssetUrls = (pokemonId) => [
   animatedPokemonSpriteUrl(pokemonId),
   animatedPokemonSpriteUrl(pokemonId, true),
 ];
+
+export const pokemonVariantSpriteAssetUrls = (pokemonId, { animated = true } = {}) => {
+  const variants = getPokemonSpriteVariants(pokemonId);
+  if (variants.length === 1) return [];
+  const getUrl = animated ? animatedPokemonSpriteUrl : pokemonSpriteUrl;
+  return variants.flatMap(variant => [
+    getUrl(pokemonId, false, variant),
+    getUrl(pokemonId, true, variant),
+  ]);
+};
 
 export const pokemonAssetUrls = (pokemonId) => [
   ...pokemonSpriteAssetUrls(pokemonId),

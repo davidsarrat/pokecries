@@ -48,3 +48,42 @@ test('keeps colored feedback in no-limited mode', () => {
   expect(card).toHaveClass('tap-animation');
   expect(card).toHaveClass('answer-correct');
 });
+
+test('starts pointer feedback at the exact pressed position', () => {
+  render(
+    <PokemonCard
+      pokemon={pokemon}
+      onClick={() => true}
+      isGameOver={false}
+      allShiny={false}
+      animated={false}
+    />
+  );
+
+  const card = screen.getByRole('button');
+  jest.spyOn(card, 'getBoundingClientRect').mockReturnValue({ left: 20, top: 30 });
+  fireEvent(card, new MouseEvent('pointerdown', {
+    bubbles: true,
+    clientX: 45,
+    clientY: 75,
+  }));
+
+  expect(card.style.getPropertyValue('--tap-x')).toBe('25px');
+  expect(card.style.getPropertyValue('--tap-y')).toBe('45px');
+});
+
+test('keeps the missed form and shiny state on the game-over card', () => {
+  render(
+    <PokemonCard
+      pokemon={{ id: 422, name: 'Shellos', spriteVariant: 'east', isShiny: true }}
+      onClick={() => {}}
+      isGameOver={true}
+      animated={true}
+    />
+  );
+
+  expect(screen.getByRole('img')).toHaveAttribute(
+    'src',
+    expect.stringMatching(/animated\/shiny\/422-east\.gif$/)
+  );
+});

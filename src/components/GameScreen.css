@@ -244,6 +244,10 @@ html, body {
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
 }
 
+.game-screen.is-empty {
+  display: none;
+}
+
 .play-cry-button {
   padding: 1rem 2rem;
   font-size: 1.2rem;
@@ -359,9 +363,14 @@ html, body {
 }
 
 @media (max-width: 1000px) {
+  .game-content {
+    padding-inline: 0;
+  }
+
   .game-screen {
     -webkit-backdrop-filter: blur(8px) saturate(1.04);
     backdrop-filter: blur(8px) saturate(1.04);
+    max-width: calc(100% - 0.5rem);
     padding: 0.5rem;
     margin: 0.5rem auto;
   }

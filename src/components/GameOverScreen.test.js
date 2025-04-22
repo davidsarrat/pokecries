@@ -84,3 +84,23 @@ test('warms result cries before scrolled cards become clickable', async () => {
     global.IntersectionObserver = originalIntersectionObserver;
   }
 });
+
+test('renders the exact missed form and shiny state', () => {
+  preloadAssets.mockResolvedValue([]);
+  render(
+    <GameOverScreen
+      stats={{ correctCount: 0, incorrectCount: 1, progressCount: 1 }}
+      failedPokemon={[
+        { id: 422, name: 'Shellos', spriteVariant: 'east', isShiny: true },
+      ]}
+      onPlayAgain={() => {}}
+      startTime={0}
+      endTime={1000}
+    />
+  );
+
+  expect(document.querySelector('.failed-pokemon-grid img')).toHaveAttribute(
+    'src',
+    expect.stringMatching(/animated\/shiny\/422-east\.gif$/)
+  );
+});

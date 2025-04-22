@@ -8,7 +8,8 @@ PokéCries references Pokémon identifiers, names, and type metadata and loads s
 
 - [PokéAPI](https://github.com/PokeAPI/pokeapi), distributed under the BSD 3-Clause License. Its license notes that Pokémon and Pokémon character names are trademarks of Nintendo.
 - [PokéAPI sprites](https://github.com/PokeAPI/sprites), pinned to commit `1435ac9b294901a0d3e8874aa69d76d038c1d65d`. Its license states that the image contents are copyright The Pokémon Company.
-- Generation I–V cries are loaded as MP3 files from [Pokémon Showdown](https://play.pokemonshowdown.com/audio/cries/). PokéAPI's pinned legacy cry collection is retained only as a fallback for unknown identifiers.
+- Generation V form and gender sprite variants are loaded from the pinned PokéAPI source above, with static fallbacks for forms delivered by [Pokémon Showdown](https://pokemonshowdown.com/).
+- Original Generation I–V cries are loaded as MP3 files from an external [legacy cry collection](https://github.com/pkelly10439594/pokemon-cries/tree/main/public/cries/old), pinned to commit `ac7823370ac9090aa0f7d05c97fec58f1afc17a7` and delivered through jsDelivr.
 - Pokémon type metadata is loaded from the PokéAPI CSV data pinned to commit `9bea2b6eaa1f8f2c8d068b535f61dd75fce4a205`.
 - Animated generation menu icons are loaded from the pinned PokéAPI sprites source above.
 

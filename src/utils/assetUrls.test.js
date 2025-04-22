@@ -6,6 +6,7 @@ import {
   pokemonCryUrl,
   pokemonSpriteAssetUrls,
   pokemonSpriteUrl,
+  pokemonVariantSpriteAssetUrls,
   preloadAssets,
   resetRuntimeAssetCache,
   unknownPokemonSpriteUrl,
@@ -14,11 +15,22 @@ import {
 test('builds pinned external asset URLs', () => {
   expect(pokemonSpriteUrl('25')).toMatch(/PokeAPI\/sprites\/[a-f0-9]{40}\/.*\/25\.png$/);
   expect(pokemonSpriteUrl('25', true)).toMatch(/black-white\/shiny\/25\.png$/);
-  expect(pokemonCryUrl('25')).toBe('https://play.pokemonshowdown.com/audio/cries/pikachu.mp3');
-  expect(pokemonCryUrl('432')).toBe('https://play.pokemonshowdown.com/audio/cries/purugly.mp3');
-  expect(pokemonCryUrl('122')).toBe('https://play.pokemonshowdown.com/audio/cries/mrmime.mp3');
+  expect(pokemonCryUrl('25')).toMatch(/pokemon-cries@[a-f0-9]{40}\/public\/cries\/old\/025\.mp3$/);
+  expect(pokemonCryUrl('274')).toMatch(/public\/cries\/old\/274\.mp3$/);
+  expect(pokemonCryUrl('432')).toMatch(/public\/cries\/old\/432\.mp3$/);
+  expect(pokemonCryUrl('649')).toMatch(/public\/cries\/old\/649\.mp3$/);
+  expect(pokemonCryUrl('492')).toMatch(/public\/cries\/old\/492_land\.mp3$/);
+  expect(pokemonCryUrl('641')).toMatch(/public\/cries\/old\/641_incarnate\.mp3$/);
   expect(animatedPokemonSpriteUrl('441')).toMatch(/animated\/441\.gif$/);
   expect(animatedPokemonSpriteUrl('272', true)).toMatch(/animated\/shiny\/272\.gif$/);
+  expect(animatedPokemonSpriteUrl('493')).toMatch(/animated\/493-normal\.gif$/);
+  expect(animatedPokemonSpriteUrl('493', true)).toMatch(/animated\/shiny\/493-normal\.gif$/);
+  expect(animatedPokemonSpriteUrl('422', true, 'east')).toMatch(/animated\/shiny\/422-east\.gif$/);
+  expect(animatedPokemonSpriteUrl('201', true, 'f')).toMatch(/animated\/shiny\/201-f\.gif$/);
+  expect(animatedPokemonSpriteUrl('25', true, 'female')).toMatch(/animated\/shiny\/female\/25\.gif$/);
+  expect(pokemonSpriteUrl('649', true, 'burn')).toBe(
+    'https://play.pokemonshowdown.com/sprites/gen5-shiny/genesect-burn.png'
+  );
   expect(generationIconUrl('gen2')).toMatch(/animated\/250\.gif$/);
   expect(unknownPokemonSpriteUrl()).toMatch(/sprites\/pokemon\/0\.png$/);
   expect(pokemonAssetUrls('25')).toHaveLength(3);
@@ -26,6 +38,8 @@ test('builds pinned external asset URLs', () => {
     expect.stringMatching(/animated\/25\.gif$/),
     expect.stringMatching(/animated\/shiny\/25\.gif$/),
   ]);
+  expect(pokemonVariantSpriteAssetUrls('493')).toHaveLength(34);
+  expect(pokemonVariantSpriteAssetUrls('1')).toEqual([]);
 });
 
 test('preloads every unique asset and reports completion', async () => {

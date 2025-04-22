@@ -16,6 +16,7 @@ const PokemonCard = React.memo(function PokemonCard({
   isGameOver, 
   allShiny,
   animated = true,
+  imageLoading = 'eager',
   showAnswerFeedback = true,
   types = []
 }) {
@@ -33,6 +34,14 @@ const PokemonCard = React.memo(function PokemonCard({
     if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
     setIsTapping(true);
     tapTimeoutRef.current = setTimeout(() => setIsTapping(false), 380);
+  };
+
+  const setTapOrigin = (event) => {
+    if (!Number.isFinite(event.clientX) || !Number.isFinite(event.clientY)) return;
+    const card = event.currentTarget;
+    const bounds = card.getBoundingClientRect();
+    card.style.setProperty('--tap-x', `${event.clientX - bounds.left}px`);
+    card.style.setProperty('--tap-y', `${event.clientY - bounds.top}px`);
   };
 
   const handleClick = () => {
@@ -59,10 +68,10 @@ const PokemonCard = React.memo(function PokemonCard({
     ${answerFeedback ? `answer-${answerFeedback}` : ''}
   `;
   
-  const isShiny = allShiny && !isGameOver;
+  const isShiny = isGameOver ? Boolean(pokemon.isShiny) : allShiny;
   const spritePath = animated
-    ? animatedPokemonSpriteUrl(pokemon.id, isShiny)
-    : pokemonSpriteUrl(pokemon.id, isShiny);
+    ? animatedPokemonSpriteUrl(pokemon.id, isShiny, pokemon.spriteVariant)
+    : pokemonSpriteUrl(pokemon.id, isShiny, pokemon.spriteVariant);
   const primaryColor = pokemonTypeColors[types[0]] || pokemonTypeColors.normal;
   const secondaryColor = pokemonTypeColors[types[1]] || primaryColor;
   const cardStyle = {
@@ -76,6 +85,7 @@ const PokemonCard = React.memo(function PokemonCard({
       className={cardClassName}
       data-pokemon-id={pokemon.id}
       onClick={handleClick}
+      onPointerDown={setTapOrigin}
       style={cardStyle}
     >
       <span className="pokemon-sprite-frame">
@@ -84,6 +94,7 @@ const PokemonCard = React.memo(function PokemonCard({
           alt={pokemon.name}
           className="pokemon-image"
           decoding="async"
+          loading={imageLoading}
           onError={(event) => {
             event.currentTarget.onerror = null;
             event.currentTarget.src = pokemonSpriteUrl(pokemon.id, isShiny);

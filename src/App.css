@@ -25,7 +25,7 @@
 }
 
 .App::before {
-  animation: ambient-background-drift 42s ease-in-out infinite;
+  animation: ambient-background-drift 48s ease-in-out infinite;
   background:
     radial-gradient(circle at 18% 22%, rgba(99, 144, 240, 0.96), transparent 36%),
     radial-gradient(circle at 82% 18%, rgba(169, 143, 243, 0.88), transparent 40%),
@@ -36,7 +36,7 @@
   inset: -18%;
   pointer-events: none;
   position: fixed;
-  transform: translate3d(-2.5%, -1.5%, 0) scale(1.08);
+  transform: translate3d(-4%, -2.5%, 0) scale(1.1);
   will-change: transform;
   z-index: 0;
 }
@@ -83,15 +83,13 @@ button {
 }
 
 @keyframes ambient-background-drift {
-  0%, 100% { transform: translate3d(-2.5%, -1.5%, 0) scale(1.08); }
-  50% { transform: translate3d(2.5%, 1.5%, 0) scale(1.12); }
+  0%, 100% { transform: translate3d(-4%, -2.5%, 0) scale(1.1); }
+  50% { transform: translate3d(4%, 2.5%, 0) scale(1.14); }
 }
 
 @media (max-width: 1000px) {
   .App::before {
-    animation: none;
-    transform: scale(1.08);
-    will-change: auto;
+    animation-duration: 60s;
   }
 }
 

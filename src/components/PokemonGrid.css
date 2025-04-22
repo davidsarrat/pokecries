@@ -7,7 +7,7 @@
   justify-content: center;
   width: var(--balanced-grid-width);
   max-width: 100%;
-  max-width: min(1200px, 100%);
+  max-width: min(1440px, 100%);
   margin: 0 auto;
   overflow: visible;
   padding: 1rem;
@@ -66,13 +66,6 @@
   }
 }
 
-@media (min-width: 1300px) {
-  .pokemon-grid {
-    gap: 1rem;
-    width: var(--balanced-grid-width-wide);
-  }
-}
-
 @media (max-width: 767px) {
   .pokemon-grid {
     gap: 0.5rem;
@@ -92,5 +85,15 @@
 
   .pokemon-grid[data-count="3"] .pokemon-card:last-child {
     width: 96px;
+  }
+}
+
+@media (min-width: 350px) and (max-width: 767px) {
+  .pokemon-grid[data-compact-tail="split-four"] .pokemon-card:nth-last-child(4) {
+    margin-left: 26px;
+  }
+
+  .pokemon-grid[data-compact-tail="split-four"] .pokemon-card:nth-last-child(3) {
+    margin-right: 26px;
   }
 }

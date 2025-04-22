@@ -1,5 +1,7 @@
 .pokemon-card {
   --tap-accent: rgba(255, 255, 255, 0.68);
+  --tap-x: 50%;
+  --tap-y: 50%;
   position: relative;
   width: 100%;
   height: 142px;
@@ -30,11 +32,11 @@
   border-radius: 50%;
   content: '';
   height: 150%;
-  left: 50%;
+  left: var(--tap-x);
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  top: 50%;
+  top: var(--tap-y);
   transform: translate(-50%, -50%) scale(0.08);
   width: 150%;
   z-index: 0;
