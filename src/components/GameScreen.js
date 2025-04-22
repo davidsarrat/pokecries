@@ -19,7 +19,8 @@ function GameScreen({
   keepCryOnError,
   hardcoreMode,
   limitedQuestions, 
-  numberOfQuestions 
+  numberOfQuestions,
+  setSelectedGenerations
 }) {
   const [pokemonList, setPokemonList] = useState([]);
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
@@ -53,6 +54,8 @@ function GameScreen({
   });
   const updateInProgress = useRef(false);
   const [isGameReady, setIsGameReady] = useState(true);
+  const isAudioPlaying = useRef(false);
+  const didInitialize = useRef(false);
 
   const memoizedPokemonList = useMemo(() => pokemonList, [pokemonList]);
 
@@ -103,19 +106,43 @@ function GameScreen({
   }, [gameState.currentPokemon]);
 
   const playCurrentCry = useCallback((pokemon = gameState.currentPokemon, isAutoplay = false) => {
-    if (pokemon && !isGameFinished) {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current = null;
+    const pokemonToPlay = pokemon || gameState.currentPokemon;
+    
+    if (!pokemonToPlay || isGameFinished) return;
+    
+    console.log("Playing cry for:", pokemonToPlay.name, "isPlaying:", isPlaying, "isAudioPlaying:", isAudioPlaying.current);
+    
+    if (audioRef.current) {
+      console.log("Stopping existing audio");
+      audioRef.current.pause();
+      audioRef.current.src = '';
+      audioRef.current = null;
+    }
+    
+    if (isAudioPlaying.current) {
+      console.log("Already playing audio, clearing flags first");
+    }
+    
+    isAudioPlaying.current = false;
+    setIsPlaying(false);
+    
+    const playAudio = () => {
+      isAudioPlaying.current = true;
+      setIsPlaying(true);
+      if (isAutoplay) {
+        setIsAutoPlaying(true);
       }
       
-      const audio = new Audio(`${process.env.PUBLIC_URL}/media/cries/${pokemon.id}.mp3`);
+      const audioPath = `${process.env.PUBLIC_URL}/media/cries/${pokemonToPlay.id}.mp3`;
+      console.log("Playing audio:", audioPath);
+      
+      const audio = new Audio(audioPath);
       audioRef.current = audio;
-      setIsPlaying(true);
       
       const handleEnded = () => {
+        console.log("Audio ended");
         setIsPlaying(false);
+        isAudioPlaying.current = false;
         if (isAutoplay) {
           setIsAutoPlaying(false);
         }
@@ -125,20 +152,20 @@ function GameScreen({
       
       audio.addEventListener('ended', handleEnded);
       
-      audio.play()
-        .catch(error => {
-          if (error.name !== 'AbortError') {
-            console.error('Error playing audio:', error);
-          }
-          setIsPlaying(false);
-          if (isAutoplay) {
-            setIsAutoPlaying(false);
-          }
-          audio.removeEventListener('ended', handleEnded);
-          audio.src = '';
-        });
-    }
-  }, [gameState.currentPokemon, isGameFinished]);
+      return audio.play().catch(error => {
+        console.error('Error playing audio:', error);
+        setIsPlaying(false);
+        isAudioPlaying.current = false;
+        if (isAutoplay) {
+          setIsAutoPlaying(false);
+        }
+        audio.removeEventListener('ended', handleEnded);
+        audio.src = '';
+      });
+    };
+    
+    setTimeout(playAudio, 50);
+  }, [gameState.currentPokemon, isGameFinished, isPlaying]);
 
   const getRandomPokemon = useCallback(() => {
     if (selectedGameMode === 'dontRepeatPokemon') {
@@ -190,46 +217,93 @@ function GameScreen({
   const initializeGame = useCallback(() => {
     if (isGameInitialized) return;
 
+    console.log("Initializing game");
+    
+    setIsGameInitialized(true);
+    
     const selectedPokemon = selectedGenerations.flatMap(genKey => {
       return pokemonData[genKey] || [];
     });
+    
     setPokemonList(selectedPokemon);
+    
+    if (selectedPokemon.length === 0) {
+      console.error("No Pokémon selected, but game initialized with generations:", selectedGenerations);
+      return;
+    }
+
+    setIsGameReady(true);
 
     if (selectedGameMode === 'dontRepeatPokemon') {
       setAvailablePokemonIndices([...Array(selectedPokemon.length).keys()]);
     }
 
-    const shuffled = shuffleArray([...selectedPokemon]);
-    setShuffledPokemonList(shuffled);
+    let audioTriggered = false;
 
-    if (shuffled.length > 0) {
-      const firstPokemon = shuffled[0];
+    requestAnimationFrame(() => {
+      const shuffled = shuffleArray([...selectedPokemon]);
+      setShuffledPokemonList(shuffled);
 
-      if (selectedGameMode === 'dontRepeatPokemon') {
-        const indexToRemove = selectedPokemon.findIndex(p => p.id === firstPokemon.id);
-        setAvailablePokemonIndices(prev => prev.filter(index => index !== indexToRemove));
+      if (shuffled.length > 0 && !audioTriggered) {
+        const firstPokemon = shuffled[0];
+
+        if (selectedGameMode === 'dontRepeatPokemon') {
+          const indexToRemove = selectedPokemon.findIndex(p => p.id === firstPokemon.id);
+          setAvailablePokemonIndices(prev => prev.filter(index => index !== indexToRemove));
+        }
+
+        const initialVisiblePokemon = selectVisiblePokemon(selectedPokemon, firstPokemon);
+
+        setGameState({
+          currentPokemon: firstPokemon,
+          visiblePokemon: initialVisiblePokemon,
+          progressCount: 1,
+          correctCount: 0,
+          incorrectCount: 0,
+        });
+
+        setFilteredPokemonList(initialVisiblePokemon);
+        
+        if (audioRef.current) {
+          audioRef.current.pause();
+          audioRef.current.src = '';
+          audioRef.current = null;
+        }
+        isAudioPlaying.current = false;
+        
+        audioTriggered = true;
+        console.log("Playing first Pokémon cry:", firstPokemon.name);
+        
+        setTimeout(() => {
+          if (!isGameFinished) {
+            setIsAutoPlaying(true);
+            playCurrentCry(firstPokemon, true);
+          }
+        }, 100);
       }
-
-      const initialVisiblePokemon = selectVisiblePokemon(selectedPokemon, firstPokemon);
-
-      setGameState({
-        currentPokemon: firstPokemon,
-        visiblePokemon: initialVisiblePokemon,
-        progressCount: 1,
-        correctCount: 0,
-        incorrectCount: 0,
-      });
-
-      setFilteredPokemonList(initialVisiblePokemon);
-    }
-
-    setIsGameInitialized(true);
-    setIsGameReady(true);
-  }, [selectedGenerations, selectedGameMode, selectVisiblePokemon]);
+    });
+  }, [selectedGenerations, selectedGameMode, selectVisiblePokemon, playCurrentCry, isGameFinished]);
 
   useEffect(() => {
-    initializeGame();
-  }, [initializeGame]);
+    if (!didInitialize.current) {
+      console.log("Mounting component, starting game initialization");
+      console.log("Selected generations on mount:", selectedGenerations);
+      
+      if (!selectedGenerations || selectedGenerations.length === 0) {
+        console.error("No generations selected! Using gen1 as fallback");
+        const generationsToUse = ['gen1'];
+        if (typeof setSelectedGenerations === 'function') {
+          setSelectedGenerations(generationsToUse);
+        }
+      }
+      
+      // Marcar como inicializado
+      didInitialize.current = true;
+      
+      // Iniciar el juego después de asegurar generaciones
+      initializeGame();
+    }
+  }, []);
 
   const updateVisiblePokemon = useCallback((nextPokemon) => {
     if (updateInProgress.current) return;
@@ -276,12 +350,24 @@ function GameScreen({
     const nextPokemon = getRandomPokemon();
     if (nextPokemon) {
       updateVisiblePokemon(nextPokemon);
+      
       setTimeout(() => {
+        if (isAudioPlaying.current) {
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.src = '';
+            audioRef.current = null;
+          }
+          isAudioPlaying.current = false;
+        }
+        
         setIsAutoPlaying(true);
         playCurrentCry(nextPokemon, true);
-      }, 0);
+      }, 100);
     }
-  }, [isGameInitialized, limitedQuestions, gameState.progressCount, numberOfQuestions, selectedGameMode, pokemonList.length, getRandomPokemon, playCurrentCry, endGame, updateVisiblePokemon]);
+  }, [isGameInitialized, limitedQuestions, gameState.progressCount, numberOfQuestions, 
+      selectedGameMode, pokemonList.length, getRandomPokemon, playCurrentCry, 
+      endGame, updateVisiblePokemon]);
 
   const handlePokemonClick = useCallback((clickedPokemon) => {
     if (!isGameInitialized || updateInProgress.current || isGameFinished) return;
@@ -296,7 +382,6 @@ function GameScreen({
 
     setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
     
-    // Clear animation after 500ms to prevent memory buildup
     const animationTimer = setTimeout(() => {
       setAnimatingCards(new Map());
     }, 500);
@@ -307,11 +392,9 @@ function GameScreen({
         setTimeLeftMs(prevTime => prevTime + gainTimeMs);
         setTimeGained(gainTimeMs);
         
-        // Clear gain time indicator after display
         const gainTimeTimer = setTimeout(() => setTimeGained(0), 500);
       }
       
-      // Clear any existing toasts before showing new ones
       toast.dismiss();
       
       showToast(
@@ -345,7 +428,6 @@ function GameScreen({
           />
         </div>;
 
-      // Clear any existing toasts before showing new ones
       toast.dismiss();
       
       showToast(toastContent, 'error');
@@ -370,7 +452,6 @@ function GameScreen({
         
         setTimeLost(loseTimeMs);
         
-        // Clear lose time indicator after display
         const loseTimeTimer = setTimeout(() => setTimeLost(0), 500);
         
         if (wouldEndGame) {
@@ -382,7 +463,18 @@ function GameScreen({
         resetSearch();
         moveToNextPokemon();
       } else if (!isGameFinished) { 
-        playCurrentCry();
+        if (gameState.currentPokemon) {
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.src = '';
+            audioRef.current = null;
+          }
+          isAudioPlaying.current = false;
+          
+          setTimeout(() => {
+            playCurrentCry(gameState.currentPokemon, false);
+          }, 50);
+        }
       }
     }
   }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, timedRun, timedRunSettings, timeLeftMs, endGame, hardcoreMode, isGameFinished, showToast]);
@@ -504,7 +596,7 @@ function GameScreen({
 
   useEffect(() => {
     if (isGameInitialized && gameState.currentPokemon) {
-      playCurrentCry();
+      console.log("EFFECT SKIP - Evitando reproducción duplicada en el useEffect");
     }
   }, [isGameInitialized, gameState.currentPokemon, playCurrentCry]);
 
@@ -575,19 +667,24 @@ function GameScreen({
     };
   }, []);
 
-  // Add this effect to preload audio for better performance
   useEffect(() => {
-    // Cleanup function to ensure we don't leave any memory leaks
     const cleanupTimers = [];
     
     return () => {
-      // Clean up any timers that might be running
       cleanupTimers.forEach(timer => clearTimeout(timer));
     };
   }, []);
 
   if (!isGameReady) {
     return <div className="game-container"></div>;
+  }
+
+  if (pokemonList.length === 0) {
+    return (
+      <div className="game-container">
+        <p className="error-message">Cargando datos de Pokémon... Si este mensaje persiste, vuelve a la pantalla inicial.</p>
+      </div>
+    );
   }
 
   if (gameOver) {
@@ -615,19 +712,27 @@ function GameScreen({
     );
   }
 
-  if (pokemonList.length === 0) {
-    return (
-      <div className="game-container">
-        <p className="error-message">No Pokémon selected. Please select at least one generation.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="game-container" style={{ paddingTop: `${navbarHeight}px` }}>
       <Navbar 
         ref={navbarRef}
-        onPlayCry={() => playCurrentCry()}
+        onPlayCry={() => {
+          console.log("Play cry button clicked");
+          if (isAudioPlaying.current || isPlaying) {
+            if (audioRef.current) {
+              audioRef.current.pause();
+              audioRef.current.src = '';
+              audioRef.current = null;
+            }
+            isAudioPlaying.current = false;
+            setIsPlaying(false);
+            setTimeout(() => {
+              playCurrentCry(gameState.currentPokemon, false);
+            }, 50);
+          } else {
+            playCurrentCry(gameState.currentPokemon, false);
+          }
+        }}
         correctCount={gameState.correctCount}
         incorrectCount={gameState.incorrectCount}
         onSearch={handleSearch}

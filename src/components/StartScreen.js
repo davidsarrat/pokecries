@@ -120,9 +120,10 @@ function StartScreen() {
     }
     setError('');
     scrollToTop();
-    setTimeout(() => {
-      setGameStarted(true);
-    }, 100);
+    const generationsToUse = selectedGenerations.length > 0 ? selectedGenerations : ['gen1'];
+    console.log("Starting game with generations:", generationsToUse);
+    setSelectedGenerations(generationsToUse);
+    setGameStarted(true);
   };
 
   const handleExitGame = () => {

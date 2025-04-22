@@ -66,11 +66,6 @@ function App() {
     };
   }, [generateColorSequence, generateKeyframes, injectKeyframes]);
 
-  useEffect(() => {
-    const img = new Image();
-    img.src = `${process.env.PUBLIC_URL}/media/images/ludicolo.gif`;
-  }, []);
-
   return (
     <div className="App">
       <BackgroundTransition />
