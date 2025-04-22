@@ -527,7 +527,7 @@ function GameScreen({
         ...upcomingAssetUrls,
         animatedPokemonSpriteUrl('272', true),
         `${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`,
-      ], undefined, { priority: 10 }).then(reportBackgroundFailures);
+      ], undefined, { priority: 50 }).then(reportBackgroundFailures);
     });
   }, [isGameInitialized, selectedGenerations, selectedGameMode, limitedQuestions, numberOfQuestions, limitedAnswers, numberOfAnswers, keepCryOnError]);
 
