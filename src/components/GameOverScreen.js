@@ -19,6 +19,11 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
   const transitionTimerRef = useRef(null);
   const [isLeaving, setIsLeaving] = useState(false);
   const [lastToastPhase, setLastToastPhase] = useState(null);
+  const uniqueFailedPokemon = useMemo(
+    () => Array.from(new Map(failedPokemon.map(pokemon => [pokemon.id, pokemon])).values()),
+    [failedPokemon]
+  );
+  const hasDenseResults = !shouldAnimatePokemon(uniqueFailedPokemon.length);
 
   useEffect(() => {
     scrollToTop();
@@ -57,9 +62,11 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
 
   const handleBackToMenu = () => {
     if (isLeaving) return;
-    scrollToTop();
     setIsLeaving(true);
-    transitionTimerRef.current = setTimeout(onPlayAgain, 240);
+    transitionTimerRef.current = setTimeout(() => {
+      onPlayAgain();
+      scrollToTop();
+    }, hasDenseResults ? 0 : 240);
   };
 
   const playPokemonCry = useCallback((pokemon) => {
@@ -160,10 +167,6 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
   const minutes = Math.floor(totalTimeSeconds / 60);
   const seconds = (totalTimeSeconds % 60).toFixed(4);
 
-  const uniqueFailedPokemon = useMemo(
-    () => Array.from(new Map(failedPokemon.map(pokemon => [pokemon.id, pokemon])).values()),
-    [failedPokemon]
-  );
   const uniqueFailedPokemonIds = useMemo(
     () => uniqueFailedPokemon.map(pokemon => pokemon.id),
     [uniqueFailedPokemon]
@@ -228,7 +231,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
           </div>
         </div>
       )}
-      <div className={`game-over-container ${isLeaving ? 'is-leaving' : ''}`} style={gameOverStyle}>
+      <div className={`game-over-container ${hasDenseResults ? 'is-dense-results' : ''} ${isLeaving ? 'is-leaving' : ''}`.trim()} style={gameOverStyle}>
         <h1 className="game-over-title" data-text="Game Over!">Game Over!</h1>
         <div className="stats-container">
           <div className="stat-item">

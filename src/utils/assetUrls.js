@@ -100,10 +100,7 @@ const trimAudioCache = () => {
   }
 };
 
-const discardAudioAsset = (url) => {
-  const audio = audioAssets.get(url);
-  if (!audio) return;
-
+const releaseAudioElement = (audio) => {
   audio.onended = null;
   audio.onerror = null;
   audio.onplaying = null;
@@ -112,6 +109,29 @@ const discardAudioAsset = (url) => {
   audio.pause();
   audio.removeAttribute('src');
   audio.load();
+};
+
+const deferAudioRelease = (audioElements) => {
+  const scheduleBatch = () => {
+    if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(releaseBatch, { timeout: 1000 });
+    } else {
+      setTimeout(releaseBatch, 32);
+    }
+  };
+  const releaseBatch = () => {
+    audioElements.splice(0, 4).forEach(releaseAudioElement);
+    if (audioElements.length > 0) scheduleBatch();
+  };
+
+  scheduleBatch();
+};
+
+const discardAudioAsset = (url) => {
+  const audio = audioAssets.get(url);
+  if (!audio) return;
+
+  releaseAudioElement(audio);
   audioAssets.delete(url);
   preloadRequests.delete(url);
 };
@@ -238,21 +258,22 @@ const runQueuedPreload = (load, priority) => new Promise((resolve, reject) => {
   startQueuedPreloads();
 });
 
-export const resetRuntimeAssetCache = () => {
+export const resetRuntimeAssetCache = ({ deferAudio = false } = {}) => {
   const cancelledPreloads = preloadQueue.splice(0);
   cancelledPreloads.forEach(entry => {
     entry.reject(createPreloadCancelledError());
   });
 
+  const disposableAudio = [];
   audioAssets.forEach((audio, url) => {
     if (pendingPreloads.has(url)) return;
-    audio.onended = null;
-    audio.pause();
-    audio.removeAttribute('src');
-    audio.load();
+    disposableAudio.push(audio);
   });
   audioAssets.clear();
   preloadRequests.clear();
+
+  if (deferAudio && disposableAudio.length > 0) deferAudioRelease(disposableAudio);
+  else disposableAudio.forEach(releaseAudioElement);
 };
 
 const preloadUrl = (url, priority) => {

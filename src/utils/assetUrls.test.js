@@ -239,6 +239,39 @@ test('releases retained runtime assets between games', async () => {
   }
 });
 
+test('can defer bulk audio teardown until after the UI transition', () => {
+  jest.useFakeTimers();
+  const originalAudio = global.Audio;
+  const audio = {
+    error: null,
+    load: jest.fn(),
+    networkState: 1,
+    onended: null,
+    onerror: null,
+    onplaying: null,
+    onstalled: null,
+    onwaiting: null,
+    pause: jest.fn(),
+    readyState: 4,
+    removeAttribute: jest.fn(),
+  };
+  global.Audio = jest.fn(() => audio);
+
+  try {
+    getPokemonCryAudio('25');
+    resetRuntimeAssetCache({ deferAudio: true });
+
+    expect(audio.pause).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(32);
+    expect(audio.pause).toHaveBeenCalledTimes(1);
+    expect(audio.removeAttribute).toHaveBeenCalledWith('src');
+  } finally {
+    resetRuntimeAssetCache();
+    global.Audio = originalAudio;
+    jest.useRealTimers();
+  }
+});
+
 test('replaces a stuck cry audio element when playback requests a reload', () => {
   const originalAudio = global.Audio;
   const audioInstances = [];

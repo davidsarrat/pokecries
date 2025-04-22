@@ -1103,11 +1103,7 @@ function GameScreen({
         }}
         failedPokemon={failedPokemon}
         onPlayAgain={() => {
-          resetRuntimeAssetCache();
-          setGameState(prevState => ({
-            ...prevState,
-            visiblePokemon: pokemonList,
-          }));
+          resetRuntimeAssetCache({ deferAudio: true });
           onExit();
         }}
         selectedGameMode={selectedGameMode}

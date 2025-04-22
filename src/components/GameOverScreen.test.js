@@ -161,3 +161,37 @@ test('starts a selected result cry and immediately cuts the previous one', async
     jest.useRealTimers();
   }
 });
+
+test('skips the expensive exit animation for a dense result list', () => {
+  jest.useFakeTimers();
+  preloadAssets.mockResolvedValue([]);
+  const onPlayAgain = jest.fn();
+
+  try {
+    const { container } = render(
+      <GameOverScreen
+        stats={{ correctCount: 0, incorrectCount: 11, progressCount: 11 }}
+        failedPokemon={Array.from({ length: 11 }, (_, index) => ({
+          id: index + 1,
+          name: `Pokémon ${index + 1}`,
+        }))}
+        onPlayAgain={onPlayAgain}
+        startTime={0}
+        endTime={1000}
+      />
+    );
+
+    fireEvent.click(container.querySelector('.play-again-button'));
+    expect(container.querySelector('.game-over-container')).toHaveClass(
+      'is-dense-results',
+      'is-leaving'
+    );
+    expect(onPlayAgain).not.toHaveBeenCalled();
+
+    act(() => jest.advanceTimersByTime(0));
+    expect(onPlayAgain).toHaveBeenCalledTimes(1);
+  } finally {
+    act(() => jest.runOnlyPendingTimers());
+    jest.useRealTimers();
+  }
+});
