@@ -69,6 +69,59 @@
   94.08% { background-color: #B7B7CE; }
 }
 
+.legal-notice {
+  bottom: 0.75rem;
+  position: fixed;
+  right: 0.75rem;
+  text-align: left;
+  z-index: 2000;
+}
+
+.legal-notice summary {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  color: #334155;
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0.45rem 0.75rem;
+}
+
+.legal-notice-content {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  bottom: 2.5rem;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.18);
+  color: #334155;
+  font-size: 0.75rem;
+  max-height: min(70vh, 32rem);
+  overflow: auto;
+  padding: 1rem;
+  position: absolute;
+  right: 0;
+  user-select: text;
+  width: min(28rem, calc(100vw - 1.5rem));
+}
+
+.legal-notice-content p {
+  margin: 0 0 0.75rem;
+}
+
+.legal-notice-content p:last-child {
+  margin-bottom: 0;
+}
+
+.legal-notice-content a {
+  color: #0f766e;
+}
+
+@media (max-width: 600px) {
+  .legal-summary-extra {
+    display: none;
+  }
+}
+
 img {
   user-select: none;
   -webkit-user-select: none;

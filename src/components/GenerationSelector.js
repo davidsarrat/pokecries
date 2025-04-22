@@ -1,12 +1,13 @@
 import React from 'react';
 import './GenerationSelector.css';
+import { generationIconUrl } from '../utils/assetUrls';
 
 const generations = [
-  { name: 'Gen I', key: 'gen1', icon: 'gen1icon.gif' },
-  { name: 'Gen II', key: 'gen2', icon: 'gen2icon.gif' },
-  { name: 'Gen III', key: 'gen3', icon: 'gen3icon.gif' },
-  { name: 'Gen IV', key: 'gen4', icon: 'gen4icon.gif' },
-  { name: 'Gen V', key: 'gen5', icon: 'gen5icon.gif' }
+  { name: 'Gen I', key: 'gen1', iconPokemonId: '25' },
+  { name: 'Gen II', key: 'gen2', iconPokemonId: '251' },
+  { name: 'Gen III', key: 'gen3', iconPokemonId: '384' },
+  { name: 'Gen IV', key: 'gen4', iconPokemonId: '447' },
+  { name: 'Gen V', key: 'gen5', iconPokemonId: '571' }
 ];
 
 function GenerationSelector({ selectedGenerations, setSelectedGenerations }) {
@@ -28,7 +29,7 @@ function GenerationSelector({ selectedGenerations, setSelectedGenerations }) {
             className={`btn btn-outline-primary ${selectedGenerations.includes(gen.key) ? 'active' : ''}`}
             onClick={() => toggleGeneration(gen.key)}
           >
-            <img src={`${process.env.PUBLIC_URL}/media/icons/${gen.icon}`} alt={`${gen.name} icon`} className="gen-icon" />
+            <img src={generationIconUrl(gen.iconPokemonId)} alt={`${gen.name} icon`} className="gen-icon" />
             <span>{gen.name}</span>
           </button>
         ))}

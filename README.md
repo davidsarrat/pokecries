@@ -4,7 +4,7 @@ PokéCries is an interactive web game that challenges players to identify Pokém
 
 ## Play now!
 
-Visit [davidsarratgonzalez.github.io/pokecries](https://davidsarratgonzalez.github.io/pokecries) to start playing!
+Visit [davidsarrat.github.io/pokecries](https://davidsarrat.github.io/pokecries) to start playing!
 
 ## Game mode customization
 
@@ -53,10 +53,10 @@ Enjoy PokéCries on any device - desktop, tablet, or mobile. The responsive desi
 
 ## Disclaimer
 
-PokéCries is a fan-made project and is not affiliated, associated, authorized, endorsed by, or in any way officially connected with The Pokémon Company, Nintendo, Game Freak, or Creatures. All Pokémon characters, names, images, and related materials are trademarks and copyrights of their respective owners.
+PokéCries is an unofficial, non-commercial fan project. It is not affiliated with, sponsored, endorsed, or approved by Nintendo, Creatures Inc., GAME FREAK inc., The Pokémon Company, or The Pokémon Company International.
 
-This project does not generate any revenue and is created solely for educational and entertainment purposes. The use of Pokémon and related materials is intended for non-commercial, educational use only. No copyright infringement is intended.
+Pokémon names, characters, sprites, audio, artwork, and other third-party material remain subject to the rights of their respective owners. They are not covered by this repository's MIT License. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for sources and additional notices.
 
 ## License
 
-PokéCries is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+Original source code authored for PokéCries is licensed under the MIT License. See [LICENSE](LICENSE). No rights to third-party intellectual property are granted by that license.

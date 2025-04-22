@@ -5,6 +5,7 @@ import './App.css';
 import StartScreen from './components/StartScreen';
 import BackgroundTransition from './components/BackgroundTransition';
 import GradientOverlay from './components/GradientOverlay';
+import LegalNotice from './components/LegalNotice';
 import pokemonTypeColors from './data/pokemonTypeColors';
 
 function App() {
@@ -71,6 +72,7 @@ function App() {
       <BackgroundTransition />
       <GradientOverlay />
       <StartScreen />
+      <LegalNotice />
     </div>
   );
 }

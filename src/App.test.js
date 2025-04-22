@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('identifies the project as unofficial and links its legal notice', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+  expect(screen.getByText(/unofficial fan game/i)).toBeInTheDocument();
+  expect(screen.getByText(/legal/i)).toBeInTheDocument();
 });

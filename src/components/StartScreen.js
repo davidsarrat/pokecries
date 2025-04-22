@@ -7,6 +7,7 @@ import GameScreen from './GameScreen';
 import { scrollToTop } from '../utils/scrollUtils';
 import LimitedQuestionsSelector from './LimitedQuestionsSelector';
 import pokemonData from '../data/pokemon.json';
+import { animatedPokemonSpriteUrl } from '../utils/assetUrls';
 
 const LOCAL_STORAGE_KEY = 'pokecries_start_screen_config';
 
@@ -131,7 +132,9 @@ function StartScreen() {
   };
 
   const startButtonClass = hardcoreMode ? 'start-button hardcore' : 'start-button';
-  const gifSrc = hardcoreMode ? `${process.env.PUBLIC_URL}/media/images/darkrai.gif` : `${process.env.PUBLIC_URL}/media/images/chatot.gif`;
+  const gifSrc = hardcoreMode
+    ? animatedPokemonSpriteUrl('491')
+    : animatedPokemonSpriteUrl('441');
   const gifClass = hardcoreMode ? "darkrai-gif" : "chatot-gif";
 
   const handleTimeSettingChange = (field, value) => {
@@ -165,6 +168,7 @@ function StartScreen() {
   return (
     <div className="start-screen">
       <h1 className="title">PokéCries</h1>
+      <p className="fan-project-label">Unofficial fan game</p>
       <p className="subtitle">Can you guess the Pokémon by its cry?</p>
       <GenerationSelector 
         selectedGenerations={selectedGenerations}
@@ -302,7 +306,7 @@ function StartScreen() {
       </button>
       {error && <p className="error-message">{error}</p>}
       <footer className="start-screen-footer">
-        <a href="https://davidsarratgonzalez.github.io" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/davidsarrat" target="_blank" rel="noopener noreferrer">
           Made with ❤️ by <strong>David Sarrat González</strong>
         </a>
       </footer>

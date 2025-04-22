@@ -1,8 +1,3 @@
-@font-face {
-  font-family: 'Pocket Monk';
-  src: url('../../public/fonts/pocket-monk.otf') format('opentype');
-}
-
 .start-screen {
   position: relative;
   background-color: rgba(255, 255, 255);
@@ -18,43 +13,27 @@
 }
 
 .title {
-  font-size: 4.8rem;
+  font-size: 3.2rem;
   font-weight: 900;
-  color: #FFCB05;
-  margin-bottom: 1rem;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
   text-align: center;
   width: 100%;
   display: block;
-  font-family: 'Pocket Monk', sans-serif;
+  font-family: 'Press Start 2P', monospace;
   position: relative;
-  letter-spacing: 2px;
-  -webkit-text-stroke: 2px #3B4CCA;
-  text-stroke: 2px #3B4CCA;
-  line-height: 1.2;
+  letter-spacing: -2px;
+  line-height: 1.35;
   white-space: nowrap;
 }
 
-.title::before,
-.title::after {
-  content: attr(data-text);
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-.title::before {
-  -webkit-text-stroke: 10px #3B4CCA;
-  text-stroke: 10px #3B4CCA;
-  z-index: -2;
-}
-
-.title::after {
-  -webkit-text-stroke: 5px #1E3A8A;
-  text-stroke: 5px #1E3A8A;
-  z-index: -1;
+.fan-project-label {
+  color: #0f766e;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.04rem;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
 }
 
 .subtitle {
@@ -117,19 +96,7 @@
 
 @media (max-width: 768px) {
   .title {
-    font-size: 4rem;
-    -webkit-text-stroke: 2px #3B4CCA;
-    text-stroke: 2px #3B4CCA;
-  }
-
-  .title::before {
-    -webkit-text-stroke: 8px #3B4CCA;
-    text-stroke: 8px #3B4CCA;
-  }
-
-  .title::after {
-    -webkit-text-stroke: 4px #1E3A8A;
-    text-stroke: 4px #1E3A8A;
+    font-size: 2.7rem;
   }
 }
 
@@ -143,26 +110,14 @@
   }
 
   .title {
-    font-size: 3.5rem;
-    -webkit-text-stroke: 2px #3B4CCA;
-    text-stroke: 2px #3B4CCA;
+    font-size: 2.2rem;
     white-space: normal;
-  }
-
-  .title::before {
-    -webkit-text-stroke: 7px #3B4CCA;
-    text-stroke: 7px #3B4CCA;
-  }
-
-  .title::after {
-    -webkit-text-stroke: 3px #1E3A8A;
-    text-stroke: 3px #1E3A8A;
   }
 }
 
 @media (max-width: 400px) {
   .title {
-    font-size: 2.8rem;
+    font-size: 1.8rem;
     white-space: normal;
   }
 }

@@ -7,6 +7,11 @@ import 'react-toastify/dist/ReactToastify.css';
 import './GameScreen.css';
 import pokemonData from '../data/pokemon.json';
 import { scrollToTop } from '../utils/scrollUtils';
+import {
+  animatedPokemonSpriteUrl,
+  pokemonCryUrl,
+  pokemonSpriteUrl,
+} from '../utils/assetUrls';
 
 const LoadingScreen = () => (
   <div className="loading-container">
@@ -155,7 +160,7 @@ function GameScreen({
         setIsAutoPlaying(true);
       }
       
-      const audioPath = `${process.env.PUBLIC_URL}/media/cries/${pokemonToPlay.id}.mp3`;
+      const audioPath = pokemonCryUrl(pokemonToPlay.id);
       console.log("Playing audio:", audioPath);
       
       const audio = new Audio(audioPath);
@@ -299,7 +304,7 @@ function GameScreen({
         
         setIsAutoPlaying(true);
         
-        const audio = new Audio(`${process.env.PUBLIC_URL}/media/cries/${firstPokemon.id}.mp3`);
+        const audio = new Audio(pokemonCryUrl(firstPokemon.id));
         
         audio.addEventListener('canplaythrough', () => {
           playCurrentCry(firstPokemon, true);
@@ -538,7 +543,7 @@ function GameScreen({
       showToast(
         <div>
           <img 
-            src={`${process.env.PUBLIC_URL}/media/sprites/${gameState.currentPokemon.id}.png`} 
+            src={pokemonSpriteUrl(gameState.currentPokemon.id)}
             alt={gameState.currentPokemon.name} 
             style={{width: '100%', height: '100%', objectFit: 'contain'}} 
           />
@@ -552,15 +557,16 @@ function GameScreen({
 
       const toastContent = keepCryOnError ?
         <div>
-          <img 
-            src={`${process.env.PUBLIC_URL}/media/sprites/0.png`} 
-            alt="Unknown Pokémon" 
-            style={{width: '100%', height: '100%', objectFit: 'contain'}} 
-          />
+          <div
+            aria-label="Unknown Pokémon"
+            style={{fontSize: '4rem', fontWeight: 'bold', lineHeight: 1}}
+          >
+            ?
+          </div>
         </div> :
         <div>
           <img 
-            src={`${process.env.PUBLIC_URL}/media/sprites/${gameState.currentPokemon.id}.png`} 
+            src={pokemonSpriteUrl(gameState.currentPokemon.id)}
             alt={gameState.currentPokemon.name}
             style={{width: '100%', height: '100%', objectFit: 'contain'}} 
           />
@@ -659,7 +665,7 @@ function GameScreen({
       toast(
         <div>
           <img 
-            src={`${process.env.PUBLIC_URL}/media/images/ludicolo.gif`}
+            src={animatedPokemonSpriteUrl('272', true)}
             alt="Shiny Ludicolo"
             style={{width: '100%', height: '100%', objectFit: 'contain'}} 
           />
@@ -951,7 +957,7 @@ function GameScreen({
       </div>
       <footer className="game-footer">
         <p className="footer-text">
-        <a href="https://davidsarratgonzalez.github.io" target="_blank" rel="noopener noreferrer">Made with ❤️ by <strong>David Sarrat González</strong></a>
+        <a href="https://github.com/davidsarrat" target="_blank" rel="noopener noreferrer">Made with ❤️ by <strong>David Sarrat González</strong></a>
         </p>
         <button className="exit-button" onClick={handleExitClick}>Exit Game</button>
       </footer>

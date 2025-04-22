@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './PokemonCard.css';
+import { pokemonSpriteUrl } from '../utils/assetUrls';
 
 const PokemonCard = React.memo(function PokemonCard({ 
   pokemon, 
@@ -34,9 +35,7 @@ const PokemonCard = React.memo(function PokemonCard({
     ${isTapping ? 'tap-animation' : ''}
   `;
   
-  const spritePath = (allShiny && !isGameOver) 
-    ? `${process.env.PUBLIC_URL}/media/sprites/shiny/${pokemon.id}.png`
-    : `${process.env.PUBLIC_URL}/media/sprites/${pokemon.id}.png`;
+  const spritePath = pokemonSpriteUrl(pokemon.id, allShiny && !isGameOver);
 
   return (
     <div 

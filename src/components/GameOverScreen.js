@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
 import { scrollToTop } from '../utils/scrollUtils';
+import { pokemonCryUrl } from '../utils/assetUrls';
 
 function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, startTime, endTime }) {
   const { correctCount, incorrectCount, progressCount } = stats;
@@ -24,7 +25,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     }
-    audioRef.current = new Audio(`${process.env.PUBLIC_URL}/media/cries/${pokemonId}.mp3`);
+    audioRef.current = new Audio(pokemonCryUrl(pokemonId));
     audioRef.current.play();
     setPlayingPokemonId(pokemonId);
     audioRef.current.addEventListener('ended', () => {
@@ -41,7 +42,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
 
   return (
     <div className="game-over-container">
-      <h1 className="game-over-title" data-text="Game Over!">Game Over!</h1>
+      <h1 className="game-over-title">Game Over!</h1>
       <div className="stats-container">
         <div className="stat-item">
           <span className="stat-label">Correct</span>
@@ -87,7 +88,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
       </button>
 
       <footer className="game-over-footer">
-        <a href="https://davidsarratgonzalez.github.io" target="_blank" rel="noopener noreferrer">
+        <a href="https://github.com/davidsarrat" target="_blank" rel="noopener noreferrer">
           Made with ❤️ by <strong>David Sarrat González</strong>
         </a>
       </footer>
