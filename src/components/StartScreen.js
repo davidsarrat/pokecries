@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import './StartScreen.css';
 import GenerationSelector from './GenerationSelector';
 import LimitedAnswersSelector from './LimitedAnswersSelector';
@@ -12,10 +12,20 @@ import { loadPokemonTypes } from '../utils/pokemonTypes';
 import {
   animatedPokemonSpriteUrl,
   generationIconUrl,
+  getPokemonCryAudio,
+  pokemonCryUrl,
   preloadAssets,
 } from '../utils/assetUrls';
 
 const LOCAL_STORAGE_KEY = 'pokecries_start_screen_config';
+const GENERATION_KEYS = ['gen1', 'gen2', 'gen3', 'gen4', 'gen5'];
+const MENU_POKEMON_IDS = ['25', '250', '384', '448', '571', '441', '491'];
+const MENU_ASSET_URLS = [
+  ...GENERATION_KEYS.map(generationIconUrl),
+  animatedPokemonSpriteUrl('441'),
+  animatedPokemonSpriteUrl('491'),
+  ...MENU_POKEMON_IDS.map(pokemonCryUrl),
+];
 
 function StartScreen() {
   const [selectedGenerations, setSelectedGenerations] = useState(['gen1']);
@@ -41,6 +51,49 @@ function StartScreen() {
   const [isLeavingForGame, setIsLeavingForGame] = useState(false);
   const [isReturningFromGame, setIsReturningFromGame] = useState(false);
   const screenTransitionTimerRef = useRef(null);
+  const menuAudioRef = useRef(null);
+  const menuAudioSequenceRef = useRef(0);
+
+  const stopMenuCry = useCallback(() => {
+    menuAudioSequenceRef.current += 1;
+    if (!menuAudioRef.current) return;
+
+    menuAudioRef.current.pause();
+    if (menuAudioRef.current.readyState > 0) menuAudioRef.current.currentTime = 0;
+    menuAudioRef.current.onended = null;
+    menuAudioRef.current = null;
+  }, []);
+
+  const playMenuCry = useCallback((pokemonId) => {
+    stopMenuCry();
+    const playbackSequence = menuAudioSequenceRef.current;
+    const audio = getPokemonCryAudio(pokemonId);
+    if (audio.readyState > 0) audio.currentTime = 0;
+    menuAudioRef.current = audio;
+
+    audio.onended = () => {
+      if (
+        menuAudioSequenceRef.current === playbackSequence
+        && menuAudioRef.current === audio
+      ) {
+        menuAudioRef.current = null;
+        audio.onended = null;
+      }
+    };
+
+    audio.play().catch(error => {
+      if (
+        menuAudioSequenceRef.current === playbackSequence
+        && menuAudioRef.current === audio
+      ) {
+        menuAudioRef.current = null;
+        audio.onended = null;
+        if (error.name !== 'AbortError') {
+          console.error('Error playing menu audio:', error);
+        }
+      }
+    });
+  }, [stopMenuCry]);
 
   useEffect(() => {
     const savedConfig = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -104,18 +157,13 @@ function StartScreen() {
       if (screenTransitionTimerRef.current) {
         clearTimeout(screenTransitionTimerRef.current);
       }
+      stopMenuCry();
     };
-  }, []);
+  }, [stopMenuCry]);
 
   useEffect(() => {
     let isMounted = true;
     const previousOverflow = document.body.style.overflow;
-    const assetUrls = [
-      ...['gen1', 'gen2', 'gen3', 'gen4', 'gen5'].map(generationIconUrl),
-      animatedPokemonSpriteUrl('441'),
-      animatedPokemonSpriteUrl('491'),
-    ];
-
     document.body.style.overflow = 'hidden';
 
     const loadAssets = async () => {
@@ -132,7 +180,7 @@ function StartScreen() {
         return {};
       });
       const [failedUrls, loadedPokemonTypes] = await Promise.all([
-        preloadAssets(assetUrls, progress => {
+        preloadAssets(MENU_ASSET_URLS, progress => {
           if (isMounted) setPreloadProgress(progress);
         }, { priority: 100 }),
         typesReady,
@@ -192,6 +240,7 @@ function StartScreen() {
       return;
     }
     setError('');
+    stopMenuCry();
     scrollToTop();
     const generationsToUse = selectedGenerations.length > 0 ? selectedGenerations : ['gen1'];
     setSelectedGenerations(generationsToUse);
@@ -204,8 +253,14 @@ function StartScreen() {
   };
 
   const handleExitGame = () => {
+    preloadAssets(MENU_ASSET_URLS, undefined, { priority: 100 });
     setIsReturningFromGame(true);
     setGameStarted(false);
+  };
+
+  const handleHardcoreModeChange = (enabled) => {
+    setHardcoreMode(enabled);
+    playMenuCry(enabled ? '491' : '441');
   };
 
   const startButtonClass = hardcoreMode ? 'start-button hardcore' : 'start-button';
@@ -269,6 +324,7 @@ function StartScreen() {
       <GenerationSelector 
         selectedGenerations={selectedGenerations}
         setSelectedGenerations={setSelectedGenerations}
+        onPokemonCry={playMenuCry}
       />
       <h2 className="settings-title">Game Rules</h2>
       <div className="dont-repeat-pokemon-checkbox">
@@ -386,7 +442,7 @@ function StartScreen() {
         keepCryOnError={keepCryOnError}
         setKeepCryOnError={setKeepCryOnError}
         hardcoreMode={hardcoreMode}
-        setHardcoreMode={setHardcoreMode}
+        setHardcoreMode={handleHardcoreModeChange}
       />
       <button 
         className={startButtonClass}

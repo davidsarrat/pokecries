@@ -23,6 +23,7 @@
   --gen-accent: #3B4CCA;
   --gen-accent-light: #7584de;
   --gen-glow: rgba(59, 76, 202, 0.22);
+  --bs-btn-focus-box-shadow: none;
   border-radius: 15px !important;
   padding: 0.55rem 0.75rem;
   font-size: 0.55rem;

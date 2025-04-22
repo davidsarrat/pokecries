@@ -3,15 +3,16 @@ import './GenerationSelector.css';
 import { generationIconUrl } from '../utils/assetUrls';
 
 const generations = [
-  { name: 'Gen I', key: 'gen1' },
-  { name: 'Gen II', key: 'gen2' },
-  { name: 'Gen III', key: 'gen3' },
-  { name: 'Gen IV', key: 'gen4' },
-  { name: 'Gen V', key: 'gen5' }
+  { name: 'Gen I', key: 'gen1', pokemonId: '25' },
+  { name: 'Gen II', key: 'gen2', pokemonId: '250' },
+  { name: 'Gen III', key: 'gen3', pokemonId: '384' },
+  { name: 'Gen IV', key: 'gen4', pokemonId: '448' },
+  { name: 'Gen V', key: 'gen5', pokemonId: '571' }
 ];
 
-function GenerationSelector({ selectedGenerations, setSelectedGenerations }) {
-  const toggleGeneration = (genKey) => {
+function GenerationSelector({ selectedGenerations, setSelectedGenerations, onPokemonCry }) {
+  const toggleGeneration = (genKey, pokemonId) => {
+    onPokemonCry(pokemonId);
     if (selectedGenerations.includes(genKey)) {
       setSelectedGenerations(selectedGenerations.filter(g => g !== genKey));
     } else {
@@ -27,7 +28,7 @@ function GenerationSelector({ selectedGenerations, setSelectedGenerations }) {
           <button
             key={gen.key}
             className={`btn btn-outline-primary ${selectedGenerations.includes(gen.key) ? 'active' : ''}`}
-            onClick={() => toggleGeneration(gen.key)}
+            onClick={() => toggleGeneration(gen.key, gen.pokemonId)}
             aria-pressed={selectedGenerations.includes(gen.key)}
           >
             <span className="gen-button-content">

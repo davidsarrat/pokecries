@@ -176,6 +176,10 @@ button {
   animation: legal-notice-reveal 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
+.legal-notice.is-closing .legal-notice-reveal {
+  animation: legal-notice-hide 300ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
 @keyframes legal-notice-reveal {
   from {
     grid-template-rows: 0fr;
@@ -186,6 +190,19 @@ button {
     grid-template-rows: 1fr;
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes legal-notice-hide {
+  from {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transform: translateY(-5px);
   }
 }
 

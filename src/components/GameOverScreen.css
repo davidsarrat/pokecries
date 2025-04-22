@@ -129,19 +129,19 @@
 }
 
 .failed-pokemon-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
+  justify-content: center;
   width: 100%;
   margin-bottom: 2rem;
-  padding: 0.75rem;
-  background: rgba(255, 255, 255, 0.34);
-  border: 1px solid rgba(255, 255, 255, 0.58);
-  border-radius: 16px;
+  padding: 0.75rem 0;
   overflow: visible;
 }
 
 .failed-pokemon-grid .pokemon-card {
+  flex: 0 1 110px;
+  width: 110px;
   transition: box-shadow 0.3s ease;
 }
 
@@ -235,8 +235,9 @@
     font-size: 1.3rem;
   }
 
-  .failed-pokemon-grid {
-    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  .failed-pokemon-grid .pokemon-card {
+    flex-basis: 96px;
+    width: 96px;
   }
 
   .failed-pokemon-title {
@@ -267,7 +268,6 @@
   }
 
   .failed-pokemon-grid {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 0.5rem;
   }
 

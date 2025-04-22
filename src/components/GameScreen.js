@@ -13,6 +13,7 @@ import {
   pokemonCryUrl,
   pokemonSpriteUrl,
   preloadAssets,
+  resetRuntimeAssetCache,
   unknownPokemonSpriteUrl,
 } from '../utils/assetUrls';
 import { createGamePlan } from '../utils/gamePlan';
@@ -22,7 +23,6 @@ const INITIAL_PLAN_SIZE = 10;
 const PLAN_REFILL_THRESHOLD = 3;
 const PRELOAD_AHEAD_ROUNDS = 3;
 const PRELOAD_AHEAD_CRIES = 10;
-const ANSWER_TOAST_ID = 'answer-feedback';
 const SHINY_PARTY_TOAST_ID = 'shiny-party';
 
 const getCriticalRoundAssetUrls = round => {
@@ -96,6 +96,7 @@ function GameScreen({
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
+  const audioPlaybackSequenceRef = useRef(0);
   const firstPokemonRef = useRef(null);
   const gamePlanRef = useRef([]);
   const gamePlanStartIndexRef = useRef(0);
@@ -103,6 +104,9 @@ function GameScreen({
   const streakTimeoutRef = useRef(null);
   const timeGainedTimeoutRef = useRef(null);
   const timeLostTimeoutRef = useRef(null);
+  const answerToastExitTimerRef = useRef(null);
+  const answerToastHideTimerRef = useRef(null);
+  const answerToastSequenceRef = useRef(0);
   const isAudioPlaying = useRef(false);
   const didInitialize = useRef(false);
   const shinyAudioRef = useRef(null);
@@ -116,6 +120,7 @@ function GameScreen({
   const [failedPokemon, setFailedPokemon] = useState([]);
   const [gameOver, setGameOver] = useState(false);
   const [lastAnswerToast, setLastAnswerToast] = useState(null);
+  const [answerToast, setAnswerToast] = useState(null);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [timeLeftMs, setTimeLeftMs] = useState((timedRunSettings.minutes * 60 + timedRunSettings.seconds) * 1000);
   const [timeGained, setTimeGained] = useState(0);
@@ -154,24 +159,32 @@ function GameScreen({
     }
   }, [pokemonList]);
 
-  const showToast = useCallback((content, type) => {
-    const options = {
-      position: "top-right",
-      autoClose: 1000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: false,
-      closeButton: false,
-      onMouseEnter: toast.dismiss,
-      className: `custom-toast ${type === 'success' ? 'correct-toast' : 'incorrect-toast'}`,
-    };
+  const clearAnswerToast = useCallback(() => {
+    if (answerToastExitTimerRef.current) clearTimeout(answerToastExitTimerRef.current);
+    if (answerToastHideTimerRef.current) clearTimeout(answerToastHideTimerRef.current);
+    setAnswerToast(null);
+  }, []);
 
-    if (toast.isActive(ANSWER_TOAST_ID)) {
-      toast.update(ANSWER_TOAST_ID, { ...options, render: content });
-    } else {
-      toast(content, { ...options, toastId: ANSWER_TOAST_ID });
-    }
+  const showToast = useCallback((content, type) => {
+    if (answerToastExitTimerRef.current) clearTimeout(answerToastExitTimerRef.current);
+    if (answerToastHideTimerRef.current) clearTimeout(answerToastHideTimerRef.current);
+
+    answerToastSequenceRef.current += 1;
+    const toastSequence = answerToastSequenceRef.current;
+    setAnswerToast({ content, type, phase: 'enter', sequence: toastSequence });
+
+    answerToastExitTimerRef.current = setTimeout(() => {
+      setAnswerToast(current => (
+        current?.sequence === toastSequence
+          ? { ...current, phase: 'exit' }
+          : current
+      ));
+    }, 1500);
+    answerToastHideTimerRef.current = setTimeout(() => {
+      setAnswerToast(current => (
+        current?.sequence === toastSequence ? null : current
+      ));
+    }, 2000);
   }, []);
 
   const rememberLastAnswerToast = useCallback((content, type) => {
@@ -181,6 +194,7 @@ function GameScreen({
   }, []);
 
   const stopCurrentCry = useCallback(() => {
+    audioPlaybackSequenceRef.current += 1;
     if (audioRef.current) {
       audioRef.current.pause();
       if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
@@ -237,33 +251,42 @@ function GameScreen({
     }
 
     const audio = getPokemonCryAudio(pokemonToPlay.id);
+    const playbackSequence = audioPlaybackSequenceRef.current;
     if (audio.readyState > 0) audio.currentTime = 0;
     audioRef.current = audio;
 
     audio.onended = () => {
-      if (audioRef.current === audio) {
+      if (
+        audioPlaybackSequenceRef.current === playbackSequence
+        && audioRef.current === audio
+      ) {
         audioRef.current = null;
         setIsPlaying(false);
         isAudioPlaying.current = false;
         if (isAutoplay) {
           setIsAutoPlaying(false);
         }
+        audio.currentTime = 0;
+        audio.onended = null;
       }
-      audio.currentTime = 0;
-      audio.onended = null;
     };
 
     return audio.play().catch(error => {
-      if (audioRef.current === audio) {
+      if (
+        audioPlaybackSequenceRef.current === playbackSequence
+        && audioRef.current === audio
+      ) {
         audioRef.current = null;
-        console.error('Error playing audio:', error);
+        if (error.name !== 'AbortError') {
+          console.error('Error playing audio:', error);
+        }
         setIsPlaying(false);
         isAudioPlaying.current = false;
         if (isAutoplay) {
           setIsAutoPlaying(false);
         }
+        audio.onended = null;
       }
-      audio.onended = null;
     });
   }, [gameState.currentPokemon, isGameFinished, stopCurrentCry]);
 
@@ -734,7 +757,7 @@ function GameScreen({
       
       shinyAudioRef.current.play().catch(error => console.error("Error playing shiny sound:", error));
       
-      toast.dismiss(ANSWER_TOAST_ID);
+      clearAnswerToast();
 
       toast(
         <div>
@@ -791,7 +814,7 @@ function GameScreen({
     if (filteredVisiblePokemon.length === 1) {
       handlePokemonClick(filteredVisiblePokemon[0]);
     }
-  }, [filteredPokemonList, gameState.visiblePokemon, handlePokemonClick, shinyPartyActivated]);
+  }, [clearAnswerToast, filteredPokemonList, gameState.visiblePokemon, handlePokemonClick, shinyPartyActivated]);
 
   const handleKeyPress = useCallback((event) => {
     const char = event.key;
@@ -802,6 +825,21 @@ function GameScreen({
 
   const handleExitClick = () => {
     scrollToTop();
+    if (gameState.currentPokemon) {
+      const toastContent = (
+        <div className="answer-toast-content">
+          <img
+            src={animatedPokemonSpriteUrl(gameState.currentPokemon.id)}
+            alt={gameState.currentPokemon.name}
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = pokemonSpriteUrl(gameState.currentPokemon.id);
+            }}
+          />
+        </div>
+      );
+      rememberLastAnswerToast(toastContent, 'error');
+    }
     endGame(true);
   };
 
@@ -865,6 +903,8 @@ function GameScreen({
       }
       if (timeGainedTimeoutRef.current) clearTimeout(timeGainedTimeoutRef.current);
       if (timeLostTimeoutRef.current) clearTimeout(timeLostTimeoutRef.current);
+      if (answerToastExitTimerRef.current) clearTimeout(answerToastExitTimerRef.current);
+      if (answerToastHideTimerRef.current) clearTimeout(answerToastHideTimerRef.current);
 
       stopCurrentCry();
       
@@ -910,6 +950,7 @@ function GameScreen({
         }}
         failedPokemon={failedPokemon}
         onPlayAgain={() => {
+          resetRuntimeAssetCache();
           setGameState(prevState => ({
             ...prevState,
             visiblePokemon: pokemonList,
@@ -927,7 +968,21 @@ function GameScreen({
   }
 
   return (
-    <div className="game-container">
+    <>
+      {answerToast && (
+        <div className="Toastify__toast-container Toastify__toast-container--top-right toast-container-custom">
+          <div
+            key={answerToast.sequence}
+            className={`Toastify__toast Toastify__toast-theme--light Toastify__toast--default Toastify--animate Toastify__bounce-${answerToast.phase}--top-right custom-toast ${answerToast.type === 'success' ? 'correct-toast' : 'incorrect-toast'}`}
+            role="alert"
+          >
+            <div className="Toastify__toast-body">
+              <div>{answerToast.content}</div>
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="game-container">
       {streakBurst && (
         <div className="streak-burst" role="status" aria-live="polite">
           <span>Hot streak</span>
@@ -975,8 +1030,9 @@ function GameScreen({
         </p>
         <button className="exit-button" onClick={handleExitClick}>Exit Game</button>
       </footer>
-      <ToastContainer className="toast-container-custom" />
-    </div>
+        <ToastContainer className="toast-container-custom" />
+      </div>
+    </>
   );
 }
 

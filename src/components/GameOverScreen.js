@@ -2,12 +2,15 @@ import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react'
 import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
 import { scrollToTop } from '../utils/scrollUtils';
-import { getPokemonCryAudio } from '../utils/assetUrls';
+import { getPokemonCryAudio, pokemonCryUrl, preloadAssets } from '../utils/assetUrls';
 import { shouldAnimatePokemon } from '../utils/renderPerformance';
+
+const RESULT_CRY_PRELOAD_LIMIT = 24;
 
 function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime, pokemonTypes = {}, lastAnswerToast }) {
   const { correctCount, incorrectCount, progressCount, bestStreak = 0 } = stats;
   const audioRef = useRef(null);
+  const audioPlaybackSequenceRef = useRef(0);
   const transitionTimerRef = useRef(null);
   const [isLeaving, setIsLeaving] = useState(false);
   const [lastToastPhase, setLastToastPhase] = useState(null);
@@ -18,6 +21,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
     document.documentElement.style.touchAction = 'auto';
     return () => {
       if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+      audioPlaybackSequenceRef.current += 1;
       if (audioRef.current) {
         audioRef.current.pause();
         if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
@@ -50,6 +54,8 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
 
   const playPokemonCry = useCallback((pokemon) => {
     const pokemonId = pokemon.id;
+    audioPlaybackSequenceRef.current += 1;
+    const playbackSequence = audioPlaybackSequenceRef.current;
     if (audioRef.current) {
       audioRef.current.pause();
       if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
@@ -59,14 +65,25 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
     audioRef.current = audio;
     if (audio.readyState > 0) audio.currentTime = 0;
     audio.onended = () => {
-      if (audioRef.current === audio) audioRef.current = null;
-      audio.onended = null;
+      if (
+        audioPlaybackSequenceRef.current === playbackSequence
+        && audioRef.current === audio
+      ) {
+        audioRef.current = null;
+        audio.onended = null;
+      }
     };
     audio.play().catch(error => {
-      if (error.name !== 'AbortError') {
-        console.error('Error playing result audio:', error);
+      if (
+        audioPlaybackSequenceRef.current === playbackSequence
+        && audioRef.current === audio
+      ) {
+        if (error.name !== 'AbortError') {
+          console.error('Error playing result audio:', error);
+        }
+        audioRef.current = null;
+        audio.onended = null;
       }
-      audio.onended = null;
     });
   }, []);
 
@@ -78,6 +95,18 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
     () => Array.from(new Map(failedPokemon.map(pokemon => [pokemon.id, pokemon])).values()),
     [failedPokemon]
   );
+  useEffect(() => {
+    const resultCryUrls = uniqueFailedPokemon
+      .slice(0, RESULT_CRY_PRELOAD_LIMIT)
+      .map(pokemon => pokemonCryUrl(pokemon.id));
+    if (resultCryUrls.length === 0) return;
+
+    preloadAssets(resultCryUrls, undefined, { priority: 100 }).then(failedUrls => {
+      if (failedUrls.length > 0) {
+        console.warn(`Could not preload ${failedUrls.length} result cries.`);
+      }
+    });
+  }, [uniqueFailedPokemon]);
   const animateResults = shouldAnimatePokemon(uniqueFailedPokemon.length);
 
   return (

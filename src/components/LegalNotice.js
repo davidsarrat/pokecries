@@ -1,9 +1,33 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 function LegalNotice() {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const closeTimerRef = useRef(null);
+
+  useEffect(() => () => {
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+  }, []);
+
+  const handleSummaryClick = (event) => {
+    event.preventDefault();
+    if (isClosing) return;
+
+    if (!isOpen) {
+      setIsOpen(true);
+      return;
+    }
+
+    setIsClosing(true);
+    closeTimerRef.current = setTimeout(() => {
+      setIsOpen(false);
+      setIsClosing(false);
+    }, 300);
+  };
+
   return (
-    <details className="legal-notice">
-      <summary>Legal information</summary>
+    <details className={`legal-notice ${isClosing ? 'is-closing' : ''}`} open={isOpen}>
+      <summary onClick={handleSummaryClick}>Legal information</summary>
       <div className="legal-notice-reveal">
         <div className="legal-notice-content">
           <p><strong>Unofficial, non-commercial fan project.</strong></p>

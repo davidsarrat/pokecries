@@ -6,6 +6,7 @@ import {
   pokemonSpriteAssetUrls,
   pokemonSpriteUrl,
   preloadAssets,
+  resetRuntimeAssetCache,
   unknownPokemonSpriteUrl,
 } from './assetUrls';
 
@@ -113,6 +114,66 @@ test('keeps background preloads from occupying every asset slot', async () => {
     );
     expect(peakRequests).toBeLessThanOrEqual(2);
   } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test('bounds queued preload work on slow connections', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = jest.fn().mockImplementation(async () => {
+    await new Promise(resolve => setTimeout(resolve, 1));
+    return {
+      ok: true,
+      arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(0)),
+    };
+  });
+
+  try {
+    await preloadAssets(Array.from({ length: 100 }, (_, index) => `bounded-queue-${index}`));
+    expect(global.fetch.mock.calls.length).toBeLessThanOrEqual(72);
+  } finally {
+    resetRuntimeAssetCache();
+    global.fetch = originalFetch;
+  }
+});
+
+test('never drops critical preload work', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(0)),
+  });
+
+  try {
+    await preloadAssets(
+      Array.from({ length: 80 }, (_, index) => `critical-${index}`),
+      undefined,
+      { priority: 100 }
+    );
+    expect(global.fetch).toHaveBeenCalledTimes(80);
+  } finally {
+    resetRuntimeAssetCache();
+    global.fetch = originalFetch;
+  }
+});
+
+test('releases retained runtime assets between games', async () => {
+  const originalFetch = global.fetch;
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(0)),
+  });
+
+  try {
+    await preloadAssets(['runtime-reset']);
+    resetRuntimeAssetCache();
+    global.fetch.mockClear();
+
+    await preloadAssets(['runtime-reset']);
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  } finally {
+    resetRuntimeAssetCache();
     global.fetch = originalFetch;
   }
 });

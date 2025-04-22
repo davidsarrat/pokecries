@@ -16,12 +16,21 @@ const MAX_RETAINED_ASSETS = 128;
 const MAX_RETAINED_AUDIO = 24;
 const MAX_CONCURRENT_PRELOADS = 8;
 const MAX_CONCURRENT_BACKGROUND_PRELOADS = 2;
+const MAX_QUEUED_PRELOADS = 64;
 const BACKGROUND_PRIORITY = 10;
+const CRITICAL_PRIORITY = 100;
+const PRELOAD_CANCELLED_ERROR_NAME = 'PreloadCancelledError';
 const IMAGE_ASSET_PATTERN = /\.(?:gif|png|jpe?g|webp)$/i;
 const AUDIO_ASSET_PATTERN = /\.ogg$/i;
 let activePreloads = 0;
 let activeBackgroundPreloads = 0;
 let preloadSequence = 0;
+
+const createPreloadCancelledError = () => {
+  const error = new Error('Asset preload cancelled');
+  error.name = PRELOAD_CANCELLED_ERROR_NAME;
+  return error;
+};
 
 export const pokemonSpriteUrl = (pokemonId, shiny = false) =>
   `${SPRITES_BASE}/black-white/${shiny ? 'shiny/' : ''}${pokemonId}.png`;
@@ -141,8 +150,39 @@ const runQueuedPreload = (load, priority) => new Promise((resolve, reject) => {
   if (insertionIndex === -1) preloadQueue.push(queuedPreload);
   else preloadQueue.splice(insertionIndex, 0, queuedPreload);
 
+  while (preloadQueue.length > MAX_QUEUED_PRELOADS) {
+    let disposableIndex = preloadQueue.length - 1;
+    while (
+      disposableIndex >= 0
+      && preloadQueue[disposableIndex].priority >= CRITICAL_PRIORITY
+    ) {
+      disposableIndex -= 1;
+    }
+    if (disposableIndex < 0) break;
+
+    const [disposablePreload] = preloadQueue.splice(disposableIndex, 1);
+    disposablePreload.reject(createPreloadCancelledError());
+  }
+
   startQueuedPreloads();
 });
+
+export const resetRuntimeAssetCache = () => {
+  const cancelledPreloads = preloadQueue.splice(0);
+  cancelledPreloads.forEach(entry => {
+    entry.reject(createPreloadCancelledError());
+  });
+
+  audioAssets.forEach((audio, url) => {
+    if (pendingPreloads.has(url)) return;
+    audio.onended = null;
+    audio.pause();
+    audio.removeAttribute('src');
+    audio.load();
+  });
+  audioAssets.clear();
+  preloadRequests.clear();
+};
 
 const preloadUrl = (url, priority) => {
   if (preloadRequests.has(url)) return refreshCacheEntry(preloadRequests, url);
@@ -238,7 +278,7 @@ export const preloadAssets = async (urls, onProgress = () => {}, { priority = 0 
     try {
       await preloadUrl(url, priority);
     } catch (error) {
-      failedUrls.push(url);
+      if (error.name !== PRELOAD_CANCELLED_ERROR_NAME) failedUrls.push(url);
     }
 
     completed += 1;
