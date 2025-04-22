@@ -1,6 +1,9 @@
+import pokemonData from '../data/pokemon.json';
+
 const SPRITES_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/1435ac9b294901a0d3e8874aa69d76d038c1d65d/sprites/pokemon/versions/generation-v';
 const POKEMON_SPRITES_ROOT = 'https://raw.githubusercontent.com/PokeAPI/sprites/1435ac9b294901a0d3e8874aa69d76d038c1d65d/sprites/pokemon';
 const CRIES_BASE = 'https://raw.githubusercontent.com/PokeAPI/cries/ef687b18f0ce17169b4b4c09175819f7ade92f0f/cries/pokemon/legacy';
+const SHOWDOWN_CRIES_BASE = 'https://play.pokemonshowdown.com/audio/cries';
 const GENERATION_ICON_IDS = {
   gen1: '25',
   gen2: '250',
@@ -21,10 +24,19 @@ const BACKGROUND_PRIORITY = 10;
 const CRITICAL_PRIORITY = 100;
 const PRELOAD_CANCELLED_ERROR_NAME = 'PreloadCancelledError';
 const IMAGE_ASSET_PATTERN = /\.(?:gif|png|jpe?g|webp)$/i;
-const AUDIO_ASSET_PATTERN = /\.ogg$/i;
+const AUDIO_ASSET_PATTERN = /\.(?:mp3|ogg)$/i;
 let activePreloads = 0;
 let activeBackgroundPreloads = 0;
 let preloadSequence = 0;
+
+const pokemonNamesById = new Map(
+  Object.values(pokemonData).flat().map(pokemon => [String(pokemon.id), pokemon.name])
+);
+
+const showdownCrySlug = name => name.toLowerCase()
+  .replace(/♀/g, 'f')
+  .replace(/♂/g, 'm')
+  .replace(/[^a-z0-9]/g, '');
 
 const createPreloadCancelledError = () => {
   const error = new Error('Asset preload cancelled');
@@ -35,7 +47,12 @@ const createPreloadCancelledError = () => {
 export const pokemonSpriteUrl = (pokemonId, shiny = false) =>
   `${SPRITES_BASE}/black-white/${shiny ? 'shiny/' : ''}${pokemonId}.png`;
 
-export const pokemonCryUrl = (pokemonId) => `${CRIES_BASE}/${pokemonId}.ogg`;
+export const pokemonCryUrl = (pokemonId) => {
+  const pokemonName = pokemonNamesById.get(String(pokemonId));
+  return pokemonName
+    ? `${SHOWDOWN_CRIES_BASE}/${showdownCrySlug(pokemonName)}.mp3`
+    : `${CRIES_BASE}/${pokemonId}.ogg`;
+};
 
 const refreshCacheEntry = (cache, key) => {
   const value = cache.get(key);
@@ -73,7 +90,28 @@ const trimAudioCache = () => {
   }
 };
 
+const discardAudioAsset = (url) => {
+  const audio = audioAssets.get(url);
+  if (!audio) return;
+
+  audio.onended = null;
+  audio.onerror = null;
+  audio.onplaying = null;
+  audio.onstalled = null;
+  audio.onwaiting = null;
+  audio.pause();
+  audio.removeAttribute('src');
+  audio.load();
+  audioAssets.delete(url);
+  preloadRequests.delete(url);
+};
+
 const getAudioAsset = (url) => {
+  const cachedAudio = audioAssets.get(url);
+  if (cachedAudio && (cachedAudio.error || cachedAudio.networkState === 3)) {
+    discardAudioAsset(url);
+  }
+
   if (audioAssets.has(url)) return refreshCacheEntry(audioAssets, url);
 
   const audio = new Audio();
@@ -84,7 +122,11 @@ const getAudioAsset = (url) => {
   return audio;
 };
 
-export const getPokemonCryAudio = (pokemonId) => getAudioAsset(pokemonCryUrl(pokemonId));
+export const getPokemonCryAudio = (pokemonId, { forceReload = false } = {}) => {
+  const url = pokemonCryUrl(pokemonId);
+  if (forceReload) discardAudioAsset(url);
+  return getAudioAsset(url);
+};
 
 export const unknownPokemonSpriteUrl = () => `${POKEMON_SPRITES_ROOT}/0.png`;
 

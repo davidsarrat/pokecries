@@ -1,11 +1,11 @@
 .pokemon-grid {
   align-content: center;
+  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
   justify-content: center;
-  width: auto;
-  width: fit-content;
+  width: var(--balanced-grid-width);
   max-width: 100%;
   max-width: min(1200px, 100%);
   margin: 0 auto;
@@ -69,6 +69,7 @@
 @media (min-width: 1300px) {
   .pokemon-grid {
     gap: 1rem;
+    width: var(--balanced-grid-width-wide);
   }
 }
 
@@ -76,6 +77,7 @@
   .pokemon-grid {
     gap: 0.5rem;
     padding: 0.5rem;
+    width: var(--balanced-grid-width-compact);
   }
 
   .pokemon-grid .pokemon-card {

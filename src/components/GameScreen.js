@@ -23,6 +23,7 @@ const INITIAL_PLAN_SIZE = 10;
 const PLAN_REFILL_THRESHOLD = 3;
 const PRELOAD_AHEAD_ROUNDS = 3;
 const PRELOAD_AHEAD_CRIES = 10;
+const AUDIO_START_TIMEOUT_MS = 1800;
 const SHINY_PARTY_TOAST_ID = 'shiny-party';
 
 const normalizePokemonName = name => name.toLowerCase()
@@ -102,6 +103,7 @@ function GameScreen({
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
   const audioPlaybackSequenceRef = useRef(0);
+  const audioRecoveryTimerRef = useRef(null);
   const pokemonClickHandlerRef = useRef(null);
   const firstPokemonRef = useRef(null);
   const gamePlanRef = useRef([]);
@@ -209,10 +211,18 @@ function GameScreen({
 
   const stopCurrentCry = useCallback(() => {
     audioPlaybackSequenceRef.current += 1;
+    if (audioRecoveryTimerRef.current) {
+      clearTimeout(audioRecoveryTimerRef.current);
+      audioRecoveryTimerRef.current = null;
+    }
     if (audioRef.current) {
       audioRef.current.pause();
       if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
       audioRef.current.onended = null;
+      audioRef.current.onerror = null;
+      audioRef.current.onplaying = null;
+      audioRef.current.onstalled = null;
+      audioRef.current.onwaiting = null;
       audioRef.current = null;
     }
     isAudioPlaying.current = false;
@@ -249,7 +259,7 @@ function GameScreen({
     }));
   }, [addFailedPokemon, gameState.currentPokemon, gameStartTime, stopCurrentCry]);
 
-  const playCurrentCry = useCallback((pokemon = gameState.currentPokemon, isAutoplay = false) => {
+  const playCurrentCry = useCallback((pokemon = gameState.currentPokemon, isAutoplay = false, forceReload = false) => {
     const pokemonToPlay = pokemon || gameState.currentPokemon;
     
     if (!pokemonToPlay || isGameFinished) return;
@@ -264,45 +274,102 @@ function GameScreen({
       setIsAutoPlaying(true);
     }
 
-    const audio = getPokemonCryAudio(pokemonToPlay.id);
     const playbackSequence = audioPlaybackSequenceRef.current;
-    if (audio.readyState > 0) audio.currentTime = 0;
-    audioRef.current = audio;
 
-    audio.onended = () => {
+    const finishPlayback = (audio, error) => {
       if (
-        audioPlaybackSequenceRef.current === playbackSequence
-        && audioRef.current === audio
-      ) {
-        audioRef.current = null;
-        setIsPlaying(false);
-        isAudioPlaying.current = false;
-        if (isAutoplay) {
-          setIsAutoPlaying(false);
-        }
-        audio.currentTime = 0;
-        audio.onended = null;
+        audioPlaybackSequenceRef.current !== playbackSequence
+        || audioRef.current !== audio
+      ) return;
+
+      if (audioRecoveryTimerRef.current) {
+        clearTimeout(audioRecoveryTimerRef.current);
+        audioRecoveryTimerRef.current = null;
+      }
+      audioRef.current = null;
+      setIsPlaying(false);
+      isAudioPlaying.current = false;
+      if (isAutoplay) setIsAutoPlaying(false);
+      if (audio.readyState > 0) audio.currentTime = 0;
+      audio.onended = null;
+      audio.onerror = null;
+      audio.onplaying = null;
+      audio.onstalled = null;
+      audio.onwaiting = null;
+
+      if (error && error.name !== 'AbortError') {
+        console.error('Error playing audio:', error);
       }
     };
 
-    return audio.play().catch(error => {
-      if (
-        audioPlaybackSequenceRef.current === playbackSequence
-        && audioRef.current === audio
-      ) {
-        audioRef.current = null;
-        if (error.name !== 'AbortError') {
-          console.error('Error playing audio:', error);
+    const attemptPlayback = (reloadAudio, retriesRemaining) => {
+      const audio = getPokemonCryAudio(pokemonToPlay.id, { forceReload: reloadAudio });
+      let retired = false;
+      audioRef.current = audio;
+      if (audio.readyState > 0) audio.currentTime = 0;
+
+      const clearRecoveryTimer = () => {
+        if (audioRecoveryTimerRef.current) {
+          clearTimeout(audioRecoveryTimerRef.current);
+          audioRecoveryTimerRef.current = null;
         }
-        setIsPlaying(false);
-        isAudioPlaying.current = false;
-        if (isAutoplay) {
-          setIsAutoPlaying(false);
-        }
+      };
+
+      const recoverOrFinish = (error) => {
+        if (
+          retired
+          || audioPlaybackSequenceRef.current !== playbackSequence
+          || audioRef.current !== audio
+        ) return;
+
+        retired = true;
+        clearRecoveryTimer();
+        audio.pause();
         audio.onended = null;
-      }
-    });
+        audio.onerror = null;
+        audio.onplaying = null;
+        audio.onstalled = null;
+        audio.onwaiting = null;
+
+        if (retriesRemaining > 0) {
+          attemptPlayback(true, retriesRemaining - 1);
+        } else {
+          finishPlayback(audio, error);
+        }
+      };
+
+      const scheduleRecovery = () => {
+        clearRecoveryTimer();
+        audioRecoveryTimerRef.current = setTimeout(() => {
+          recoverOrFinish(new Error(`Cry playback stalled for Pokémon ${pokemonToPlay.id}`));
+        }, AUDIO_START_TIMEOUT_MS);
+      };
+
+      audio.onplaying = clearRecoveryTimer;
+      audio.onstalled = scheduleRecovery;
+      audio.onwaiting = scheduleRecovery;
+      audio.onerror = () => recoverOrFinish(audio.error || new Error('Cry playback failed'));
+      audio.onended = () => {
+        if (retired) return;
+        retired = true;
+        finishPlayback(audio);
+      };
+
+      scheduleRecovery();
+      Promise.resolve(audio.play()).then(clearRecoveryTimer).catch(recoverOrFinish);
+    };
+
+    attemptPlayback(forceReload, 1);
   }, [gameState.currentPokemon, isGameFinished, stopCurrentCry]);
+
+  const replayCurrentCry = useCallback(() => {
+    const activeAudio = audioRef.current;
+    const shouldReload = Boolean(
+      activeAudio
+      && (activeAudio.error || activeAudio.readyState < 3 || activeAudio.networkState === 3)
+    );
+    playCurrentCry(gameState.currentPokemon, false, shouldReload);
+  }, [gameState.currentPokemon, playCurrentCry]);
 
   const initializeGame = useCallback(() => {
     if (isGameInitialized) return;
@@ -984,7 +1051,7 @@ function GameScreen({
       )}
       <Navbar
         ref={navbarRef}
-        onPlayCry={() => playCurrentCry(gameState.currentPokemon, false)}
+        onPlayCry={replayCurrentCry}
         correctCount={gameState.correctCount}
         incorrectCount={gameState.incorrectCount}
         onSearch={handleSearch}

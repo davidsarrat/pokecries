@@ -43,8 +43,10 @@ function LegalNotice() {
             subject to the rights of their respective owners.
           </p>
           <p>
-            Pokémon data references, sprites, and cries are provided by{' '}
+            Pokémon data references and sprites are provided by{' '}
             <a href="https://pokeapi.co/" target="_blank" rel="noopener noreferrer">PokéAPI</a>.
+            {' '}Cries are provided in MP3 format by{' '}
+            <a href="https://pokemonshowdown.com/" target="_blank" rel="noopener noreferrer">Pokémon Showdown</a>.
             {' '}Pokémon and Pokémon character names are trademarks of Nintendo.
           </p>
           <p>
@@ -58,7 +60,7 @@ function LegalNotice() {
             {' · '}
             <a href="https://github.com/PokeAPI/sprites" target="_blank" rel="noopener noreferrer">Sprite source</a>
             {' · '}
-            <a href="https://github.com/PokeAPI/cries" target="_blank" rel="noopener noreferrer">Cry source</a>
+            <a href="https://play.pokemonshowdown.com/audio/cries/" target="_blank" rel="noopener noreferrer">Cry source</a>
           </p>
         </div>
       </div>

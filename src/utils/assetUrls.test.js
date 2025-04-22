@@ -1,6 +1,7 @@
 import {
   animatedPokemonSpriteUrl,
   generationIconUrl,
+  getPokemonCryAudio,
   pokemonAssetUrls,
   pokemonCryUrl,
   pokemonSpriteAssetUrls,
@@ -13,7 +14,9 @@ import {
 test('builds pinned external asset URLs', () => {
   expect(pokemonSpriteUrl('25')).toMatch(/PokeAPI\/sprites\/[a-f0-9]{40}\/.*\/25\.png$/);
   expect(pokemonSpriteUrl('25', true)).toMatch(/black-white\/shiny\/25\.png$/);
-  expect(pokemonCryUrl('25')).toMatch(/PokeAPI\/cries\/[a-f0-9]{40}\/.*\/25\.ogg$/);
+  expect(pokemonCryUrl('25')).toBe('https://play.pokemonshowdown.com/audio/cries/pikachu.mp3');
+  expect(pokemonCryUrl('432')).toBe('https://play.pokemonshowdown.com/audio/cries/purugly.mp3');
+  expect(pokemonCryUrl('122')).toBe('https://play.pokemonshowdown.com/audio/cries/mrmime.mp3');
   expect(animatedPokemonSpriteUrl('441')).toMatch(/animated\/441\.gif$/);
   expect(animatedPokemonSpriteUrl('272', true)).toMatch(/animated\/shiny\/272\.gif$/);
   expect(generationIconUrl('gen2')).toMatch(/animated\/250\.gif$/);
@@ -175,5 +178,41 @@ test('releases retained runtime assets between games', async () => {
   } finally {
     resetRuntimeAssetCache();
     global.fetch = originalFetch;
+  }
+});
+
+test('replaces a stuck cry audio element when playback requests a reload', () => {
+  const originalAudio = global.Audio;
+  const audioInstances = [];
+  global.Audio = jest.fn(() => {
+    const audio = {
+      error: null,
+      load: jest.fn(),
+      networkState: 1,
+      onended: null,
+      onerror: null,
+      onplaying: null,
+      onstalled: null,
+      onwaiting: null,
+      pause: jest.fn(),
+      readyState: 0,
+      removeAttribute: jest.fn(),
+    };
+    audioInstances.push(audio);
+    return audio;
+  });
+
+  try {
+    const firstAudio = getPokemonCryAudio('432');
+    expect(getPokemonCryAudio('432')).toBe(firstAudio);
+
+    const replacementAudio = getPokemonCryAudio('432', { forceReload: true });
+    expect(replacementAudio).not.toBe(firstAudio);
+    expect(firstAudio.pause).toHaveBeenCalledTimes(1);
+    expect(firstAudio.removeAttribute).toHaveBeenCalledWith('src');
+    expect(audioInstances).toHaveLength(2);
+  } finally {
+    resetRuntimeAssetCache();
+    global.Audio = originalAudio;
   }
 });

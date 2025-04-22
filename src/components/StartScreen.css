@@ -125,15 +125,15 @@
 }
 
 .title::before {
-  -webkit-text-stroke: 0.13em #3B4CCA;
-  text-stroke: 0.13em #3B4CCA;
+  -webkit-text-stroke: 0.095em #3B4CCA;
+  text-stroke: 0.095em #3B4CCA;
   paint-order: stroke fill;
   z-index: -2;
 }
 
 .title::after {
-  -webkit-text-stroke: 0.06em #1E3A8A;
-  text-stroke: 0.06em #1E3A8A;
+  -webkit-text-stroke: 0.045em #1E3A8A;
+  text-stroke: 0.045em #1E3A8A;
   paint-order: stroke fill;
   z-index: -1;
 }
