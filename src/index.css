@@ -16,7 +16,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--current-color) !important;
+  background-color: #7286b8 !important;
 }
 
 code {
@@ -27,7 +27,7 @@ code {
 @media not all and (min-resolution:.001dpcm) { 
   @supports (-webkit-appearance:none) {
     body {
-      background-color: var(--current-color) !important;
+      background-color: #7286b8 !important;
     }
   }
 }

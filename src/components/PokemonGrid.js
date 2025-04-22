@@ -9,6 +9,7 @@ const PokemonGrid = React.memo(function PokemonGrid({
   isGameOver, 
   allShiny,
   animatedSprites = true,
+  showAnswerFeedback = true,
   denseGrid = false,
   pokemonTypes = {}
 }) {
@@ -29,11 +30,12 @@ const PokemonGrid = React.memo(function PokemonGrid({
           isGameOver={isGameOver}
           allShiny={allShiny}
           animated={animatedSprites}
+          showAnswerFeedback={showAnswerFeedback}
           types={pokemonTypes[pokemon.id]}
         />
       );
     });
-  }, [pokemonList, visiblePokemonIds, handlePokemonClick, isGameOver, allShiny, animatedSprites, pokemonTypes]);
+  }, [pokemonList, visiblePokemonIds, handlePokemonClick, isGameOver, allShiny, animatedSprites, showAnswerFeedback, pokemonTypes]);
 
   return (
     <div className={`pokemon-grid ${denseGrid ? 'is-dense-grid' : ''}`} data-count={memoizedPokemonCards.length}>

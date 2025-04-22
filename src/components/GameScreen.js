@@ -9,6 +9,7 @@ import pokemonData from '../data/pokemon.json';
 import { scrollToTop } from '../utils/scrollUtils';
 import {
   animatedPokemonSpriteUrl,
+  getPokemonCryAudio,
   pokemonCryUrl,
   pokemonSpriteUrl,
   preloadAssets,
@@ -19,6 +20,7 @@ import { createGamePlan } from '../utils/gamePlan';
 const INITIAL_PLAN_SIZE = 10;
 const PLAN_REFILL_THRESHOLD = 3;
 const PRELOAD_AHEAD_ROUNDS = 5;
+const PRELOAD_AHEAD_CRIES = 10;
 const MAX_ANIMATED_ANSWERS = 32;
 
 const getCriticalRoundAssetUrls = round => {
@@ -39,10 +41,9 @@ const getDeferredRoundAssetUrls = round => round.visiblePokemon
       : pokemonSpriteUrl(pokemon.id, true)
   ));
 
-const getTargetAssetUrls = round => [
-  pokemonCryUrl(round.pokemon.id),
-  animatedPokemonSpriteUrl(round.pokemon.id),
-];
+const getCryAssetUrls = rounds => rounds.map(round => pokemonCryUrl(round.pokemon.id));
+
+const getTargetAssetUrls = round => [animatedPokemonSpriteUrl(round.pokemon.id)];
 
 const getPlannedAssetUrls = rounds => [
   ...rounds.flatMap(getCriticalRoundAssetUrls),
@@ -174,6 +175,16 @@ function GameScreen({
     setLastAnswerToast({ content, type, createdAt: Date.now() });
   }, []);
 
+  const stopCurrentCry = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
+      audioRef.current.onended = null;
+      audioRef.current = null;
+    }
+    isAudioPlaying.current = false;
+  }, []);
+
   const endGame = useCallback((addCurrentToFailed = false) => {
     if (addCurrentToFailed && gameState.currentPokemon) {
       setFailedPokemon(prev => [...prev, gameState.currentPokemon]);
@@ -188,70 +199,59 @@ function GameScreen({
       setGameDuration(duration);
     }
     
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = '';
-      audioRef.current = null;
-    }
+    stopCurrentCry();
     setGameOver(true);
     setGameState(prevState => ({
       ...prevState,
       currentPokemon: null
     }));
-  }, [gameState.currentPokemon, gameStartTime]);
+  }, [gameState.currentPokemon, gameStartTime, stopCurrentCry]);
 
   const playCurrentCry = useCallback((pokemon = gameState.currentPokemon, isAutoplay = false) => {
     const pokemonToPlay = pokemon || gameState.currentPokemon;
     
     if (!pokemonToPlay || isGameFinished) return;
     
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.src = '';
-      audioRef.current = null;
-    }
-    
-    isAudioPlaying.current = false;
+    stopCurrentCry();
     setIsPlaying(false);
-    
-    const playAudio = () => {
-      isAudioPlaying.current = true;
-      setIsPlaying(true);
-      if (isAutoplay) {
-        setIsAutoPlaying(true);
-      }
-      
-      const audioPath = pokemonCryUrl(pokemonToPlay.id);
-      
-      const audio = new Audio(audioPath);
-      audioRef.current = audio;
-      
-      const handleEnded = () => {
+    setIsAutoPlaying(false);
+
+    isAudioPlaying.current = true;
+    setIsPlaying(true);
+    if (isAutoplay) {
+      setIsAutoPlaying(true);
+    }
+
+    const audio = getPokemonCryAudio(pokemonToPlay.id);
+    if (audio.readyState > 0) audio.currentTime = 0;
+    audioRef.current = audio;
+
+    audio.onended = () => {
+      if (audioRef.current === audio) {
+        audioRef.current = null;
         setIsPlaying(false);
         isAudioPlaying.current = false;
         if (isAutoplay) {
           setIsAutoPlaying(false);
         }
-        audio.removeEventListener('ended', handleEnded);
-        audio.src = '';
-      };
-      
-      audio.addEventListener('ended', handleEnded);
-      
-      return audio.play().catch(error => {
+      }
+      audio.currentTime = 0;
+      audio.onended = null;
+    };
+
+    return audio.play().catch(error => {
+      if (audioRef.current === audio) {
+        audioRef.current = null;
         console.error('Error playing audio:', error);
         setIsPlaying(false);
         isAudioPlaying.current = false;
         if (isAutoplay) {
           setIsAutoPlaying(false);
         }
-        audio.removeEventListener('ended', handleEnded);
-        audio.src = '';
-      });
-    };
-    
-    setTimeout(playAudio, 50);
-  }, [gameState.currentPokemon, isGameFinished]);
+      }
+      audio.onended = null;
+    });
+  }, [gameState.currentPokemon, isGameFinished, stopCurrentCry]);
 
   const initializeGame = useCallback(() => {
     if (isGameInitialized) return;
@@ -316,6 +316,7 @@ function GameScreen({
       setIsCountdownReady(true);
 
       const upcomingRounds = plan.slice(1, 1 + PRELOAD_AHEAD_ROUNDS);
+      const upcomingCryRounds = plan.slice(1, 1 + PRELOAD_AHEAD_CRIES);
       const upcomingAssetUrls = hasFullAnswerSet
         ? upcomingRounds.flatMap(getTargetAssetUrls)
         : [
@@ -323,6 +324,7 @@ function GameScreen({
           ...upcomingRounds.flatMap(getDeferredRoundAssetUrls),
         ];
       preloadAssets([
+        ...getCryAssetUrls(upcomingCryRounds),
         ...upcomingAssetUrls,
         ...getDeferredRoundAssetUrls(firstRound),
         animatedPokemonSpriteUrl('272', true),
@@ -355,12 +357,19 @@ function GameScreen({
       roundIndex,
       roundIndex + PRELOAD_AHEAD_ROUNDS
     );
+    const upcomingCryRounds = gamePlanRef.current.slice(
+      roundIndex,
+      roundIndex + PRELOAD_AHEAD_CRIES
+    );
     const hasFullAnswerSet = !limitedAnswers
       || Number(numberOfAnswers) >= pokemonList.length;
     const upcomingAssetUrls = hasFullAnswerSet
       ? upcomingRounds.flatMap(getTargetAssetUrls)
       : getPlannedAssetUrls(upcomingRounds);
-    preloadAssets(upcomingAssetUrls).then(failedUrls => {
+    preloadAssets([
+      ...getCryAssetUrls(upcomingCryRounds),
+      ...upcomingAssetUrls,
+    ]).then(failedUrls => {
       if (failedUrls.length > 0) {
         console.warn(`Could not preload ${failedUrls.length} upcoming assets.`);
       }
@@ -446,20 +455,7 @@ function GameScreen({
     const nextRound = ensurePlannedRound(gameState.progressCount);
     if (nextRound) {
       updateVisiblePokemon(nextRound);
-      
-      setTimeout(() => {
-        if (isAudioPlaying.current) {
-          if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.src = '';
-            audioRef.current = null;
-          }
-          isAudioPlaying.current = false;
-        }
-        
-        setIsAutoPlaying(true);
-        playCurrentCry(nextRound.pokemon, true);
-      }, 100);
+      playCurrentCry(nextRound.pokemon, true);
     }
   }, [isGameInitialized, limitedQuestions, gameState.progressCount, numberOfQuestions, 
       selectedGameMode, pokemonList.length, ensurePlannedRound, playCurrentCry,
@@ -666,16 +662,7 @@ function GameScreen({
         moveToNextPokemon();
       } else if (!isGameFinished) { 
         if (gameState.currentPokemon) {
-          if (audioRef.current) {
-            audioRef.current.pause();
-            audioRef.current.src = '';
-            audioRef.current = null;
-          }
-          isAudioPlaying.current = false;
-          
-          setTimeout(() => {
-            playCurrentCry(gameState.currentPokemon, false);
-          }, 50);
+          playCurrentCry(gameState.currentPokemon, false);
         }
       }
     }
@@ -850,11 +837,7 @@ function GameScreen({
         clearTimeout(streakTimeoutRef.current);
       }
 
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = '';
-        audioRef.current = null;
-      }
+      stopCurrentCry();
       
       if (shinyAudioRef.current) {
         shinyAudioRef.current.pause();
@@ -862,7 +845,7 @@ function GameScreen({
         shinyAudioRef.current = null;
       }
     };
-  }, []);
+  }, [stopCurrentCry]);
 
   if (!isGameReady) {
     return <div className="game-container"></div>;
@@ -924,22 +907,7 @@ function GameScreen({
       )}
       <Navbar
         ref={navbarRef}
-        onPlayCry={() => {
-          if (isAudioPlaying.current || isPlaying) {
-            if (audioRef.current) {
-              audioRef.current.pause();
-              audioRef.current.src = '';
-              audioRef.current = null;
-            }
-            isAudioPlaying.current = false;
-            setIsPlaying(false);
-            setTimeout(() => {
-              playCurrentCry(gameState.currentPokemon, false);
-            }, 50);
-          } else {
-            playCurrentCry(gameState.currentPokemon, false);
-          }
-        }}
+        onPlayCry={() => playCurrentCry(gameState.currentPokemon, false)}
         correctCount={gameState.correctCount}
         incorrectCount={gameState.incorrectCount}
         onSearch={handleSearch}
@@ -966,6 +934,7 @@ function GameScreen({
             isGameOver={false}
             allShiny={allShiny}
             animatedSprites={!denseGrid}
+            showAnswerFeedback={!limitedAnswers}
             denseGrid={denseGrid}
             pokemonTypes={pokemonTypes}
           />

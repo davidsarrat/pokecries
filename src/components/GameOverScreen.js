@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
 import { scrollToTop } from '../utils/scrollUtils';
-import { pokemonCryUrl } from '../utils/assetUrls';
+import { getPokemonCryAudio } from '../utils/assetUrls';
 
 const MAX_ANIMATED_RESULTS = 32;
 
@@ -28,7 +28,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
       if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current.src = '';
+        if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
       }
     };
   }, []);
@@ -50,9 +50,10 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
     const pokemonId = pokemon.id;
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+      if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
     }
-    audioRef.current = new Audio(pokemonCryUrl(pokemonId));
+    audioRef.current = getPokemonCryAudio(pokemonId);
+    if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
     audioRef.current.play();
   }, []);
 

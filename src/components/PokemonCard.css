@@ -57,6 +57,10 @@
   animation: card-liquid-tap 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+.pokemon-card:is(:hover, :focus-visible, .tap-animation, .answer-correct, .answer-wrong) {
+  z-index: 2;
+}
+
 .pokemon-sprite-frame {
   align-items: center;
   display: flex;

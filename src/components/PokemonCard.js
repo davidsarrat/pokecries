@@ -16,6 +16,7 @@ const PokemonCard = React.memo(function PokemonCard({
   isGameOver, 
   allShiny,
   animated = true,
+  showAnswerFeedback = true,
   types = []
 }) {
   const [isTapping, setIsTapping] = useState(false);
@@ -33,9 +34,11 @@ const PokemonCard = React.memo(function PokemonCard({
     if (typeof isCorrect !== 'boolean') return;
 
     setIsTapping(true);
-    setAnswerFeedback(isCorrect ? 'correct' : 'wrong');
     setTimeout(() => setIsTapping(false), 380);
-    setTimeout(() => setAnswerFeedback(null), 500);
+    if (showAnswerFeedback) {
+      setAnswerFeedback(isCorrect ? 'correct' : 'wrong');
+      setTimeout(() => setAnswerFeedback(null), 500);
+    }
   };
 
   const cardClassName = `

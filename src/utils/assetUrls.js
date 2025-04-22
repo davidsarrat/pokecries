@@ -9,12 +9,26 @@ const GENERATION_ICON_IDS = {
   gen5: '571',
 };
 const preloadRequests = new Map();
+const audioAssets = new Map();
 const IMAGE_ASSET_PATTERN = /\.(?:gif|png|jpe?g|webp)$/i;
+const AUDIO_ASSET_PATTERN = /\.ogg$/i;
 
 export const pokemonSpriteUrl = (pokemonId, shiny = false) =>
   `${SPRITES_BASE}/black-white/${shiny ? 'shiny/' : ''}${pokemonId}.png`;
 
 export const pokemonCryUrl = (pokemonId) => `${CRIES_BASE}/${pokemonId}.ogg`;
+
+const getAudioAsset = (url) => {
+  if (!audioAssets.has(url)) {
+    const audio = new Audio();
+    audio.preload = 'auto';
+    audio.src = url;
+    audioAssets.set(url, audio);
+  }
+  return audioAssets.get(url);
+};
+
+export const getPokemonCryAudio = (pokemonId) => getAudioAsset(pokemonCryUrl(pokemonId));
 
 export const unknownPokemonSpriteUrl = () => `${POKEMON_SPRITES_ROOT}/0.png`;
 
@@ -39,6 +53,9 @@ const preloadUrl = (url) => {
     const canPreloadAsImage = process.env.NODE_ENV !== 'test'
       && typeof Image === 'function'
       && IMAGE_ASSET_PATTERN.test(url);
+    const canPreloadAsAudio = process.env.NODE_ENV !== 'test'
+      && typeof Audio === 'function'
+      && AUDIO_ASSET_PATTERN.test(url);
     const request = (canPreloadAsImage
       ? new Promise((resolve, reject) => {
         const image = new Image();
@@ -53,6 +70,32 @@ const preloadUrl = (url) => {
         image.onerror = () => reject(new Error('Image preload failed'));
         image.src = url;
       })
+      : canPreloadAsAudio
+        ? new Promise((resolve, reject) => {
+          const audio = getAudioAsset(url);
+          if (audio.readyState >= 3) {
+            resolve(audio);
+            return;
+          }
+
+          const cleanup = () => {
+            audio.removeEventListener('canplay', handleReady);
+            audio.removeEventListener('error', handleError);
+          };
+          const handleReady = () => {
+            cleanup();
+            resolve(audio);
+          };
+          const handleError = () => {
+            cleanup();
+            audioAssets.delete(url);
+            reject(new Error('Audio preload failed'));
+          };
+
+          audio.addEventListener('canplay', handleReady);
+          audio.addEventListener('error', handleError);
+          audio.load();
+        })
       : fetch(url, {
         cache: 'force-cache',
         referrerPolicy: 'no-referrer',
