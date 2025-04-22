@@ -28,7 +28,7 @@ const PokemonGrid = React.memo(function PokemonGrid({
   }, [pokemonList, visiblePokemonIds, onPokemonClick, animatingCards, isGameOver, allShiny]);
 
   return (
-    <div className="pokemon-grid">
+    <div className="pokemon-grid" data-count={memoizedPokemonCards.length}>
       {memoizedPokemonCards}
     </div>
   );

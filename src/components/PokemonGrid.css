@@ -14,6 +14,12 @@
   flex: 0 1 100px;
 }
 
+.pokemon-grid[data-count="4"] {
+  display: grid;
+  grid-template-columns: repeat(2, 100px);
+  width: auto;
+}
+
 @media (min-width: 1300px) {
   .pokemon-grid {
     gap: 1rem;
@@ -28,5 +34,9 @@
 
   .pokemon-grid .pokemon-card {
     flex-basis: 85px;
+  }
+
+  .pokemon-grid[data-count="4"] {
+    grid-template-columns: repeat(2, 85px);
   }
 }

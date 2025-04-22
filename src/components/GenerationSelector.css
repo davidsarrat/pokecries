@@ -21,7 +21,7 @@
 
 .btn-group-vertical .btn {
   border-radius: 15px !important;
-  padding: 0.8rem 0.8rem 0.8rem 3.25rem;
+  padding: 0.55rem 0.75rem;
   font-size: 0.55rem;
   font-weight: 500;
   transition: all 0.3s ease;
@@ -38,24 +38,30 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  min-height: 3.25rem;
+  min-height: 3.75rem;
 }
 
 .btn-group-vertical .btn .gen-icon {
   display: block;
-  height: 32px;
+  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.18));
+  flex: 0 0 auto;
+  height: 40px;
   image-rendering: pixelated;
   object-fit: contain;
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
+  width: 40px;
 }
 
-.btn-group-vertical .btn span {
-  flex-grow: 1;
-  text-align: center;
+.gen-button-content {
+  align-items: center;
+  display: inline-flex;
+  gap: 0.65rem;
+  justify-content: flex-start;
+  min-width: 7.5rem;
+}
+
+.btn-group-vertical .btn .gen-label {
+  flex: 0 0 auto;
+  text-align: left;
 }
 
 .btn-group-vertical .btn.active {
@@ -105,26 +111,34 @@
 
   .btn-group-vertical .btn {
     font-size: 0.5rem;
-    min-height: 3.1rem;
-    padding: 0.6rem 0.6rem 0.6rem 3rem;
+    min-height: 3.5rem;
+    padding: 0.5rem;
   }
 
   .btn-group-vertical .btn .gen-icon {
-    height: 30px;
-    left: 0.6rem;
-    width: 30px;
+    height: 36px;
+    width: 36px;
+  }
+
+  .gen-button-content {
+    gap: 0.5rem;
+    min-width: 6.75rem;
   }
 }
 
 @media (max-width: 400px) {
   .btn-group-vertical .btn {
     font-size: 0.45rem;
-    padding: 0.5rem 0.5rem 0.5rem 2.75rem;
+    min-height: 3.25rem;
   }
 
   .btn-group-vertical .btn .gen-icon {
-    height: 28px;
-    left: 0.5rem;
-    width: 28px;
+    height: 34px;
+    width: 34px;
+  }
+
+  .gen-button-content {
+    gap: 0.4rem;
+    min-width: 6.25rem;
   }
 }

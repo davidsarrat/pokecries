@@ -26,9 +26,13 @@ test('preloads every unique asset and reports completion', async () => {
   });
 
   try {
-    const failedUrls = await preloadAssets(['one', 'two', 'one'], value => progress.push(value));
+    const [failedUrls, duplicateFailures] = await Promise.all([
+      preloadAssets(['one', 'two', 'one'], value => progress.push(value)),
+      preloadAssets(['one']),
+    ]);
 
     expect(failedUrls).toEqual([]);
+    expect(duplicateFailures).toEqual([]);
     expect(global.fetch).toHaveBeenCalledTimes(2);
     expect(progress.at(-1)).toBe(100);
   } finally {

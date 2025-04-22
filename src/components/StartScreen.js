@@ -34,8 +34,6 @@ function StartScreen() {
   const [hardcoreMode, setHardcoreMode] = useState(false);
   const [timedRun, setTimedRun] = useState(false);
   const [dontRepeatPokemon, setDontRepeatPokemon] = useState(true);
-  const [isPreloading, setIsPreloading] = useState(false);
-  const [preloadProgress, setPreloadProgress] = useState(0);
 
   useEffect(() => {
     const savedConfig = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -96,6 +94,31 @@ function StartScreen() {
     scrollToTop();
   }, []);
 
+  useEffect(() => {
+    const preloadSelectedAssets = () => {
+      const selectedPokemon = selectedGenerations.flatMap(genKey => pokemonData[genKey] || []);
+      const assetUrls = selectedPokemon.flatMap(pokemon => pokemonAssetUrls(pokemon.id));
+      assetUrls.push(
+        animatedPokemonSpriteUrl('272', true),
+        `${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`
+      );
+
+      preloadAssets(assetUrls).then(failedUrls => {
+        if (failedUrls.length > 0) {
+          console.warn(`Could not preload ${failedUrls.length} assets; the game will load them on demand.`);
+        }
+      });
+    };
+
+    if ('requestIdleCallback' in window) {
+      const requestId = window.requestIdleCallback(preloadSelectedAssets, { timeout: 1000 });
+      return () => window.cancelIdleCallback(requestId);
+    }
+
+    const timeoutId = window.setTimeout(preloadSelectedAssets, 100);
+    return () => window.clearTimeout(timeoutId);
+  }, [selectedGenerations]);
+
   const isStartButtonDisabled = () => {
     if (selectedGenerations.length === 0) return true;
     if (timedRun && !isTimedRunValid()) return true;
@@ -105,7 +128,7 @@ function StartScreen() {
     return false;
   };
 
-  const handleStartGame = async () => {
+  const handleStartGame = () => {
     if (selectedGenerations.length === 0) {
       setError('You must select at least one generation!');
       return;
@@ -129,20 +152,6 @@ function StartScreen() {
     setError('');
     scrollToTop();
     const generationsToUse = selectedGenerations.length > 0 ? selectedGenerations : ['gen1'];
-    const selectedPokemon = generationsToUse.flatMap(genKey => pokemonData[genKey] || []);
-    const assetUrls = selectedPokemon.flatMap(pokemon => pokemonAssetUrls(pokemon.id));
-    assetUrls.push(
-      animatedPokemonSpriteUrl('272', true),
-      `${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`
-    );
-
-    setIsPreloading(true);
-    const failedUrls = await preloadAssets(assetUrls, setPreloadProgress);
-    if (failedUrls.length > 0) {
-      console.warn(`Could not preload ${failedUrls.length} assets; the game will load them on demand.`);
-    }
-    setIsPreloading(false);
-
     setSelectedGenerations(generationsToUse);
     setGameStarted(true);
   };
@@ -187,8 +196,7 @@ function StartScreen() {
 
   return (
     <div className="start-screen">
-      <h1 className="title">PokéCries</h1>
-      <p className="fan-project-label">Unofficial fan game</p>
+      <h1 className="title" data-text="PokéCries">PokéCries</h1>
       <p className="subtitle">Can you guess the Pokémon by its cry?</p>
       <GenerationSelector 
         selectedGenerations={selectedGenerations}
@@ -315,16 +323,14 @@ function StartScreen() {
       <button 
         className={startButtonClass}
         onClick={handleStartGame}
-        disabled={isStartButtonDisabled() || isPreloading}
+        disabled={isStartButtonDisabled()}
       >
-        {isPreloading ? `Loading assets... ${preloadProgress}%` : 'Start Game'}
-        {!isPreloading && (
-          <img
-            src={gifSrc}
-            alt={hardcoreMode ? "Darkrai" : "Chatot"}
-            className={gifClass}
-          />
-        )}
+        Start Game
+        <img
+          src={gifSrc}
+          alt={hardcoreMode ? "Darkrai" : "Chatot"}
+          className={gifClass}
+        />
       </button>
       {error && <p className="error-message">{error}</p>}
       <footer className="start-screen-footer">

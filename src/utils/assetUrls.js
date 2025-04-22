@@ -7,6 +7,7 @@ const GENERATION_ICON_URLS = {
   gen4: 'https://images.wikidexcdn.net/mwuploads/wikidex/d/d8/latest/20091209223655/Lucario_icon.gif',
   gen5: 'https://images.wikidexcdn.net/mwuploads/wikidex/5/5b/latest/20101005232130/Zoroark_icon.gif',
 };
+const preloadRequests = new Map();
 
 export const pokemonSpriteUrl = (pokemonId, shiny = false) =>
   `${SPRITES_BASE}/black-white/${shiny ? 'shiny/' : ''}${pokemonId}.png`;
@@ -23,6 +24,25 @@ export const pokemonAssetUrls = (pokemonId) => [
   pokemonSpriteUrl(pokemonId, true),
   pokemonCryUrl(pokemonId),
 ];
+
+const preloadUrl = (url) => {
+  if (!preloadRequests.has(url)) {
+    const request = fetch(url, {
+      cache: 'force-cache',
+      referrerPolicy: 'no-referrer',
+    }).then(async response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      await response.arrayBuffer();
+    }).catch(error => {
+      preloadRequests.delete(url);
+      throw error;
+    });
+
+    preloadRequests.set(url, request);
+  }
+
+  return preloadRequests.get(url);
+};
 
 export const preloadAssets = async (urls, onProgress = () => {}) => {
   const uniqueUrls = [...new Set(urls)];
@@ -49,12 +69,7 @@ export const preloadAssets = async (urls, onProgress = () => {}) => {
       nextIndex += 1;
 
       try {
-        const response = await fetch(url, {
-          cache: 'force-cache',
-          referrerPolicy: 'no-referrer',
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        await response.arrayBuffer();
+        await preloadUrl(url);
       } catch (error) {
         failedUrls.push(url);
       }
