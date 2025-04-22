@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
@@ -8,6 +8,8 @@ import GradientOverlay from './components/GradientOverlay';
 import pokemonTypeColors from './data/pokemonTypeColors';
 
 function App() {
+  const styleRef = useRef(null);
+  
   const shuffleArray = useCallback((array) => {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -33,20 +35,35 @@ function App() {
   }, []);
 
   const injectKeyframes = useCallback((keyframes) => {
+    if (styleRef.current) {
+      // Remove existing style to prevent accumulating styles
+      document.head.removeChild(styleRef.current);
+      styleRef.current = null;
+    }
+    
     const styleSheet = document.createElement('style');
     styleSheet.type = 'text/css';
     styleSheet.innerHTML = `
       @keyframes backgroundTransition { ${keyframes} }
-      .App { animation: backgroundTransition 2400s ease-in-out infinite; }
+      .App { animation: backgroundTransition 240s ease-in-out infinite; }
     `;
     document.head.appendChild(styleSheet);
+    styleRef.current = styleSheet;
   }, []);
 
   useEffect(() => {
     const colors = Object.values(pokemonTypeColors);
-    const sequence = generateColorSequence(colors, 10);
+    const sequence = generateColorSequence(colors, 5); // Reduce from 10 to 5 for better performance
     const keyframes = generateKeyframes(sequence);
     injectKeyframes(keyframes);
+    
+    // Cleanup function to remove style sheet when component unmounts
+    return () => {
+      if (styleRef.current) {
+        document.head.removeChild(styleRef.current);
+        styleRef.current = null;
+      }
+    };
   }, [generateColorSequence, generateKeyframes, injectKeyframes]);
 
   useEffect(() => {

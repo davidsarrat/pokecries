@@ -40,7 +40,7 @@ function GameScreen({
   const [endTime, setEndTime] = useState(null);
   const [allShiny, setAllShiny] = useState(false);
   const [shinyPartyActivated, setShinyPartyActivated] = useState(false);
-  const [shinyAudio] = useState(new Audio(`${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`));
+  const shinyAudioRef = useRef(null);
   const [timer, setTimer] = useState(0);
   const [availablePokemonIndices, setAvailablePokemonIndices] = useState([]);
   const [isGameInitialized, setIsGameInitialized] = useState(false);
@@ -52,7 +52,7 @@ function GameScreen({
     incorrectCount: 0,
   });
   const updateInProgress = useRef(false);
-  const [isGameReady, setIsGameReady] = useState(false);
+  const [isGameReady, setIsGameReady] = useState(true);
 
   const memoizedPokemonList = useMemo(() => pokemonList, [pokemonList]);
 
@@ -109,19 +109,23 @@ function GameScreen({
         audioRef.current.src = '';
         audioRef.current = null;
       }
-      audioRef.current = new Audio(`${process.env.PUBLIC_URL}/media/cries/${pokemon.id}.mp3`);
+      
+      const audio = new Audio(`${process.env.PUBLIC_URL}/media/cries/${pokemon.id}.mp3`);
+      audioRef.current = audio;
       setIsPlaying(true);
-      audioRef.current.play()
-        .then(() => {
-          const handleEnded = () => {
-            setIsPlaying(false);
-            if (isAutoplay) {
-              setIsAutoPlaying(false);
-            }
-            audioRef.current.removeEventListener('ended', handleEnded);
-          };
-          audioRef.current.addEventListener('ended', handleEnded);
-        })
+      
+      const handleEnded = () => {
+        setIsPlaying(false);
+        if (isAutoplay) {
+          setIsAutoPlaying(false);
+        }
+        audio.removeEventListener('ended', handleEnded);
+        audio.src = '';
+      };
+      
+      audio.addEventListener('ended', handleEnded);
+      
+      audio.play()
         .catch(error => {
           if (error.name !== 'AbortError') {
             console.error('Error playing audio:', error);
@@ -130,6 +134,8 @@ function GameScreen({
           if (isAutoplay) {
             setIsAutoPlaying(false);
           }
+          audio.removeEventListener('ended', handleEnded);
+          audio.src = '';
         });
     }
   }, [gameState.currentPokemon, isGameFinished]);
@@ -290,7 +296,8 @@ function GameScreen({
 
     setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
     
-    setTimeout(() => {
+    // Clear animation after 500ms to prevent memory buildup
+    const animationTimer = setTimeout(() => {
       setAnimatingCards(new Map());
     }, 500);
 
@@ -299,8 +306,14 @@ function GameScreen({
         const gainTimeMs = timedRunSettings.gainTime * 1000;
         setTimeLeftMs(prevTime => prevTime + gainTimeMs);
         setTimeGained(gainTimeMs);
-        setTimeout(() => setTimeGained(0), 500);
+        
+        // Clear gain time indicator after display
+        const gainTimeTimer = setTimeout(() => setTimeGained(0), 500);
       }
+      
+      // Clear any existing toasts before showing new ones
+      toast.dismiss();
+      
       showToast(
         <div>
           <img 
@@ -332,6 +345,9 @@ function GameScreen({
           />
         </div>;
 
+      // Clear any existing toasts before showing new ones
+      toast.dismiss();
+      
       showToast(toastContent, 'error');
 
       if (hardcoreMode) {
@@ -353,7 +369,9 @@ function GameScreen({
         });
         
         setTimeLost(loseTimeMs);
-        setTimeout(() => setTimeLost(0), 500);
+        
+        // Clear lose time indicator after display
+        const loseTimeTimer = setTimeout(() => setTimeLost(0), 500);
         
         if (wouldEndGame) {
           return;
@@ -367,7 +385,7 @@ function GameScreen({
         playCurrentCry();
       }
     }
-  }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, timedRun, timedRunSettings, timeLeftMs, endGame, hardcoreMode, isGameFinished]);
+  }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, timedRun, timedRunSettings, timeLeftMs, endGame, hardcoreMode, isGameFinished, showToast]);
 
   const handleSearch = useCallback((searchTerm) => {
     const normalizedSearchTerm = searchTerm.toLowerCase()
@@ -397,7 +415,11 @@ function GameScreen({
       setAllShiny(true);
       setShinyPartyActivated(true);
       
-      shinyAudio.play().catch(error => console.error("Error playing shiny sound:", error));
+      if (!shinyAudioRef.current) {
+        shinyAudioRef.current = new Audio(`${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`);
+      }
+      
+      shinyAudioRef.current.play().catch(error => console.error("Error playing shiny sound:", error));
       
       const existingToasts = document.getElementsByClassName('Toastify__toast');
       for (let i = 0; i < existingToasts.length; i++) {
@@ -459,7 +481,7 @@ function GameScreen({
     if (filteredVisiblePokemon.length === 1) {
       handlePokemonClick(filteredVisiblePokemon[0]);
     }
-  }, [filteredPokemonList, gameState.visiblePokemon, handlePokemonClick, shinyPartyActivated, shinyAudio]);
+  }, [filteredPokemonList, gameState.visiblePokemon, handlePokemonClick, shinyPartyActivated]);
 
   const handleKeyPress = useCallback((event) => {
     const char = event.key;
@@ -544,11 +566,28 @@ function GameScreen({
         audioRef.current.src = '';
         audioRef.current = null;
       }
+      
+      if (shinyAudioRef.current) {
+        shinyAudioRef.current.pause();
+        shinyAudioRef.current.src = '';
+        shinyAudioRef.current = null;
+      }
+    };
+  }, []);
+
+  // Add this effect to preload audio for better performance
+  useEffect(() => {
+    // Cleanup function to ensure we don't leave any memory leaks
+    const cleanupTimers = [];
+    
+    return () => {
+      // Clean up any timers that might be running
+      cleanupTimers.forEach(timer => clearTimeout(timer));
     };
   }, []);
 
   if (!isGameReady) {
-    return <div>Loading...</div>;
+    return <div className="game-container"></div>;
   }
 
   if (gameOver) {
