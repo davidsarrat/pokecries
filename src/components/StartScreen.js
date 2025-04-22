@@ -134,7 +134,7 @@ function StartScreen() {
       const [failedUrls, loadedPokemonTypes] = await Promise.all([
         preloadAssets(assetUrls, progress => {
           if (isMounted) setPreloadProgress(progress);
-        }),
+        }, { priority: 100 }),
         typesReady,
         fontReady,
       ]);

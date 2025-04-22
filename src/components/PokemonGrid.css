@@ -49,21 +49,21 @@
 
 @media (max-width: 767px) {
   .pokemon-grid {
-    gap: 0.4rem;
+    gap: 0.5rem;
     padding: 0.5rem;
   }
 
   .pokemon-grid .pokemon-card {
-    flex-basis: 90px;
+    flex-basis: 96px;
   }
 
   .pokemon-grid[data-count="2"],
   .pokemon-grid[data-count="3"],
   .pokemon-grid[data-count="4"] {
-    grid-template-columns: repeat(2, 90px);
+    grid-template-columns: repeat(2, 96px);
   }
 
   .pokemon-grid[data-count="3"] .pokemon-card:last-child {
-    width: 90px;
+    width: 96px;
   }
 }

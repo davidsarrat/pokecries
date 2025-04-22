@@ -17,39 +17,9 @@
   z-index: 2;
 }
 
-.results-answer-toast {
-  animation: results-toast-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border-radius: 8px;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.2);
-  box-sizing: border-box;
-  padding: 8px 12px;
-  pointer-events: none;
-  position: fixed;
-  right: 16px;
-  top: calc(42px + 1.5rem);
-  width: min(160px, calc(100vw - 2rem));
-  z-index: 1001;
-}
-
-@keyframes results-toast-enter {
-  from { opacity: 0; transform: translate3d(20px, -4px, 0) scale(0.94); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-}
-
 .game-over-container.is-leaving {
   animation: screen-exit-right 240ms cubic-bezier(0.4, 0, 1, 1) forwards;
   pointer-events: none;
-}
-
-@media (max-width: 1000px) {
-  .results-answer-toast {
-    padding: 8px;
-    right: 0.75rem;
-    top: calc(0.75rem + env(safe-area-inset-top));
-    width: min(150px, calc(100vw - 1.5rem));
-  }
 }
 
 .game-over-title {
@@ -63,8 +33,9 @@
   font-family: 'Pocket Monk', sans-serif;
   position: relative;
   letter-spacing: 2px;
-  -webkit-text-stroke: 0.5px #3B4CCA;
-  text-stroke: 0.5px #3B4CCA;
+  -webkit-text-stroke: 0.026em #3B4CCA;
+  text-stroke: 0.026em #3B4CCA;
+  paint-order: stroke fill;
   line-height: 1.2;
   white-space: nowrap;
 }
@@ -80,14 +51,16 @@
 }
 
 .game-over-title::before {
-  -webkit-text-stroke: 5px #3B4CCA;
-  text-stroke: 5px #3B4CCA;
+  -webkit-text-stroke: 0.13em #3B4CCA;
+  text-stroke: 0.13em #3B4CCA;
+  paint-order: stroke fill;
   z-index: -2;
 }
 
 .game-over-title::after {
-  -webkit-text-stroke: 2px #1E3A8A;
-  text-stroke: 2px #1E3A8A;
+  -webkit-text-stroke: 0.06em #1E3A8A;
+  text-stroke: 0.06em #1E3A8A;
+  paint-order: stroke fill;
   z-index: -1;
 }
 
@@ -165,6 +138,7 @@
   background: rgba(255, 255, 255, 0.34);
   border: 1px solid rgba(255, 255, 255, 0.58);
   border-radius: 16px;
+  overflow: visible;
 }
 
 .failed-pokemon-grid .pokemon-card {
@@ -240,27 +214,17 @@
 
 @media (max-width: 768px) {
   .game-over-container {
+    -webkit-backdrop-filter: blur(10px) saturate(1.04);
+    backdrop-filter: blur(10px) saturate(1.04);
     padding: 1.5rem;
   }
 
   .game-over-title {
     font-size: 4rem;
-    -webkit-text-stroke: 0.5px #3B4CCA;
-    text-stroke: 0.5px #3B4CCA;
   }
 
   .stats-container {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .game-over-title::before {
-    -webkit-text-stroke: 4px #3B4CCA;
-    text-stroke: 4px #3B4CCA;
-  }
-
-  .game-over-title::after {
-    -webkit-text-stroke: 1.5px #1E3A8A;
-    text-stroke: 1.5px #1E3A8A;
   }
 
   .stat-label {
@@ -272,7 +236,7 @@
   }
 
   .failed-pokemon-grid {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   }
 
   .failed-pokemon-title {
@@ -292,8 +256,6 @@
 
   .game-over-title {
     font-size: 3.5rem;
-    -webkit-text-stroke: 0.5px #3B4CCA;
-    text-stroke: 0.5px #3B4CCA;
   }
 
   .stats-container {
@@ -304,18 +266,8 @@
     grid-column: 1 / -1;
   }
 
-  .game-over-title::before {
-    -webkit-text-stroke: 3px #3B4CCA;
-    text-stroke: 3px #3B4CCA;
-  }
-
-  .game-over-title::after {
-    -webkit-text-stroke: 1px #1E3A8A;
-    text-stroke: 1px #1E3A8A;
-  }
-
   .failed-pokemon-grid {
-    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 0.5rem;
   }
 

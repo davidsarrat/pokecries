@@ -16,15 +16,17 @@ import {
   unknownPokemonSpriteUrl,
 } from '../utils/assetUrls';
 import { createGamePlan } from '../utils/gamePlan';
+import { shouldAnimatePokemon } from '../utils/renderPerformance';
 
 const INITIAL_PLAN_SIZE = 10;
 const PLAN_REFILL_THRESHOLD = 3;
-const PRELOAD_AHEAD_ROUNDS = 5;
+const PRELOAD_AHEAD_ROUNDS = 3;
 const PRELOAD_AHEAD_CRIES = 10;
-const MAX_ANIMATED_ANSWERS = 32;
+const ANSWER_TOAST_ID = 'answer-feedback';
+const SHINY_PARTY_TOAST_ID = 'shiny-party';
 
 const getCriticalRoundAssetUrls = round => {
-  const animateCards = round.visiblePokemon.length <= MAX_ANIMATED_ANSWERS;
+  const animateCards = shouldAnimatePokemon(round.visiblePokemon.length);
   return [
     pokemonCryUrl(round.pokemon.id),
     ...(!animateCards ? [animatedPokemonSpriteUrl(round.pokemon.id)] : []),
@@ -34,12 +36,11 @@ const getCriticalRoundAssetUrls = round => {
   ];
 };
 
-const getDeferredRoundAssetUrls = round => round.visiblePokemon
-  .map(pokemon => (
-    round.visiblePokemon.length <= MAX_ANIMATED_ANSWERS
-      ? animatedPokemonSpriteUrl(pokemon.id, true)
-      : pokemonSpriteUrl(pokemon.id, true)
-  ));
+const getDeferredRoundAssetUrls = round => (
+  shouldAnimatePokemon(round.visiblePokemon.length)
+    ? round.visiblePokemon.map(pokemon => animatedPokemonSpriteUrl(pokemon.id, true))
+    : []
+);
 
 const getCryAssetUrls = rounds => rounds.map(round => pokemonCryUrl(round.pokemon.id));
 
@@ -93,16 +94,19 @@ function GameScreen({
 }) {
   const [pokemonList, setPokemonList] = useState([]);
   const [filteredPokemonList, setFilteredPokemonList] = useState([]);
-  const [shuffledPokemonList, setShuffledPokemonList] = useState([]);
   const navbarRef = useRef(null);
   const audioRef = useRef(null);
   const firstPokemonRef = useRef(null);
   const gamePlanRef = useRef([]);
+  const gamePlanStartIndexRef = useRef(0);
   const isMountedRef = useRef(true);
   const streakTimeoutRef = useRef(null);
+  const timeGainedTimeoutRef = useRef(null);
+  const timeLostTimeoutRef = useRef(null);
   const isAudioPlaying = useRef(false);
   const didInitialize = useRef(false);
   const shinyAudioRef = useRef(null);
+  const lastAnswerToastRef = useRef(null);
   const [isGameFullyLoaded, setIsGameFullyLoaded] = useState(false);
   const [isCountdownReady, setIsCountdownReady] = useState(false);
   const [gamePreloadProgress, setGamePreloadProgress] = useState(0);
@@ -140,7 +144,7 @@ function GameScreen({
     () => filteredPokemonList.map(pokemon => pokemon.id),
     [filteredPokemonList]
   );
-  const denseGrid = gameState.visiblePokemon.length > MAX_ANIMATED_ANSWERS;
+  const denseGrid = !shouldAnimatePokemon(gameState.visiblePokemon.length);
 
   const resetSearch = useCallback(() => {
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
@@ -151,14 +155,7 @@ function GameScreen({
   }, [pokemonList]);
 
   const showToast = useCallback((content, type) => {
-    const existingToasts = document.getElementsByClassName('Toastify__toast');
-    for (let i = 0; i < existingToasts.length; i++) {
-      existingToasts[i].style.display = 'none';
-    }
-
-    toast.dismiss();
-
-    toast(content, {
+    const options = {
       position: "top-right",
       autoClose: 1000,
       hideProgressBar: true,
@@ -168,11 +165,19 @@ function GameScreen({
       closeButton: false,
       onMouseEnter: toast.dismiss,
       className: `custom-toast ${type === 'success' ? 'correct-toast' : 'incorrect-toast'}`,
-    });
+    };
+
+    if (toast.isActive(ANSWER_TOAST_ID)) {
+      toast.update(ANSWER_TOAST_ID, { ...options, render: content });
+    } else {
+      toast(content, { ...options, toastId: ANSWER_TOAST_ID });
+    }
   }, []);
 
   const rememberLastAnswerToast = useCallback((content, type) => {
-    setLastAnswerToast({ content, type, createdAt: Date.now() });
+    const answerToast = { content, type, createdAt: Date.now() };
+    lastAnswerToastRef.current = answerToast;
+    setLastAnswerToast(answerToast);
   }, []);
 
   const stopCurrentCry = useCallback(() => {
@@ -185,9 +190,18 @@ function GameScreen({
     isAudioPlaying.current = false;
   }, []);
 
+  const addFailedPokemon = useCallback((pokemon) => {
+    if (!pokemon) return;
+    setFailedPokemon(previous => (
+      previous.some(failed => failed.id === pokemon.id)
+        ? previous
+        : [...previous, pokemon]
+    ));
+  }, []);
+
   const endGame = useCallback((addCurrentToFailed = false) => {
     if (addCurrentToFailed && gameState.currentPokemon) {
-      setFailedPokemon(prev => [...prev, gameState.currentPokemon]);
+      addFailedPokemon(gameState.currentPokemon);
     }
     setIsGameFinished(true);
     
@@ -205,7 +219,7 @@ function GameScreen({
       ...prevState,
       currentPokemon: null
     }));
-  }, [gameState.currentPokemon, gameStartTime, stopCurrentCry]);
+  }, [addFailedPokemon, gameState.currentPokemon, gameStartTime, stopCurrentCry]);
 
   const playCurrentCry = useCallback((pokemon = gameState.currentPokemon, isAutoplay = false) => {
     const pokemonToPlay = pokemon || gameState.currentPokemon;
@@ -288,7 +302,7 @@ function GameScreen({
       || Number(numberOfAnswers) >= selectedPokemon.length;
 
     gamePlanRef.current = plan;
-    setShuffledPokemonList(plan.map(round => round.pokemon));
+    gamePlanStartIndexRef.current = 0;
     firstPokemonRef.current = firstRound.pokemon;
     setGameState({
       currentPokemon: firstRound.pokemon,
@@ -306,7 +320,7 @@ function GameScreen({
 
     preloadAssets(initialAssetUrls, progress => {
       if (isMountedRef.current) setGamePreloadProgress(progress);
-    }).then(failedUrls => {
+    }, { priority: 100 }).then(failedUrls => {
       if (failedUrls.length > 0) {
         console.warn(`Could not preload ${failedUrls.length} planned assets; they will load on demand.`);
       }
@@ -323,23 +337,36 @@ function GameScreen({
           ...upcomingRounds.flatMap(getCriticalRoundAssetUrls),
           ...upcomingRounds.flatMap(getDeferredRoundAssetUrls),
         ];
+      const reportBackgroundFailures = backgroundFailures => {
+        if (backgroundFailures.length > 0) {
+          console.warn(`Could not preload ${backgroundFailures.length} background assets.`);
+        }
+      };
+      preloadAssets(
+        getCryAssetUrls(upcomingCryRounds),
+        undefined,
+        { priority: 90 }
+      ).then(reportBackgroundFailures);
       preloadAssets([
-        ...getCryAssetUrls(upcomingCryRounds),
         ...upcomingAssetUrls,
         ...getDeferredRoundAssetUrls(firstRound),
         animatedPokemonSpriteUrl('272', true),
         `${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`,
-      ]).then(backgroundFailures => {
-        if (backgroundFailures.length > 0) {
-          console.warn(`Could not preload ${backgroundFailures.length} background assets.`);
-        }
-      });
+      ], undefined, { priority: 10 }).then(reportBackgroundFailures);
     });
   }, [isGameInitialized, selectedGenerations, selectedGameMode, limitedQuestions, numberOfQuestions, limitedAnswers, numberOfAnswers, keepCryOnError]);
 
   const ensurePlannedRound = useCallback((roundIndex) => {
     const isUnlimitedNormalMode = !limitedQuestions && selectedGameMode === 'normal';
-    if (isUnlimitedNormalMode && gamePlanRef.current.length - roundIndex <= PLAN_REFILL_THRESHOLD) {
+    let planIndex = roundIndex - gamePlanStartIndexRef.current;
+
+    if (isUnlimitedNormalMode && planIndex >= INITIAL_PLAN_SIZE) {
+      gamePlanRef.current = gamePlanRef.current.slice(planIndex);
+      gamePlanStartIndexRef.current = roundIndex;
+      planIndex = 0;
+    }
+
+    if (isUnlimitedNormalMode && gamePlanRef.current.length - planIndex <= PLAN_REFILL_THRESHOLD) {
       const previousRound = gamePlanRef.current[gamePlanRef.current.length - 1];
       const previousPokemonId = previousRound?.pokemon.id;
       const extraRounds = createGamePlan({
@@ -354,28 +381,35 @@ function GameScreen({
     }
 
     const upcomingRounds = gamePlanRef.current.slice(
-      roundIndex,
-      roundIndex + PRELOAD_AHEAD_ROUNDS
+      planIndex,
+      planIndex + PRELOAD_AHEAD_ROUNDS
     );
     const upcomingCryRounds = gamePlanRef.current.slice(
-      roundIndex,
-      roundIndex + PRELOAD_AHEAD_CRIES
+      planIndex,
+      planIndex + PRELOAD_AHEAD_CRIES
     );
     const hasFullAnswerSet = !limitedAnswers
       || Number(numberOfAnswers) >= pokemonList.length;
     const upcomingAssetUrls = hasFullAnswerSet
       ? upcomingRounds.flatMap(getTargetAssetUrls)
       : getPlannedAssetUrls(upcomingRounds);
-    preloadAssets([
-      ...getCryAssetUrls(upcomingCryRounds),
-      ...upcomingAssetUrls,
-    ]).then(failedUrls => {
+    const reportUpcomingFailures = failedUrls => {
       if (failedUrls.length > 0) {
         console.warn(`Could not preload ${failedUrls.length} upcoming assets.`);
       }
-    });
+    };
+    preloadAssets(
+      getCryAssetUrls(upcomingCryRounds),
+      undefined,
+      { priority: 90 }
+    ).then(reportUpcomingFailures);
+    preloadAssets(
+      upcomingAssetUrls,
+      undefined,
+      { priority: 50 }
+    ).then(reportUpcomingFailures);
 
-    return gamePlanRef.current[roundIndex] || null;
+    return gamePlanRef.current[planIndex] || null;
   }, [limitedQuestions, selectedGameMode, pokemonList, limitedAnswers, numberOfAnswers]);
 
   useEffect(() => {
@@ -518,7 +552,7 @@ function GameScreen({
             }, 0);
           }
         }
-      }, 100); // Update more frequently for higher precision
+      }, 250);
       
       return () => {
         if (timerIntervalRef.current) {
@@ -585,11 +619,9 @@ function GameScreen({
         // Use precise time addition
         addTime(gainTimeMs);
         setTimeGained(gainTimeMs);
-        
-        setTimeout(() => setTimeGained(0), 500);
+        if (timeGainedTimeoutRef.current) clearTimeout(timeGainedTimeoutRef.current);
+        timeGainedTimeoutRef.current = setTimeout(() => setTimeGained(0), 500);
       }
-      
-      toast.dismiss();
       
       const toastContent = (
         <div className="answer-toast-content">
@@ -611,7 +643,7 @@ function GameScreen({
       setCorrectStreak(0);
       setStreakBurst(null);
       if (streakTimeoutRef.current) clearTimeout(streakTimeoutRef.current);
-      setFailedPokemon(prev => [...prev, gameState.currentPokemon]);
+      addFailedPokemon(gameState.currentPokemon);
 
       const toastContent = keepCryOnError ?
         <div className="answer-toast-content">
@@ -628,7 +660,6 @@ function GameScreen({
           />
         </div>;
 
-      toast.dismiss();
       rememberLastAnswerToast(toastContent, 'error');
       showToast(toastContent, 'error');
 
@@ -643,8 +674,8 @@ function GameScreen({
         // Use precise time subtraction and check if it will end the game
         const willEndGame = subtractTime(loseTimeMs);
         setTimeLost(loseTimeMs);
-        
-        setTimeout(() => setTimeLost(0), 500);
+        if (timeLostTimeoutRef.current) clearTimeout(timeLostTimeoutRef.current);
+        timeLostTimeoutRef.current = setTimeout(() => setTimeLost(0), 500);
         
         // End the game if time ran out
         if (willEndGame) {
@@ -668,7 +699,7 @@ function GameScreen({
     }
 
     return isCorrect;
-  }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, timedRun, timedRunSettings, endGame, hardcoreMode, isGameFinished, showToast, rememberLastAnswerToast, addTime, subtractTime, correctStreak]);
+  }, [addFailedPokemon, isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, timedRun, timedRunSettings, endGame, hardcoreMode, isGameFinished, showToast, rememberLastAnswerToast, addTime, subtractTime, correctStreak]);
 
   const handleSearch = useCallback((searchTerm) => {
     const normalizedSearchTerm = searchTerm.toLowerCase()
@@ -703,12 +734,7 @@ function GameScreen({
       
       shinyAudioRef.current.play().catch(error => console.error("Error playing shiny sound:", error));
       
-      const existingToasts = document.getElementsByClassName('Toastify__toast');
-      for (let i = 0; i < existingToasts.length; i++) {
-        existingToasts[i].style.display = 'none';
-      }
-
-      toast.dismiss();
+      toast.dismiss(ANSWER_TOAST_ID);
 
       toast(
         <div>
@@ -731,6 +757,7 @@ function GameScreen({
           closeButton: false,
           className: 'custom-toast shiny-party-toast',
           onMouseEnter: toast.dismiss,
+          toastId: SHINY_PARTY_TOAST_ID,
         }
       );
       if (navbarRef.current) {
@@ -836,6 +863,8 @@ function GameScreen({
       if (streakTimeoutRef.current) {
         clearTimeout(streakTimeoutRef.current);
       }
+      if (timeGainedTimeoutRef.current) clearTimeout(timeGainedTimeoutRef.current);
+      if (timeLostTimeoutRef.current) clearTimeout(timeLostTimeoutRef.current);
 
       stopCurrentCry();
       
@@ -892,7 +921,7 @@ function GameScreen({
         pokemonTypes={pokemonTypes}
         startTime={gameStartTime}
         endTime={endTime}
-        lastAnswerToast={lastAnswerToast}
+        lastAnswerToast={lastAnswerToastRef.current || lastAnswerToast}
       />
     );
   }
@@ -914,7 +943,7 @@ function GameScreen({
         onEnterPress={handleEnterPress}
         isPlaying={isPlaying || isAutoPlaying}
         progressCount={gameState.progressCount}
-        totalCount={limitedQuestions ? numberOfQuestions : (selectedGameMode === 'dontRepeatPokemon' ? shuffledPokemonList.length : undefined)}
+        totalCount={limitedQuestions ? numberOfQuestions : (selectedGameMode === 'dontRepeatPokemon' ? pokemonList.length : undefined)}
         showProgress={true}
         timeLeft={timedRun ? timeLeftMs : timer * 1000}
         showTimer={true}

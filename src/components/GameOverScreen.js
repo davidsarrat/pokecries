@@ -1,27 +1,19 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import './GameOverScreen.css';
 import PokemonCard from './PokemonCard';
 import { scrollToTop } from '../utils/scrollUtils';
 import { getPokemonCryAudio } from '../utils/assetUrls';
-
-const MAX_ANIMATED_RESULTS = 32;
+import { shouldAnimatePokemon } from '../utils/renderPerformance';
 
 function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime, pokemonTypes = {}, lastAnswerToast }) {
   const { correctCount, incorrectCount, progressCount, bestStreak = 0 } = stats;
   const audioRef = useRef(null);
   const transitionTimerRef = useRef(null);
   const [isLeaving, setIsLeaving] = useState(false);
-  const [showLastAnswerToast, setShowLastAnswerToast] = useState(
-    () => Boolean(lastAnswerToast && Date.now() - lastAnswerToast.createdAt < 1500)
-  );
+  const [lastToastPhase, setLastToastPhase] = useState(null);
 
   useEffect(() => {
     scrollToTop();
-    const allPokemonCards = document.querySelectorAll('.pokemon-card');
-    allPokemonCards.forEach(card => {
-      card.classList.remove('hidden');
-    });
-
     document.body.style.touchAction = 'auto';
     document.documentElement.style.touchAction = 'auto';
     return () => {
@@ -29,15 +21,25 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
       if (audioRef.current) {
         audioRef.current.pause();
         if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
+        audioRef.current.onended = null;
       }
     };
   }, []);
 
   useEffect(() => {
-    if (!showLastAnswerToast) return undefined;
-    const timeoutId = setTimeout(() => setShowLastAnswerToast(false), 2000);
-    return () => clearTimeout(timeoutId);
-  }, [showLastAnswerToast]);
+    if (!lastAnswerToast || Date.now() - lastAnswerToast.createdAt >= 1500) {
+      return undefined;
+    }
+
+    setLastToastPhase('enter');
+    const exitTimerId = setTimeout(() => setLastToastPhase('exit'), 1500);
+    const hideTimerId = setTimeout(() => setLastToastPhase(null), 2000);
+
+    return () => {
+      clearTimeout(exitTimerId);
+      clearTimeout(hideTimerId);
+    };
+  }, [lastAnswerToast]);
 
   const handleBackToMenu = () => {
     if (isLeaving) return;
@@ -51,28 +53,46 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
     if (audioRef.current) {
       audioRef.current.pause();
       if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
+      audioRef.current.onended = null;
     }
-    audioRef.current = getPokemonCryAudio(pokemonId);
-    if (audioRef.current.readyState > 0) audioRef.current.currentTime = 0;
-    audioRef.current.play();
+    const audio = getPokemonCryAudio(pokemonId);
+    audioRef.current = audio;
+    if (audio.readyState > 0) audio.currentTime = 0;
+    audio.onended = () => {
+      if (audioRef.current === audio) audioRef.current = null;
+      audio.onended = null;
+    };
+    audio.play().catch(error => {
+      if (error.name !== 'AbortError') {
+        console.error('Error playing result audio:', error);
+      }
+      audio.onended = null;
+    });
   }, []);
 
   const totalTimeSeconds = ((endTime - startTime) / 1000).toFixed(4);
   const minutes = Math.floor(totalTimeSeconds / 60);
   const seconds = (totalTimeSeconds % 60).toFixed(4);
 
-  const uniqueFailedPokemon = Array.from(new Set(failedPokemon.map(p => p.id)))
-    .map(id => failedPokemon.find(p => p.id === id));
+  const uniqueFailedPokemon = useMemo(
+    () => Array.from(new Map(failedPokemon.map(pokemon => [pokemon.id, pokemon])).values()),
+    [failedPokemon]
+  );
+  const animateResults = shouldAnimatePokemon(uniqueFailedPokemon.length);
 
   return (
     <>
-      {showLastAnswerToast && (
-        <div
-          className={`results-answer-toast ${lastAnswerToast.type === 'success' ? 'correct-toast' : 'incorrect-toast'}`}
-          role="status"
-          aria-live="polite"
-        >
-          {lastAnswerToast.content}
+      {lastToastPhase && (
+        <div className="Toastify__toast-container Toastify__toast-container--top-right toast-container-custom">
+          <div
+            className={`Toastify__toast Toastify__toast-theme--light Toastify__toast--default Toastify--animate Toastify__bounce-${lastToastPhase}--top-right custom-toast ${lastAnswerToast.type === 'success' ? 'correct-toast' : 'incorrect-toast'}`}
+            role="status"
+            aria-live="polite"
+          >
+            <div className="Toastify__toast-body">
+              <div>{lastAnswerToast.content}</div>
+            </div>
+          </div>
         </div>
       )}
       <div className={`game-over-container ${isLeaving ? 'is-leaving' : ''}`}>
@@ -103,14 +123,14 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
         {uniqueFailedPokemon.length > 0 && (
           <>
             <h2 className="failed-pokemon-title">Pokémon you missed:</h2>
-            <div className={`failed-pokemon-grid ${uniqueFailedPokemon.length > MAX_ANIMATED_RESULTS ? 'is-dense-grid' : ''}`}>
+            <div className={`failed-pokemon-grid ${animateResults ? '' : 'is-dense-grid'}`}>
               {uniqueFailedPokemon.map(pokemon => (
                 <PokemonCard
                   key={pokemon.id}
                   pokemon={pokemon}
                   onClick={playPokemonCry}
                   isGameOver={true}
-                  animated={uniqueFailedPokemon.length <= MAX_ANIMATED_RESULTS}
+                  animated={animateResults}
                   types={pokemonTypes[pokemon.id]}
                 />
               ))}

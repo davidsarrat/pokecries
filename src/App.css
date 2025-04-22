@@ -87,6 +87,14 @@ button {
   50% { transform: translate3d(2.5%, 1.5%, 0) scale(1.12); }
 }
 
+@media (max-width: 1000px) {
+  .App::before {
+    animation: none;
+    transform: scale(1.08);
+    will-change: auto;
+  }
+}
+
 @keyframes ui-panel-enter {
   from { opacity: 0; transform: translateY(14px) scale(0.985); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -153,8 +161,32 @@ button {
   color: #334155;
   font-size: 0.75rem;
   margin-top: 0.75rem;
+  min-height: 0;
+  overflow: hidden;
   padding-top: 0.75rem;
   user-select: text;
+}
+
+.legal-notice-reveal {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.legal-notice[open] .legal-notice-reveal {
+  animation: legal-notice-reveal 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes legal-notice-reveal {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .legal-notice-content p {

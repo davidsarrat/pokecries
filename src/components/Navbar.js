@@ -47,13 +47,16 @@ const Navbar = forwardRef(({
   };
 
   useEffect(() => {
+    let timeoutId;
     if (timeGained > 0) {
       setTimerClass('time-gained');
-      setTimeout(() => setTimerClass(''), 500);
+      timeoutId = setTimeout(() => setTimerClass(''), 500);
     } else if (timeLost > 0) {
       setTimerClass('time-lost');
-      setTimeout(() => setTimerClass(''), 500);
+      timeoutId = setTimeout(() => setTimerClass(''), 500);
     }
+
+    return () => clearTimeout(timeoutId);
   }, [timeGained, timeLost]);
 
   return (

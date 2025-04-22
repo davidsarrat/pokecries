@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './PokemonCard.css';
 import { animatedPokemonSpriteUrl, pokemonSpriteUrl } from '../utils/assetUrls';
 import pokemonTypeColors from '../data/pokemonTypeColors';
@@ -21,11 +21,23 @@ const PokemonCard = React.memo(function PokemonCard({
 }) {
   const [isTapping, setIsTapping] = useState(false);
   const [answerFeedback, setAnswerFeedback] = useState(null);
+  const tapTimeoutRef = useRef(null);
+  const answerTimeoutRef = useRef(null);
+
+  useEffect(() => () => {
+    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    if (answerTimeoutRef.current) clearTimeout(answerTimeoutRef.current);
+  }, []);
+
+  const triggerTap = () => {
+    if (tapTimeoutRef.current) clearTimeout(tapTimeoutRef.current);
+    setIsTapping(true);
+    tapTimeoutRef.current = setTimeout(() => setIsTapping(false), 380);
+  };
 
   const handleClick = () => {
     if (isGameOver) {
-      setIsTapping(true);
-      setTimeout(() => setIsTapping(false), 380);
+      triggerTap();
       onClick(pokemon);
       return;
     }
@@ -33,11 +45,11 @@ const PokemonCard = React.memo(function PokemonCard({
     const isCorrect = onClick(pokemon);
     if (typeof isCorrect !== 'boolean') return;
 
-    setIsTapping(true);
-    setTimeout(() => setIsTapping(false), 380);
+    triggerTap();
     if (showAnswerFeedback) {
+      if (answerTimeoutRef.current) clearTimeout(answerTimeoutRef.current);
       setAnswerFeedback(isCorrect ? 'correct' : 'wrong');
-      setTimeout(() => setAnswerFeedback(null), 500);
+      answerTimeoutRef.current = setTimeout(() => setAnswerFeedback(null), 500);
     }
   };
 

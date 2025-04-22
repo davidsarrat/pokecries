@@ -1,6 +1,5 @@
 .pokemon-card {
   --tap-accent: rgba(255, 255, 255, 0.68);
-  perspective: 1000px;
   position: relative;
   width: 100%;
   height: 142px;
