@@ -140,6 +140,13 @@ const discardAudioAsset = (url) => {
   preloadRequests.delete(url);
 };
 
+const createAudioAsset = (url) => {
+  const audio = new Audio();
+  audio.preload = 'auto';
+  audio.src = url;
+  return audio;
+};
+
 const getAudioAsset = (url) => {
   const cachedAudio = audioAssets.get(url);
   if (cachedAudio && (cachedAudio.error || cachedAudio.networkState === 3)) {
@@ -148,9 +155,7 @@ const getAudioAsset = (url) => {
 
   if (audioAssets.has(url)) return refreshCacheEntry(audioAssets, url);
 
-  const audio = new Audio();
-  audio.preload = 'auto';
-  audio.src = url;
+  const audio = createAudioAsset(url);
   audioAssets.set(url, audio);
   trimAudioCache();
   return audio;
@@ -159,7 +164,12 @@ const getAudioAsset = (url) => {
 export const getPokemonCryAudio = (pokemonId, { forceReload = false } = {}) => {
   const url = pokemonCryUrl(pokemonId);
   if (forceReload) discardAudioAsset(url);
-  return getAudioAsset(url);
+  const audio = getAudioAsset(url);
+  const standbyAudio = createAudioAsset(url);
+  standbyAudio.load();
+  audioAssets.delete(url);
+  audioAssets.set(url, standbyAudio);
+  return audio;
 };
 
 export const unknownPokemonSpriteUrl = () => `${POKEMON_SPRITES_ROOT}/0.png`;

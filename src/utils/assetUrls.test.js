@@ -290,7 +290,7 @@ test('can defer bulk audio teardown until after the UI transition', () => {
   }
 });
 
-test('replaces a stuck cry audio element when playback requests a reload', () => {
+test('rotates a warmed standby instead of seeking a played cry', () => {
   const originalAudio = global.Audio;
   const audioInstances = [];
   global.Audio = jest.fn(() => {
@@ -313,13 +313,15 @@ test('replaces a stuck cry audio element when playback requests a reload', () =>
 
   try {
     const firstAudio = getPokemonCryAudio('432');
-    expect(getPokemonCryAudio('432')).toBe(firstAudio);
+    const secondAudio = getPokemonCryAudio('432');
+    expect(secondAudio).not.toBe(firstAudio);
+    expect(audioInstances[1].load).toHaveBeenCalledTimes(1);
 
     const replacementAudio = getPokemonCryAudio('432', { forceReload: true });
-    expect(replacementAudio).not.toBe(firstAudio);
-    expect(firstAudio.pause).toHaveBeenCalledTimes(1);
-    expect(firstAudio.removeAttribute).toHaveBeenCalledWith('src');
-    expect(audioInstances).toHaveLength(2);
+    expect(replacementAudio).not.toBe(secondAudio);
+    expect(audioInstances[2].pause).toHaveBeenCalledTimes(1);
+    expect(audioInstances[2].removeAttribute).toHaveBeenCalledWith('src');
+    expect(audioInstances).toHaveLength(5);
   } finally {
     resetRuntimeAssetCache();
     global.Audio = originalAudio;
