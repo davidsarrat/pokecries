@@ -39,6 +39,11 @@ const getDeferredRoundAssetUrls = round => round.visiblePokemon
       : pokemonSpriteUrl(pokemon.id, true)
   ));
 
+const getTargetAssetUrls = round => [
+  pokemonCryUrl(round.pokemon.id),
+  animatedPokemonSpriteUrl(round.pokemon.id),
+];
+
 const getPlannedAssetUrls = rounds => [
   ...rounds.flatMap(getCriticalRoundAssetUrls),
   ...rounds.flatMap(getDeferredRoundAssetUrls),
@@ -105,7 +110,7 @@ function GameScreen({
   const [isGameFinished, setIsGameFinished] = useState(false);
   const [failedPokemon, setFailedPokemon] = useState([]);
   const [gameOver, setGameOver] = useState(false);
-  const [animatingCards, setAnimatingCards] = useState(new Map());
+  const [lastAnswerToast, setLastAnswerToast] = useState(null);
   const [isAutoPlaying, setIsAutoPlaying] = useState(false);
   const [timeLeftMs, setTimeLeftMs] = useState((timedRunSettings.minutes * 60 + timedRunSettings.seconds) * 1000);
   const [timeGained, setTimeGained] = useState(0);
@@ -163,6 +168,10 @@ function GameScreen({
       onMouseEnter: toast.dismiss,
       className: `custom-toast ${type === 'success' ? 'correct-toast' : 'incorrect-toast'}`,
     });
+  }, []);
+
+  const rememberLastAnswerToast = useCallback((content, type) => {
+    setLastAnswerToast({ content, type, createdAt: Date.now() });
   }, []);
 
   const endGame = useCallback((addCurrentToFailed = false) => {
@@ -275,6 +284,8 @@ function GameScreen({
       numberOfAnswers: Number(numberOfAnswers),
     });
     const firstRound = plan[0];
+    const hasFullAnswerSet = !limitedAnswers
+      || Number(numberOfAnswers) >= selectedPokemon.length;
 
     gamePlanRef.current = plan;
     setShuffledPokemonList(plan.map(round => round.pokemon));
@@ -305,10 +316,15 @@ function GameScreen({
       setIsCountdownReady(true);
 
       const upcomingRounds = plan.slice(1, 1 + PRELOAD_AHEAD_ROUNDS);
+      const upcomingAssetUrls = hasFullAnswerSet
+        ? upcomingRounds.flatMap(getTargetAssetUrls)
+        : [
+          ...upcomingRounds.flatMap(getCriticalRoundAssetUrls),
+          ...upcomingRounds.flatMap(getDeferredRoundAssetUrls),
+        ];
       preloadAssets([
-        ...upcomingRounds.flatMap(getCriticalRoundAssetUrls),
+        ...upcomingAssetUrls,
         ...getDeferredRoundAssetUrls(firstRound),
-        ...upcomingRounds.flatMap(getDeferredRoundAssetUrls),
         animatedPokemonSpriteUrl('272', true),
         `${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`,
       ]).then(backgroundFailures => {
@@ -339,7 +355,12 @@ function GameScreen({
       roundIndex,
       roundIndex + PRELOAD_AHEAD_ROUNDS
     );
-    preloadAssets(getPlannedAssetUrls(upcomingRounds)).then(failedUrls => {
+    const hasFullAnswerSet = !limitedAnswers
+      || Number(numberOfAnswers) >= pokemonList.length;
+    const upcomingAssetUrls = hasFullAnswerSet
+      ? upcomingRounds.flatMap(getTargetAssetUrls)
+      : getPlannedAssetUrls(upcomingRounds);
+    preloadAssets(upcomingAssetUrls).then(failedUrls => {
       if (failedUrls.length > 0) {
         console.warn(`Could not preload ${failedUrls.length} upcoming assets.`);
       }
@@ -541,7 +562,7 @@ function GameScreen({
 
   // Modify handlePokemonClick to use the new precise time functions
   const handlePokemonClick = useCallback((clickedPokemon) => {
-    if (!isGameInitialized || updateInProgress.current || isGameFinished) return;
+    if (!isGameInitialized || updateInProgress.current || isGameFinished) return undefined;
 
     const isCorrect = clickedPokemon.id === gameState.currentPokemon.id;
 
@@ -550,12 +571,6 @@ function GameScreen({
       correctCount: isCorrect ? prevState.correctCount + 1 : prevState.correctCount,
       incorrectCount: !isCorrect ? prevState.incorrectCount + 1 : prevState.incorrectCount,
     }));
-
-    setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
-    
-    setTimeout(() => {
-      setAnimatingCards(new Map());
-    }, 500);
 
     if (isCorrect) {
       const nextStreak = correctStreak + 1;
@@ -580,7 +595,7 @@ function GameScreen({
       
       toast.dismiss();
       
-      showToast(
+      const toastContent = (
         <div className="answer-toast-content">
           <img 
             src={animatedPokemonSpriteUrl(gameState.currentPokemon.id)}
@@ -590,10 +605,10 @@ function GameScreen({
               event.currentTarget.src = pokemonSpriteUrl(gameState.currentPokemon.id);
             }}
           />
-          {nextStreak >= 2 && <span className="toast-streak">🔥 {nextStreak} streak</span>}
-        </div>,
-        'success'
+        </div>
       );
+      rememberLastAnswerToast(toastContent, 'success');
+      showToast(toastContent, 'success');
       resetSearch();
       moveToNextPokemon();
     } else {
@@ -618,12 +633,12 @@ function GameScreen({
         </div>;
 
       toast.dismiss();
-      
+      rememberLastAnswerToast(toastContent, 'error');
       showToast(toastContent, 'error');
 
       if (hardcoreMode) {
         endGame();
-        return;
+        return false;
       }
       
       if (timedRun) {
@@ -642,7 +657,7 @@ function GameScreen({
               endGame(true);
             }
           }, 100);
-          return;
+          return false;
         }
       }
       
@@ -664,7 +679,9 @@ function GameScreen({
         }
       }
     }
-  }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, timedRun, timedRunSettings, endGame, hardcoreMode, isGameFinished, showToast, addTime, subtractTime, correctStreak]);
+
+    return isCorrect;
+  }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, timedRun, timedRunSettings, endGame, hardcoreMode, isGameFinished, showToast, rememberLastAnswerToast, addTime, subtractTime, correctStreak]);
 
   const handleSearch = useCallback((searchTerm) => {
     const normalizedSearchTerm = searchTerm.toLowerCase()
@@ -888,10 +905,11 @@ function GameScreen({
           onExit();
         }}
         selectedGameMode={selectedGameMode}
-        pokemonList={pokemonList} 
+        pokemonList={pokemonList}
         pokemonTypes={pokemonTypes}
         startTime={gameStartTime}
         endTime={endTime}
+        lastAnswerToast={lastAnswerToast}
       />
     );
   }
@@ -904,7 +922,7 @@ function GameScreen({
           <strong>×{streakBurst}</strong>
         </div>
       )}
-      <Navbar 
+      <Navbar
         ref={navbarRef}
         onPlayCry={() => {
           if (isAudioPlaying.current || isPlaying) {
@@ -923,7 +941,6 @@ function GameScreen({
           }
         }}
         correctCount={gameState.correctCount}
-        correctStreak={correctStreak}
         incorrectCount={gameState.incorrectCount}
         onSearch={handleSearch}
         onEnterPress={handleEnterPress}
@@ -942,11 +959,10 @@ function GameScreen({
       />
       <div className="game-content">
         <div className="game-screen" data-card-count={filteredPokemonList.length}>
-          <PokemonGrid 
+          <PokemonGrid
             pokemonList={pokemonList}
             visiblePokemonIds={visiblePokemonIds}
             onPokemonClick={handlePokemonClick}
-            animatingCards={animatingCards}
             isGameOver={false}
             allShiny={allShiny}
             animatedSprites={!denseGrid}
@@ -957,7 +973,7 @@ function GameScreen({
       </div>
       <footer className="game-footer">
         <p className="footer-text">
-        <a href="https://github.com/davidsarrat" target="_blank" rel="noopener noreferrer">Made with ❤️ by <strong>David Sarrat González</strong></a>
+          <a href="https://github.com/davidsarrat" target="_blank" rel="noopener noreferrer">Made with ❤️ by <strong>David Sarrat González</strong></a>
         </p>
         <button className="exit-button" onClick={handleExitClick}>Exit Game</button>
       </footer>

@@ -6,7 +6,6 @@ const PokemonGrid = React.memo(function PokemonGrid({
   pokemonList, 
   visiblePokemonIds, 
   onPokemonClick, 
-  animatingCards, 
   isGameOver, 
   allShiny,
   animatedSprites = true,
@@ -16,20 +15,17 @@ const PokemonGrid = React.memo(function PokemonGrid({
   const onPokemonClickRef = useRef(onPokemonClick);
   onPokemonClickRef.current = onPokemonClick;
   const handlePokemonClick = useCallback((pokemon) => {
-    onPokemonClickRef.current(pokemon);
+    return onPokemonClickRef.current(pokemon);
   }, []);
 
   const memoizedPokemonCards = useMemo(() => {
     const pokemonById = new Map(pokemonList.map(pokemon => [pokemon.id, pokemon]));
     return visiblePokemonIds.map(id => pokemonById.get(id)).filter(Boolean).map(pokemon => {
-      const animationInfo = animatingCards.get(pokemon.id);
       return (
         <PokemonCard
           key={pokemon.id}
           pokemon={pokemon}
           onClick={handlePokemonClick}
-          isAnimating={!!animationInfo}
-          isCorrect={animationInfo?.isCorrect}
           isGameOver={isGameOver}
           allShiny={allShiny}
           animated={animatedSprites}
@@ -37,7 +33,7 @@ const PokemonGrid = React.memo(function PokemonGrid({
         />
       );
     });
-  }, [pokemonList, visiblePokemonIds, handlePokemonClick, animatingCards, isGameOver, allShiny, animatedSprites, pokemonTypes]);
+  }, [pokemonList, visiblePokemonIds, handlePokemonClick, isGameOver, allShiny, animatedSprites, pokemonTypes]);
 
   return (
     <div className={`pokemon-grid ${denseGrid ? 'is-dense-grid' : ''}`} data-count={memoizedPokemonCards.length}>

@@ -13,32 +13,35 @@ const colorWithOpacity = (hexColor, opacity) => {
 const PokemonCard = React.memo(function PokemonCard({ 
   pokemon, 
   onClick, 
-  isAnimating, 
-  isCorrect, 
   isGameOver, 
   allShiny,
   animated = true,
   types = []
 }) {
-  const [isShaking, setIsShaking] = useState(false);
   const [isTapping, setIsTapping] = useState(false);
+  const [answerFeedback, setAnswerFeedback] = useState(null);
 
   const handleClick = () => {
     if (isGameOver) {
-      setIsShaking(true);
-      setTimeout(() => setIsShaking(false), 500);
-    } else {
       setIsTapping(true);
       setTimeout(() => setIsTapping(false), 380);
+      onClick(pokemon);
+      return;
     }
-    onClick(pokemon);
+
+    const isCorrect = onClick(pokemon);
+    if (typeof isCorrect !== 'boolean') return;
+
+    setIsTapping(true);
+    setAnswerFeedback(isCorrect ? 'correct' : 'wrong');
+    setTimeout(() => setIsTapping(false), 380);
+    setTimeout(() => setAnswerFeedback(null), 500);
   };
 
   const cardClassName = `
     pokemon-card 
-    ${isShaking ? 'shake-animation' : ''}
     ${isTapping ? 'tap-animation' : ''}
-    ${isAnimating ? (isCorrect ? 'answer-correct' : 'answer-wrong') : ''}
+    ${answerFeedback ? `answer-${answerFeedback}` : ''}
   `;
   
   const isShiny = allShiny && !isGameOver;

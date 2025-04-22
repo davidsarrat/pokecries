@@ -87,14 +87,18 @@
 }
 
 .btn-group-vertical .btn .gen-icon-gen2,
-.btn-group-vertical .btn .gen-icon-gen4,
 .btn-group-vertical .btn .gen-icon-gen5 {
+  transform: scale(1.25);
+  transform-origin: center;
+}
+
+.btn-group-vertical .btn .gen-icon-gen4 {
   transform: scale(1.18);
   transform-origin: center;
 }
 
 .btn-group-vertical .btn .gen-icon-gen3 {
-  transform: scale(1.28);
+  transform: scale(1.35);
   transform-origin: center;
 }
 

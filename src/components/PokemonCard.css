@@ -41,14 +41,16 @@
   z-index: 0;
 }
 
-.pokemon-card.answer-correct {
-  --tap-accent: rgba(74, 222, 128, 0.58);
-  box-shadow: inset 0 0 0 2px rgba(34, 197, 94, 0.52), 0 10px 22px rgba(34, 197, 94, 0.2);
+.pokemon-card.answer-correct,
+.pokemon-card.answer-correct:hover {
+  --tap-accent: rgba(34, 197, 94, 0.78);
+  box-shadow: inset 0 0 0 2px rgba(34, 197, 94, 0.52), 0 16px 36px rgba(22, 163, 74, 0.34), 0 0 30px rgba(74, 222, 128, 0.24);
 }
 
-.pokemon-card.answer-wrong {
-  --tap-accent: rgba(248, 113, 113, 0.55);
-  box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.5), 0 10px 22px rgba(239, 68, 68, 0.18);
+.pokemon-card.answer-wrong,
+.pokemon-card.answer-wrong:hover {
+  --tap-accent: rgba(239, 68, 68, 0.8);
+  box-shadow: inset 0 0 0 2px rgba(239, 68, 68, 0.5), 0 16px 36px rgba(220, 38, 38, 0.34), 0 0 30px rgba(248, 113, 113, 0.24);
 }
 
 .pokemon-card.tap-animation::after {
@@ -137,10 +139,6 @@
     transform: translateY(-5px) scale(0.96);
   }
 
-  .shake-animation:hover {
-    animation: shakeHovered 0.5s;
-  }
-
   .tap-animation:hover {
     animation: tapHovered 0.32s cubic-bezier(0.2, 0.8, 0.2, 1.15);
   }
@@ -169,22 +167,6 @@
   .pokemon-name {
     font-size: 0.75rem;
   }
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
-}
-
-@keyframes shakeHovered {
-  0%, 100% { transform: translateY(-5px) translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateY(-5px) translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateY(-5px) translateX(5px); }
-}
-
-.shake-animation {
-  animation: shake 0.5s;
 }
 
 @keyframes tap {
