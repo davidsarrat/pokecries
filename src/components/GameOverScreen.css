@@ -23,7 +23,7 @@
 }
 
 .game-over-title {
-  font-size: 4.8rem;
+  font-size: clamp(2.6rem, 12.8vw, 4.8rem);
   font-weight: 900;
   color: #FFCB05;
   margin-bottom: 2rem;
@@ -32,9 +32,9 @@
   display: block;
   font-family: 'Pocket Monk', sans-serif;
   position: relative;
-  letter-spacing: 2px;
-  -webkit-text-stroke: 0.026em #3B4CCA;
-  text-stroke: 0.026em #3B4CCA;
+  letter-spacing: clamp(0.5px, 0.35vw, 2px);
+  -webkit-text-stroke: 0.022em #3B4CCA;
+  text-stroke: 0.022em #3B4CCA;
   paint-order: stroke fill;
   line-height: 1.2;
   white-space: nowrap;
@@ -51,15 +51,15 @@
 }
 
 .game-over-title::before {
-  -webkit-text-stroke: 0.13em #3B4CCA;
-  text-stroke: 0.13em #3B4CCA;
+  -webkit-text-stroke: 0.075em #3B4CCA;
+  text-stroke: 0.075em #3B4CCA;
   paint-order: stroke fill;
   z-index: -2;
 }
 
 .game-over-title::after {
-  -webkit-text-stroke: 0.06em #1E3A8A;
-  text-stroke: 0.06em #1E3A8A;
+  -webkit-text-stroke: 0.035em #1E3A8A;
+  text-stroke: 0.035em #1E3A8A;
   paint-order: stroke fill;
   z-index: -1;
 }
@@ -185,10 +185,6 @@
     width: calc(100% - 1rem);
   }
 
-  .game-over-title {
-    font-size: 4rem;
-  }
-
   .stats-container {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -216,10 +212,6 @@
     padding: 1rem 0.5rem;
   }
 
-  .game-over-title {
-    font-size: 3.5rem;
-  }
-
   .stats-container {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -238,9 +230,8 @@
   }
 }
 
-@media (max-width: 400px) {
+@media (max-width: 280px) {
   .game-over-title {
-    font-size: 2.8rem;
-    white-space: normal;
+    font-size: 12.8vw;
   }
 }

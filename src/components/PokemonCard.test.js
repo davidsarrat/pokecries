@@ -94,6 +94,24 @@ test('keeps the missed form and shiny state on the game-over card', () => {
   );
 });
 
+test('activates a game-over card on pointer release without replaying on click', () => {
+  const onClick = jest.fn();
+  render(
+    <PokemonCard
+      pokemon={pokemon}
+      onClick={onClick}
+      isGameOver={true}
+      animated={false}
+    />
+  );
+
+  const card = screen.getByRole('button');
+  fireEvent.pointerUp(card, { button: 0 });
+  fireEvent.click(card);
+
+  expect(onClick).toHaveBeenCalledTimes(1);
+});
+
 test('renders a naturally shiny form during the game', () => {
   render(
     <PokemonCard

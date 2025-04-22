@@ -183,7 +183,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
       .map(pokemon => pokemonCryUrl(pokemon.id));
     if (resultCryUrls.length === 0) return;
 
-    preloadAssets(resultCryUrls, undefined, { priority: 100 }).then(failedUrls => {
+    preloadAssets(resultCryUrls, undefined, { priority: 10 }).then(failedUrls => {
       if (failedUrls.length > 0) {
         console.warn(`Could not preload ${failedUrls.length} result cries.`);
       }
@@ -201,7 +201,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
         });
 
       if (visibleCryUrls.length > 0) {
-        preloadAssets(visibleCryUrls, undefined, { priority: 100 });
+        preloadAssets(visibleCryUrls, undefined, { priority: 10 });
       }
     }, { rootMargin: '240px 0px' });
 

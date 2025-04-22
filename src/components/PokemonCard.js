@@ -5,6 +5,7 @@ import pokemonTypeColors from '../data/pokemonTypeColors';
 
 const tapTimers = new WeakMap();
 const answerTimers = new WeakMap();
+const pointerActivatedCards = new WeakSet();
 
 const colorWithOpacity = (hexColor, opacity) => {
   const red = parseInt(hexColor.slice(1, 3), 16);
@@ -73,6 +74,7 @@ const PokemonCard = React.memo(function PokemonCard({
   const handleClick = (event) => {
     const card = event.currentTarget;
     if (isGameOver) {
+      if (pointerActivatedCards.delete(card)) return;
       onClick(pokemon);
       triggerTap(card);
       return;
@@ -92,6 +94,15 @@ const PokemonCard = React.memo(function PokemonCard({
       );
     }
   };
+
+  const handlePointerUp = (event) => {
+    if (!isGameOver || event.button !== 0) return;
+
+    const card = event.currentTarget;
+    pointerActivatedCards.add(card);
+    onClick(pokemon);
+    triggerTap(card);
+  };
   
   const isShiny = Boolean(allShiny || pokemon.isShiny);
   const spritePath = animated
@@ -106,6 +117,7 @@ const PokemonCard = React.memo(function PokemonCard({
       data-pokemon-id={pokemon.id}
       onClick={handleClick}
       onPointerDown={setTapOrigin}
+      onPointerUp={handlePointerUp}
       style={cardStyle}
     >
       <span className="pokemon-sprite-frame">

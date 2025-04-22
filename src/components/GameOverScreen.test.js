@@ -16,7 +16,7 @@ jest.mock('../utils/scrollUtils', () => ({
   scrollToTop: jest.fn(),
 }));
 
-test('preloads the first result cries at high priority', async () => {
+test('preloads the first result cries without competing with direct playback', async () => {
   preloadAssets.mockResolvedValue([]);
   const failedPokemon = Array.from({ length: 30 }, (_, index) => ({
     id: index + 1,
@@ -39,7 +39,7 @@ test('preloads the first result cries at high priority', async () => {
         .slice(0, getEagerDensePokemonCount())
         .map(pokemon => pokemonCryUrl(pokemon.id)),
       undefined,
-      { priority: 100 }
+      { priority: 10 }
     );
   });
 });
@@ -82,7 +82,7 @@ test('warms result cries before scrolled cards become clickable', async () => {
     expect(preloadAssets).toHaveBeenCalledWith(
       [pokemonCryUrl('250')],
       undefined,
-      { priority: 100 }
+      { priority: 10 }
     );
   } finally {
     global.IntersectionObserver = originalIntersectionObserver;
@@ -147,7 +147,9 @@ test('starts a selected result cry and immediately cuts the previous one', async
     );
     const cards = container.querySelectorAll('.pokemon-card');
 
+    fireEvent.pointerUp(cards[0], { button: 0 });
     fireEvent.click(cards[0]);
+    fireEvent.pointerUp(cards[1], { button: 0 });
     fireEvent.click(cards[1]);
     await act(async () => Promise.resolve());
 
