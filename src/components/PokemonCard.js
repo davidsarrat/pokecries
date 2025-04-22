@@ -74,6 +74,7 @@ const PokemonCard = React.memo(function PokemonCard({
     <button
       type="button"
       className={cardClassName}
+      data-pokemon-id={pokemon.id}
       onClick={handleClick}
       style={cardStyle}
     >

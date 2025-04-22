@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import GameOverScreen from './GameOverScreen';
 import { pokemonCryUrl, preloadAssets } from '../utils/assetUrls';
 
@@ -38,4 +38,49 @@ test('preloads the first result cries at high priority', async () => {
       { priority: 100 }
     );
   });
+});
+
+test('warms result cries before scrolled cards become clickable', async () => {
+  const originalIntersectionObserver = global.IntersectionObserver;
+  const observedCards = [];
+  let intersectionCallback;
+  const unobserve = jest.fn();
+  global.IntersectionObserver = jest.fn().mockImplementation(callback => {
+    intersectionCallback = callback;
+    return {
+      disconnect: jest.fn(),
+      observe: card => observedCards.push(card),
+      unobserve,
+    };
+  });
+  preloadAssets.mockResolvedValue([]);
+
+  try {
+    render(
+      <GameOverScreen
+        stats={{ correctCount: 0, incorrectCount: 2, progressCount: 2 }}
+        failedPokemon={[
+          { id: 25, name: 'Pikachu' },
+          { id: 250, name: 'Ho-Oh' },
+        ]}
+        onPlayAgain={() => {}}
+        startTime={0}
+        endTime={1000}
+      />
+    );
+
+    expect(observedCards).toHaveLength(2);
+    await act(async () => {
+      intersectionCallback([{ isIntersecting: true, target: observedCards[1] }]);
+    });
+
+    expect(unobserve).toHaveBeenCalledWith(observedCards[1]);
+    expect(preloadAssets).toHaveBeenCalledWith(
+      [pokemonCryUrl('250')],
+      undefined,
+      { priority: 100 }
+    );
+  } finally {
+    global.IntersectionObserver = originalIntersectionObserver;
+  }
 });

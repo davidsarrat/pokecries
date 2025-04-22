@@ -11,6 +11,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
   const { correctCount, incorrectCount, progressCount, bestStreak = 0 } = stats;
   const audioRef = useRef(null);
   const audioPlaybackSequenceRef = useRef(0);
+  const failedGridRef = useRef(null);
   const transitionTimerRef = useRef(null);
   const [isLeaving, setIsLeaving] = useState(false);
   const [lastToastPhase, setLastToastPhase] = useState(null);
@@ -107,6 +108,28 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
       }
     });
   }, [uniqueFailedPokemon]);
+  useEffect(() => {
+    if (!failedGridRef.current || typeof IntersectionObserver !== 'function') return undefined;
+
+    const observer = new IntersectionObserver(entries => {
+      const visibleCryUrls = entries
+        .filter(entry => entry.isIntersecting)
+        .map(entry => {
+          observer.unobserve(entry.target);
+          return pokemonCryUrl(entry.target.dataset.pokemonId);
+        });
+
+      if (visibleCryUrls.length > 0) {
+        preloadAssets(visibleCryUrls, undefined, { priority: 100 });
+      }
+    }, { rootMargin: '240px 0px' });
+
+    failedGridRef.current
+      .querySelectorAll('[data-pokemon-id]')
+      .forEach(card => observer.observe(card));
+
+    return () => observer.disconnect();
+  }, [uniqueFailedPokemon]);
   const animateResults = shouldAnimatePokemon(uniqueFailedPokemon.length);
 
   return (
@@ -152,7 +175,7 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, startTime, endTime,
         {uniqueFailedPokemon.length > 0 && (
           <>
             <h2 className="failed-pokemon-title">Pokémon you missed:</h2>
-            <div className={`failed-pokemon-grid ${animateResults ? '' : 'is-dense-grid'}`}>
+            <div ref={failedGridRef} className={`failed-pokemon-grid ${animateResults ? '' : 'is-dense-grid'}`}>
               {uniqueFailedPokemon.map(pokemon => (
                 <PokemonCard
                   key={pokemon.id}
