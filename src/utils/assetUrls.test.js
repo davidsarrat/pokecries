@@ -3,7 +3,6 @@ import {
   generationIconUrl,
   getPokemonCryAudio,
   pokemonAssetUrls,
-  pokemonCryPlaybackOffset,
   pokemonCryUrl,
   pokemonSpriteAssetUrls,
   pokemonSpriteUrl,
@@ -44,19 +43,71 @@ test('builds pinned external asset URLs', () => {
   expect(pokemonVariantSpriteAssetUrls('1')).toEqual([]);
 });
 
-test('skips only the encoder delay of each legacy cry sample-rate group', () => {
-  expect(pokemonCryPlaybackOffset('25')).toBe(0.095);
-  expect(pokemonCryPlaybackOffset('432')).toBe(0.087);
-  expect(pokemonCryPlaybackOffset('503')).toBe(0.095);
-  expect(pokemonCryPlaybackOffset('518')).toBe(0.087);
-  expect(pokemonCryPlaybackOffset('571')).toBe(0.064);
-  expect(pokemonCryPlaybackOffset('640')).toBe(0.045);
-  expect(pokemonCryPlaybackOffset('516')).toBe(0.029);
-  expect(pokemonCryPlaybackOffset('550')).toBe(0.02);
+test('restarts a played cry without seeking a fresh one', () => {
+  let freshSeekCount = 0;
+  const freshAudio = { readyState: 4 };
+  Object.defineProperty(freshAudio, 'currentTime', {
+    get: () => 0,
+    set: () => {
+      freshSeekCount += 1;
+    },
+  });
+  restartPokemonCry(freshAudio);
+  expect(freshSeekCount).toBe(0);
 
-  const audio = { currentTime: 0, readyState: 4 };
-  restartPokemonCry(audio, '25');
-  expect(audio.currentTime).toBe(0.095);
+  const playedAudio = { currentTime: 0.4, readyState: 4 };
+  restartPokemonCry(playedAudio);
+  expect(playedAudio.currentTime).toBe(0);
+});
+
+test('plays a preloaded cry from a decoded low-latency buffer', async () => {
+  const originalAudioContext = window.AudioContext;
+  const originalFetch = global.fetch;
+  const originalNodeEnv = process.env.NODE_ENV;
+  const decodedAudio = { duration: 0.8 };
+  const source = {
+    buffer: null,
+    connect: jest.fn(),
+    disconnect: jest.fn(),
+    onended: null,
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  const context = {
+    createBufferSource: jest.fn(() => source),
+    currentTime: 1,
+    decodeAudioData: jest.fn().mockResolvedValue(decodedAudio),
+    destination: {},
+    resume: jest.fn().mockResolvedValue(undefined),
+    state: 'running',
+  };
+  window.AudioContext = jest.fn(() => context);
+  process.env.NODE_ENV = 'development';
+  global.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
+  });
+
+  try {
+    await preloadAssets([pokemonCryUrl('432')], undefined, { priority: 100 });
+    const audio = getPokemonCryAudio('432');
+    const onplaying = jest.fn();
+    audio.onplaying = onplaying;
+
+    await audio.play();
+
+    expect(context.decodeAudioData).toHaveBeenCalledTimes(1);
+    expect(source.start).toHaveBeenCalledWith(0, 0);
+    expect(onplaying).toHaveBeenCalledTimes(1);
+
+    audio.pause();
+    expect(source.stop).toHaveBeenCalledTimes(1);
+  } finally {
+    resetRuntimeAssetCache();
+    window.AudioContext = originalAudioContext;
+    global.fetch = originalFetch;
+    process.env.NODE_ENV = originalNodeEnv;
+  }
 });
 
 test('preloads every unique asset and reports completion', async () => {

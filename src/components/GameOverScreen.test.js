@@ -39,7 +39,7 @@ test('preloads the first result cries without competing with direct playback', a
         .slice(0, getEagerDensePokemonCount())
         .map(pokemon => pokemonCryUrl(pokemon.id)),
       undefined,
-      { priority: 10 }
+      { priority: 90 }
     );
   });
 });
@@ -82,7 +82,7 @@ test('warms result cries before scrolled cards become clickable', async () => {
     expect(preloadAssets).toHaveBeenCalledWith(
       [pokemonCryUrl('250')],
       undefined,
-      { priority: 10 }
+      { priority: 90 }
     );
   } finally {
     global.IntersectionObserver = originalIntersectionObserver;

@@ -16,6 +16,7 @@ import {
   pokemonCryUrl,
   preloadAssets,
   restartPokemonCry,
+  unlockPokemonCryAudio,
 } from '../utils/assetUrls';
 
 const LOCAL_STORAGE_KEY = 'pokecries_start_screen_config';
@@ -258,6 +259,7 @@ function StartScreen() {
       return;
     }
     setError('');
+    unlockPokemonCryAudio();
     stopMenuCry();
     scrollToTop();
     const generationsToUse = selectedGenerations.length > 0 ? selectedGenerations : ['gen1'];

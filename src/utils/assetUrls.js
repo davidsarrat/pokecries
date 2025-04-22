@@ -13,16 +13,6 @@ const LEGACY_CRY_FILENAMES = {
   642: '642_incarnate',
   645: '645_incarnate',
 };
-const GEN5_CRIES_AT_11025_HZ = new Set([503, 601, 638, 644]);
-const GEN5_CRIES_AT_12000_HZ = new Set([518, 545, 547, 576, 609, 635, 637, 642, 643]);
-const GEN5_CRIES_AT_22050_HZ = new Set([
-  494, 496, 506, 507, 508, 509, 510, 511, 512, 513, 514, 515, 524, 529,
-  531, 535, 536, 537, 538, 539, 557, 559, 560, 564, 568, 575, 580, 581,
-  582, 583, 584, 587, 588, 589, 590, 591, 593, 598, 602, 603, 605, 613,
-  614, 616, 617, 620, 622, 624, 625, 628, 632, 634, 636, 640, 647,
-]);
-const GEN5_CRIES_AT_32000_HZ = new Set([516, 532, 543, 566, 597, 627]);
-const GEN5_CRIES_AT_44100_HZ = new Set([498, 519, 550, 574, 595]);
 const GENERATION_ICON_IDS = {
   gen1: '25',
   gen2: '250',
@@ -32,10 +22,13 @@ const GENERATION_ICON_IDS = {
 };
 const preloadRequests = new Map();
 const audioAssets = new Map();
+const decodedAudioBuffers = new Map();
+const audioDecodeRequests = new Map();
 const pendingPreloads = new Set();
 const preloadQueue = [];
 const MAX_RETAINED_ASSETS = 128;
 const MAX_RETAINED_AUDIO = 48;
+const MAX_RETAINED_AUDIO_BUFFERS = 48;
 const MAX_CONCURRENT_PRELOADS = 8;
 const MAX_CONCURRENT_BACKGROUND_PRELOADS = 1;
 const MAX_QUEUED_PRELOADS = 64;
@@ -47,6 +40,9 @@ const AUDIO_ASSET_PATTERN = /\.(?:mp3|ogg)$/i;
 let activePreloads = 0;
 let activeBackgroundPreloads = 0;
 let preloadSequence = 0;
+let audioBufferGeneration = 0;
+let lowLatencyAudioContext = null;
+let lowLatencyAudioUnavailable = false;
 
 const createPreloadCancelledError = () => {
   const error = new Error('Asset preload cancelled');
@@ -74,18 +70,35 @@ export const pokemonCryUrl = (pokemonId) => {
   return `${LEGACY_CRIES_BASE}/${filename}.mp3`;
 };
 
-export const pokemonCryPlaybackOffset = (pokemonId) => {
-  const id = Number(pokemonId);
-  if (id <= 386 || id === 438 || id === 446 || GEN5_CRIES_AT_11025_HZ.has(id)) return 0.095;
-  if (id <= 493 || GEN5_CRIES_AT_12000_HZ.has(id)) return 0.087;
-  if (GEN5_CRIES_AT_22050_HZ.has(id)) return 0.045;
-  if (GEN5_CRIES_AT_32000_HZ.has(id)) return 0.029;
-  if (GEN5_CRIES_AT_44100_HZ.has(id)) return 0.02;
-  return 0.064;
+export const restartPokemonCry = (audio) => {
+  if (audio.readyState > 0 && audio.currentTime > 0) audio.currentTime = 0;
 };
 
-export const restartPokemonCry = (audio, pokemonId) => {
-  if (audio.readyState > 0) audio.currentTime = pokemonCryPlaybackOffset(pokemonId);
+const getLowLatencyAudioContext = () => {
+  if (lowLatencyAudioUnavailable || typeof window === 'undefined') return null;
+  if (lowLatencyAudioContext && lowLatencyAudioContext.state !== 'closed') {
+    return lowLatencyAudioContext;
+  }
+
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (typeof AudioContextClass !== 'function') {
+    lowLatencyAudioUnavailable = true;
+    return null;
+  }
+
+  try {
+    lowLatencyAudioContext = new AudioContextClass({ latencyHint: 'interactive' });
+    return lowLatencyAudioContext;
+  } catch (error) {
+    lowLatencyAudioUnavailable = true;
+    return null;
+  }
+};
+
+export const unlockPokemonCryAudio = () => {
+  const context = getLowLatencyAudioContext();
+  if (!context || context.state === 'running') return Promise.resolve();
+  return context.resume().catch(() => undefined);
 };
 
 const refreshCacheEntry = (cache, key) => {
@@ -93,6 +106,135 @@ const refreshCacheEntry = (cache, key) => {
   cache.delete(key);
   cache.set(key, value);
   return value;
+};
+
+const trimDecodedAudioCache = () => {
+  while (decodedAudioBuffers.size > MAX_RETAINED_AUDIO_BUFFERS) {
+    const disposableUrl = decodedAudioBuffers.keys().next().value;
+    decodedAudioBuffers.delete(disposableUrl);
+    preloadRequests.delete(disposableUrl);
+  }
+};
+
+const decodeAudioAsset = (url) => {
+  if (decodedAudioBuffers.has(url)) {
+    return Promise.resolve(refreshCacheEntry(decodedAudioBuffers, url));
+  }
+  if (audioDecodeRequests.has(url)) return audioDecodeRequests.get(url);
+
+  const context = getLowLatencyAudioContext();
+  if (!context) return Promise.reject(new Error('Low-latency audio is unavailable'));
+
+  const generation = audioBufferGeneration;
+  const request = fetch(url, {
+    cache: 'force-cache',
+    referrerPolicy: 'no-referrer',
+  })
+    .then(async response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const encodedAudio = await response.arrayBuffer();
+      return context.decodeAudioData(encodedAudio);
+    })
+    .then(decodedAudio => {
+      if (generation === audioBufferGeneration) {
+        decodedAudioBuffers.set(url, decodedAudio);
+        trimDecodedAudioCache();
+      }
+      return decodedAudio;
+    })
+    .finally(() => {
+      if (audioDecodeRequests.get(url) === request) audioDecodeRequests.delete(url);
+    });
+
+  audioDecodeRequests.set(url, request);
+  return request;
+};
+
+const createBufferedAudioAsset = (url, decodedAudio, context) => {
+  let source = null;
+  let playbackPosition = 0;
+  let playbackStartedAt = 0;
+  let playbackVersion = 0;
+
+  const stopSource = () => {
+    if (!source) return;
+    source.onended = null;
+    try {
+      source.stop();
+    } catch (error) {
+      // The source may already have ended between the click and this cleanup.
+    }
+    source.disconnect();
+    source = null;
+  };
+
+  const audio = {
+    error: null,
+    networkState: 1,
+    onended: null,
+    onerror: null,
+    onplaying: null,
+    onstalled: null,
+    onwaiting: null,
+    paused: true,
+    preload: 'auto',
+    readyState: 4,
+    src: url,
+    load: () => {},
+    removeAttribute: attribute => {
+      if (attribute === 'src') audio.src = '';
+    },
+    pause: () => {
+      playbackVersion += 1;
+      if (!audio.paused) {
+        playbackPosition = Math.min(
+          decodedAudio.duration,
+          Math.max(0, context.currentTime - playbackStartedAt)
+        );
+      }
+      audio.paused = true;
+      stopSource();
+    },
+    play: async () => {
+      const requestedVersion = playbackVersion + 1;
+      playbackVersion = requestedVersion;
+      stopSource();
+
+      if (context.state !== 'running') await context.resume();
+      if (requestedVersion !== playbackVersion) return;
+
+      const nextSource = context.createBufferSource();
+      nextSource.buffer = decodedAudio;
+      nextSource.connect(context.destination);
+      source = nextSource;
+      audio.paused = false;
+      playbackStartedAt = context.currentTime - playbackPosition;
+      nextSource.onended = () => {
+        if (source !== nextSource) return;
+        source.disconnect();
+        source = null;
+        playbackPosition = decodedAudio.duration;
+        audio.paused = true;
+        if (typeof audio.onended === 'function') audio.onended();
+      };
+      nextSource.start(0, playbackPosition);
+      if (typeof audio.onplaying === 'function') audio.onplaying();
+    },
+  };
+
+  Object.defineProperty(audio, 'currentTime', {
+    configurable: true,
+    get: () => (
+      audio.paused
+        ? playbackPosition
+        : Math.min(decodedAudio.duration, context.currentTime - playbackStartedAt)
+    ),
+    set: value => {
+      playbackPosition = Math.min(decodedAudio.duration, Math.max(0, Number(value) || 0));
+    },
+  });
+
+  return audio;
 };
 
 const trimPreloadCache = () => {
@@ -153,10 +295,11 @@ const deferAudioRelease = (audioElements) => {
 
 const discardAudioAsset = (url) => {
   const audio = audioAssets.get(url);
-  if (!audio) return;
-
-  releaseAudioElement(audio);
-  audioAssets.delete(url);
+  if (audio) {
+    releaseAudioElement(audio);
+    audioAssets.delete(url);
+  }
+  decodedAudioBuffers.delete(url);
   preloadRequests.delete(url);
 };
 
@@ -168,9 +311,16 @@ const getAudioAsset = (url) => {
 
   if (audioAssets.has(url)) return refreshCacheEntry(audioAssets, url);
 
-  const audio = new Audio();
-  audio.preload = 'auto';
-  audio.src = url;
+  const context = getLowLatencyAudioContext();
+  const decodedAudio = decodedAudioBuffers.get(url);
+  const canUseDecodedAudio = Boolean(context && decodedAudio);
+  const audio = canUseDecodedAudio
+    ? createBufferedAudioAsset(url, decodedAudio, context)
+    : new Audio();
+  if (!canUseDecodedAudio) {
+    audio.preload = 'auto';
+    audio.src = url;
+  }
   audioAssets.set(url, audio);
   trimAudioCache();
   return audio;
@@ -181,6 +331,33 @@ export const getPokemonCryAudio = (pokemonId, { forceReload = false } = {}) => {
   if (forceReload) discardAudioAsset(url);
   return getAudioAsset(url);
 };
+
+const preloadNativeAudioAsset = url => new Promise((resolve, reject) => {
+  const audio = getAudioAsset(url);
+  if (audio.readyState >= 3) {
+    resolve();
+    return;
+  }
+
+  const cleanup = () => {
+    audio.removeEventListener('canplay', handleReady);
+    audio.removeEventListener('error', handleError);
+  };
+  const handleReady = () => {
+    cleanup();
+    trimAudioCache();
+    resolve();
+  };
+  const handleError = () => {
+    cleanup();
+    audioAssets.delete(url);
+    reject(new Error('Audio preload failed'));
+  };
+
+  audio.addEventListener('canplay', handleReady);
+  audio.addEventListener('error', handleError);
+  audio.load();
+});
 
 export const unknownPokemonSpriteUrl = () => `${POKEMON_SPRITES_ROOT}/0.png`;
 
@@ -294,6 +471,9 @@ export const resetRuntimeAssetCache = ({ deferAudio = false } = {}) => {
     disposableAudio.push(audio);
   });
   audioAssets.clear();
+  audioBufferGeneration += 1;
+  decodedAudioBuffers.clear();
+  audioDecodeRequests.clear();
   preloadRequests.clear();
 
   if (deferAudio && disposableAudio.length > 0) deferAudioRelease(disposableAudio);
@@ -332,32 +512,12 @@ const preloadUrl = (url, priority) => {
       image.src = url;
     })
     : canPreloadAsAudio
-      ? new Promise((resolve, reject) => {
-        const audio = getAudioAsset(url);
-        if (audio.readyState >= 3) {
-          resolve();
-          return;
-        }
-
-        const cleanup = () => {
-          audio.removeEventListener('canplay', handleReady);
-          audio.removeEventListener('error', handleError);
-        };
-        const handleReady = () => {
-          cleanup();
-          trimAudioCache();
-          resolve();
-        };
-        const handleError = () => {
-          cleanup();
-          audioAssets.delete(url);
-          reject(new Error('Audio preload failed'));
-        };
-
-        audio.addEventListener('canplay', handleReady);
-        audio.addEventListener('error', handleError);
-        audio.load();
-      })
+      ? (() => {
+        const context = getLowLatencyAudioContext();
+        return context
+          ? decodeAudioAsset(url).catch(() => preloadNativeAudioAsset(url))
+          : preloadNativeAudioAsset(url);
+      })()
     : fetch(url, {
       cache: 'force-cache',
       referrerPolicy: 'no-referrer',
