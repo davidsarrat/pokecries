@@ -321,7 +321,7 @@ function StartScreen() {
       {!isPreloadComplete && (
         <div className="initial-loader" role="status" aria-live="polite">
           <div className="initial-loader-card">
-            <div className="initial-loader-title">PokéCries</div>
+            <div className="initial-loader-title" data-text="PokéCries">PokéCries</div>
             <p>Loading the menu...</p>
             <div
               className="initial-loader-track"
