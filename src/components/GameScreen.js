@@ -56,6 +56,7 @@ function GameScreen({
   const [isGameReady, setIsGameReady] = useState(true);
   const isAudioPlaying = useRef(false);
   const didInitialize = useRef(false);
+  const [isGameFullyLoaded, setIsGameFullyLoaded] = useState(false);
 
   const memoizedPokemonList = useMemo(() => pokemonList, [pokemonList]);
 
@@ -265,6 +266,7 @@ function GameScreen({
         setFilteredPokemonList(initialVisiblePokemon);
         
         if (audioRef.current) {
+          console.log("Stopping existing audio");
           audioRef.current.pause();
           audioRef.current.src = '';
           audioRef.current = null;
@@ -278,6 +280,11 @@ function GameScreen({
           if (!isGameFinished) {
             setIsAutoPlaying(true);
             playCurrentCry(firstPokemon, true);
+            
+            setTimeout(() => {
+              console.log("Juego completamente cargado, iniciando temporizador");
+              setIsGameFullyLoaded(true);
+            }, 300);
           }
         }, 100);
       }
@@ -601,17 +608,23 @@ function GameScreen({
   }, [isGameInitialized, gameState.currentPokemon, playCurrentCry]);
 
   useEffect(() => {
-    if (!timedRun && !isGameFinished) {
+    if (isGameFullyLoaded && !timedRun && !isGameFinished) {
+      console.log("Iniciando temporizador normal");
+      setTimer(0);
+      
       const intervalId = setInterval(() => {
         setTimer(prevTimer => prevTimer + 1);
       }, 1000);
 
       return () => clearInterval(intervalId);
     }
-  }, [timedRun, isGameFinished]);
+  }, [isGameFullyLoaded, timedRun, isGameFinished]);
 
   useEffect(() => {
-    if (timedRun && !isGameFinished) {
+    if (isGameFullyLoaded && timedRun && !isGameFinished) {
+      console.log("Iniciando temporizador de modo tiempo");
+      setTimeLeftMs((timedRunSettings.minutes * 60 + timedRunSettings.seconds) * 1000);
+      
       const intervalId = setInterval(() => {
         setTimeLeftMs(prevTime => {
           const newTime = prevTime - 1000;
@@ -626,7 +639,7 @@ function GameScreen({
 
       return () => clearInterval(intervalId);
     }
-  }, [timedRun, isGameFinished, endGame]);
+  }, [isGameFullyLoaded, timedRun, isGameFinished, endGame, timedRunSettings]);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
