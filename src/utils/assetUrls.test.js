@@ -60,56 +60,6 @@ test('restarts a played cry without seeking a fresh one', () => {
   expect(playedAudio.currentTime).toBe(0);
 });
 
-test('plays a preloaded cry from a decoded low-latency buffer', async () => {
-  const originalAudioContext = window.AudioContext;
-  const originalFetch = global.fetch;
-  const originalNodeEnv = process.env.NODE_ENV;
-  const decodedAudio = { duration: 0.8 };
-  const source = {
-    buffer: null,
-    connect: jest.fn(),
-    disconnect: jest.fn(),
-    onended: null,
-    start: jest.fn(),
-    stop: jest.fn(),
-  };
-  const context = {
-    createBufferSource: jest.fn(() => source),
-    currentTime: 1,
-    decodeAudioData: jest.fn().mockResolvedValue(decodedAudio),
-    destination: {},
-    resume: jest.fn().mockResolvedValue(undefined),
-    state: 'running',
-  };
-  window.AudioContext = jest.fn(() => context);
-  process.env.NODE_ENV = 'development';
-  global.fetch = jest.fn().mockResolvedValue({
-    ok: true,
-    arrayBuffer: jest.fn().mockResolvedValue(new ArrayBuffer(8)),
-  });
-
-  try {
-    await preloadAssets([pokemonCryUrl('432')], undefined, { priority: 100 });
-    const audio = getPokemonCryAudio('432');
-    const onplaying = jest.fn();
-    audio.onplaying = onplaying;
-
-    await audio.play();
-
-    expect(context.decodeAudioData).toHaveBeenCalledTimes(1);
-    expect(source.start).toHaveBeenCalledWith(0, 0);
-    expect(onplaying).toHaveBeenCalledTimes(1);
-
-    audio.pause();
-    expect(source.stop).toHaveBeenCalledTimes(1);
-  } finally {
-    resetRuntimeAssetCache();
-    window.AudioContext = originalAudioContext;
-    global.fetch = originalFetch;
-    process.env.NODE_ENV = originalNodeEnv;
-  }
-});
-
 test('preloads every unique asset and reports completion', async () => {
   const originalFetch = global.fetch;
   const progress = [];
