@@ -400,6 +400,111 @@ function GameScreen({
       selectedGameMode, pokemonList.length, getRandomPokemon, playCurrentCry, 
       endGame, updateVisiblePokemon]);
 
+  // Add timestamp references to track time more precisely
+  const startTimeRef = useRef(null);
+  const endTimeRef = useRef(null);
+  const lastTickRef = useRef(null);
+  const remainingTimeRef = useRef(null);
+
+  // Completely overhaul the timed run timer system to use a more precise approach
+  useEffect(() => {
+    // Clear any existing timer interval first
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    
+    if (isGameFullyLoaded && timedRun && !isGameFinished) {
+      console.log("Starting timed run timer with precise timing");
+      
+      // Initialize the timer only once at the beginning
+      if (!gameStartTime) {
+        const now = Date.now();
+        setGameStartTime(now);
+        startTimeRef.current = now;
+        lastTickRef.current = now;
+        
+        // Calculate total milliseconds from settings
+        const totalTimeMs = (timedRunSettings.minutes * 60 + timedRunSettings.seconds) * 1000;
+        remainingTimeRef.current = totalTimeMs;
+        
+        // Set the visible time display
+        setTimeLeftMs(totalTimeMs);
+        
+        console.log(`Game started at: ${new Date(now).toISOString()}, Initial time: ${totalTimeMs/1000}s`);
+      }
+      
+      // Use a more precise timer that calculates actual elapsed time
+      timerIntervalRef.current = setInterval(() => {
+        const now = Date.now();
+        const elapsed = now - lastTickRef.current;
+        lastTickRef.current = now;
+        
+        // Update the remaining time
+        if (remainingTimeRef.current !== null) {
+          remainingTimeRef.current = Math.max(0, remainingTimeRef.current - elapsed);
+          
+          // Update the visible time display (rounded to whole seconds for display)
+          const displayTime = Math.ceil(remainingTimeRef.current / 1000) * 1000;
+          setTimeLeftMs(displayTime);
+          
+          // End game when time runs out
+          if (remainingTimeRef.current <= 0) {
+            clearInterval(timerIntervalRef.current);
+            timerIntervalRef.current = null;
+            
+            // Make sure we only end the game once
+            setTimeout(() => {
+              if (!isGameFinished) {
+                console.log("Time's up! Ending game.");
+                endGame(true);
+              }
+            }, 0);
+          }
+        }
+      }, 100); // Update more frequently for higher precision
+      
+      return () => {
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+          timerIntervalRef.current = null;
+        }
+      };
+    }
+  }, [isGameFullyLoaded, timedRun, isGameFinished, endGame, timedRunSettings, gameStartTime]);
+
+  // Create functions to adjust time with precise control
+  const addTime = useCallback((milliseconds) => {
+    if (remainingTimeRef.current !== null) {
+      const oldTime = remainingTimeRef.current;
+      remainingTimeRef.current = remainingTimeRef.current + milliseconds;
+      
+      // Update the visible time immediately
+      const displayTime = Math.ceil(remainingTimeRef.current / 1000) * 1000;
+      setTimeLeftMs(displayTime);
+      
+      console.log(`Added ${milliseconds/1000}s: ${oldTime/1000}s → ${remainingTimeRef.current/1000}s (display: ${displayTime/1000}s)`);
+    }
+  }, []);
+
+  const subtractTime = useCallback((milliseconds) => {
+    if (remainingTimeRef.current !== null) {
+      const oldTime = remainingTimeRef.current;
+      remainingTimeRef.current = Math.max(0, remainingTimeRef.current - milliseconds);
+      
+      // Update the visible time immediately
+      const displayTime = Math.ceil(remainingTimeRef.current / 1000) * 1000;
+      setTimeLeftMs(displayTime);
+      
+      const willEndGame = remainingTimeRef.current <= 0;
+      console.log(`Subtracted ${milliseconds/1000}s: ${oldTime/1000}s → ${remainingTimeRef.current/1000}s (display: ${displayTime/1000}s), Will end: ${willEndGame}`);
+      
+      return willEndGame;
+    }
+    return false;
+  }, []);
+
+  // Modify handlePokemonClick to use the new precise time functions
   const handlePokemonClick = useCallback((clickedPokemon) => {
     if (!isGameInitialized || updateInProgress.current || isGameFinished) return;
 
@@ -420,7 +525,9 @@ function GameScreen({
     if (isCorrect) {
       if (timedRun) {
         const gainTimeMs = timedRunSettings.gainTime * 1000;
-        setTimeLeftMs(prevTime => prevTime + gainTimeMs);
+        
+        // Use precise time addition
+        addTime(gainTimeMs);
         setTimeGained(gainTimeMs);
         
         const gainTimeTimer = setTimeout(() => setTimeGained(0), 500);
@@ -470,22 +577,20 @@ function GameScreen({
       
       if (timedRun) {
         const loseTimeMs = timedRunSettings.loseTime * 1000;
-        const wouldEndGame = timeLeftMs - loseTimeMs <= 0;
         
-        setTimeLeftMs(prevTime => {
-          const newTime = Math.max(0, prevTime - loseTimeMs);
-          if (newTime <= 0) {
-            endGame(true);
-            return 0;
-          }
-          return newTime;
-        });
-        
+        // Use precise time subtraction and check if it will end the game
+        const willEndGame = subtractTime(loseTimeMs);
         setTimeLost(loseTimeMs);
         
         const loseTimeTimer = setTimeout(() => setTimeLost(0), 500);
         
-        if (wouldEndGame) {
+        // End the game if time ran out
+        if (willEndGame) {
+          setTimeout(() => {
+            if (!isGameFinished) {
+              endGame(true);
+            }
+          }, 100);
           return;
         }
       }
@@ -508,7 +613,7 @@ function GameScreen({
         }
       }
     }
-  }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, timedRun, timedRunSettings, timeLeftMs, endGame, hardcoreMode, isGameFinished, showToast]);
+  }, [isGameInitialized, gameState.currentPokemon, keepCryOnError, moveToNextPokemon, playCurrentCry, resetSearch, timedRun, timedRunSettings, endGame, hardcoreMode, isGameFinished, showToast, addTime, subtractTime]);
 
   const handleSearch = useCallback((searchTerm) => {
     const normalizedSearchTerm = searchTerm.toLowerCase()
@@ -618,8 +723,9 @@ function GameScreen({
     endGame(true);
   };
 
+  // Update formatTime to handle millisecond precision
   const formatTime = (time) => {
-    const totalSeconds = typeof time === 'number' ? Math.floor(time / 1000) : time;
+    const totalSeconds = typeof time === 'number' ? Math.ceil(time / 1000) : time;
     const minutes = Math.floor(totalSeconds / 60);
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
@@ -655,33 +761,7 @@ function GameScreen({
     }
   }, [isGameFullyLoaded, timedRun, isGameFinished, gameStartTime]);
 
-  useEffect(() => {
-    if (isGameFullyLoaded && timedRun && !isGameFinished) {
-      console.log("Starting timed run timer");
-      
-      setTimeLeftMs((timedRunSettings.minutes * 60 + timedRunSettings.seconds) * 1000);
-      
-      if (!gameStartTime) {
-        const startTime = Date.now();
-        setGameStartTime(startTime);
-        console.log(`Game started at: ${new Date(startTime).toISOString()}`);
-      }
-      
-      const intervalId = setInterval(() => {
-        setTimeLeftMs(prevTime => {
-          const newTime = prevTime - 1000;
-          if (newTime <= 0) {
-            clearInterval(intervalId);
-            endGame(true);
-            return 0;
-          }
-          return newTime;
-        });
-      }, 1000);
-
-      return () => clearInterval(intervalId);
-    }
-  }, [isGameFullyLoaded, timedRun, isGameFinished, endGame, timedRunSettings]);
+  const timerIntervalRef = useRef(null);
 
   useEffect(() => {
     document.addEventListener('keydown', handleKeyPress);
