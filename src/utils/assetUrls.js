@@ -44,7 +44,12 @@ const preloadUrl = (url) => {
         const image = new Image();
         image.decoding = 'async';
         image.referrerPolicy = 'no-referrer';
-        image.onload = resolve;
+        image.onload = () => {
+          const decodeRequest = typeof image.decode === 'function'
+            ? image.decode().catch(() => undefined)
+            : Promise.resolve();
+          decodeRequest.then(() => resolve(image));
+        };
         image.onerror = () => reject(new Error('Image preload failed'));
         image.src = url;
       })

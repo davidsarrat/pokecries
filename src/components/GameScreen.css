@@ -503,7 +503,7 @@ html, body {
 }
 
 .shiny-party-toast img {
-  filter: drop-shadow(0 2px 1px rgba(15, 23, 42, 0.18));
+  filter: drop-shadow(0 3px 2px rgba(15, 23, 42, 0.28));
   height: auto !important;
   max-height: 80px;
   max-width: 80px;
