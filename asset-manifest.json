@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/pokecries/static/css/main.cdc17f0f.css",
-    "main.js": "/pokecries/static/js/main.d1eaba3c.js",
+    "main.css": "/pokecries/static/css/main.e7f46f99.css",
+    "main.js": "/pokecries/static/js/main.57abac1a.js",
     "static/js/453.eb7508fa.chunk.js": "/pokecries/static/js/453.eb7508fa.chunk.js",
     "index.html": "/pokecries/index.html",
-    "main.cdc17f0f.css.map": "/pokecries/static/css/main.cdc17f0f.css.map",
-    "main.d1eaba3c.js.map": "/pokecries/static/js/main.d1eaba3c.js.map",
+    "main.e7f46f99.css.map": "/pokecries/static/css/main.e7f46f99.css.map",
+    "main.57abac1a.js.map": "/pokecries/static/js/main.57abac1a.js.map",
     "453.eb7508fa.chunk.js.map": "/pokecries/static/js/453.eb7508fa.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.cdc17f0f.css",
-    "static/js/main.d1eaba3c.js"
+    "static/css/main.e7f46f99.css",
+    "static/js/main.57abac1a.js"
   ]
 }
