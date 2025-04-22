@@ -21,9 +21,9 @@
   text-align: center;
   width: 100%;
   display: block;
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Pocket Monk', sans-serif;
   position: relative;
-  letter-spacing: -2px;
+  letter-spacing: 2px;
   line-height: 1.35;
   white-space: nowrap;
 }

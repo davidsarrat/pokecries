@@ -1,5 +1,12 @@
 const SPRITES_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/1435ac9b294901a0d3e8874aa69d76d038c1d65d/sprites/pokemon/versions/generation-v';
 const CRIES_BASE = 'https://raw.githubusercontent.com/PokeAPI/cries/ef687b18f0ce17169b4b4c09175819f7ade92f0f/cries/pokemon/legacy';
+const GENERATION_ICON_URLS = {
+  gen1: 'https://images.wikidexcdn.net/mwuploads/wikidex/b/bf/latest/20081214235115/Pikachu_icon.gif',
+  gen2: 'https://images.wikidexcdn.net/mwuploads/wikidex/d/d7/latest/20091208194409/Ho-Oh_icon.gif',
+  gen3: 'https://images.wikidexcdn.net/mwuploads/wikidex/3/32/latest/20091209210959/Rayquaza_icon.gif',
+  gen4: 'https://images.wikidexcdn.net/mwuploads/wikidex/d/d8/latest/20091209223655/Lucario_icon.gif',
+  gen5: 'https://images.wikidexcdn.net/mwuploads/wikidex/5/5b/latest/20101005232130/Zoroark_icon.gif',
+};
 
 export const pokemonSpriteUrl = (pokemonId, shiny = false) =>
   `${SPRITES_BASE}/black-white/${shiny ? 'shiny/' : ''}${pokemonId}.png`;
@@ -9,5 +16,55 @@ export const pokemonCryUrl = (pokemonId) => `${CRIES_BASE}/${pokemonId}.ogg`;
 export const animatedPokemonSpriteUrl = (pokemonId, shiny = false) =>
   `${SPRITES_BASE}/black-white/animated/${shiny ? 'shiny/' : ''}${pokemonId}.gif`;
 
-export const generationIconUrl = (pokemonId) =>
-  `${SPRITES_BASE}/icons/${pokemonId}.png`;
+export const generationIconUrl = (generationKey) => GENERATION_ICON_URLS[generationKey];
+
+export const pokemonAssetUrls = (pokemonId) => [
+  pokemonSpriteUrl(pokemonId),
+  pokemonSpriteUrl(pokemonId, true),
+  pokemonCryUrl(pokemonId),
+];
+
+export const preloadAssets = async (urls, onProgress = () => {}) => {
+  const uniqueUrls = [...new Set(urls)];
+  const failedUrls = [];
+  let nextIndex = 0;
+  let completed = 0;
+  let lastProgress = -1;
+
+  const reportProgress = () => {
+    const progress = uniqueUrls.length === 0
+      ? 100
+      : Math.round((completed / uniqueUrls.length) * 100);
+    if (progress !== lastProgress) {
+      lastProgress = progress;
+      onProgress(progress);
+    }
+  };
+
+  reportProgress();
+
+  const preloadNext = async () => {
+    while (nextIndex < uniqueUrls.length) {
+      const url = uniqueUrls[nextIndex];
+      nextIndex += 1;
+
+      try {
+        const response = await fetch(url, {
+          cache: 'force-cache',
+          referrerPolicy: 'no-referrer',
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        await response.arrayBuffer();
+      } catch (error) {
+        failedUrls.push(url);
+      }
+
+      completed += 1;
+      reportProgress();
+    }
+  };
+
+  const workerCount = Math.min(12, uniqueUrls.length);
+  await Promise.all(Array.from({ length: workerCount }, preloadNext));
+  return failedUrls;
+};

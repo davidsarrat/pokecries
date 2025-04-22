@@ -3,11 +3,11 @@ import './GenerationSelector.css';
 import { generationIconUrl } from '../utils/assetUrls';
 
 const generations = [
-  { name: 'Gen I', key: 'gen1', iconPokemonId: '25' },
-  { name: 'Gen II', key: 'gen2', iconPokemonId: '251' },
-  { name: 'Gen III', key: 'gen3', iconPokemonId: '384' },
-  { name: 'Gen IV', key: 'gen4', iconPokemonId: '447' },
-  { name: 'Gen V', key: 'gen5', iconPokemonId: '571' }
+  { name: 'Gen I', key: 'gen1' },
+  { name: 'Gen II', key: 'gen2' },
+  { name: 'Gen III', key: 'gen3' },
+  { name: 'Gen IV', key: 'gen4' },
+  { name: 'Gen V', key: 'gen5' }
 ];
 
 function GenerationSelector({ selectedGenerations, setSelectedGenerations }) {
@@ -29,7 +29,7 @@ function GenerationSelector({ selectedGenerations, setSelectedGenerations }) {
             className={`btn btn-outline-primary ${selectedGenerations.includes(gen.key) ? 'active' : ''}`}
             onClick={() => toggleGeneration(gen.key)}
           >
-            <img src={generationIconUrl(gen.iconPokemonId)} alt={`${gen.name} icon`} className="gen-icon" />
+            <img src={generationIconUrl(gen.key)} alt={`${gen.name} icon`} className="gen-icon" />
             <span>{gen.name}</span>
           </button>
         ))}

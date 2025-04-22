@@ -7,7 +7,12 @@ import GameScreen from './GameScreen';
 import { scrollToTop } from '../utils/scrollUtils';
 import LimitedQuestionsSelector from './LimitedQuestionsSelector';
 import pokemonData from '../data/pokemon.json';
-import { animatedPokemonSpriteUrl } from '../utils/assetUrls';
+import LegalNotice from './LegalNotice';
+import {
+  animatedPokemonSpriteUrl,
+  pokemonAssetUrls,
+  preloadAssets,
+} from '../utils/assetUrls';
 
 const LOCAL_STORAGE_KEY = 'pokecries_start_screen_config';
 
@@ -29,6 +34,8 @@ function StartScreen() {
   const [hardcoreMode, setHardcoreMode] = useState(false);
   const [timedRun, setTimedRun] = useState(false);
   const [dontRepeatPokemon, setDontRepeatPokemon] = useState(true);
+  const [isPreloading, setIsPreloading] = useState(false);
+  const [preloadProgress, setPreloadProgress] = useState(0);
 
   useEffect(() => {
     const savedConfig = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -98,7 +105,7 @@ function StartScreen() {
     return false;
   };
 
-  const handleStartGame = () => {
+  const handleStartGame = async () => {
     if (selectedGenerations.length === 0) {
       setError('You must select at least one generation!');
       return;
@@ -122,7 +129,20 @@ function StartScreen() {
     setError('');
     scrollToTop();
     const generationsToUse = selectedGenerations.length > 0 ? selectedGenerations : ['gen1'];
-    console.log("Starting game with generations:", generationsToUse);
+    const selectedPokemon = generationsToUse.flatMap(genKey => pokemonData[genKey] || []);
+    const assetUrls = selectedPokemon.flatMap(pokemon => pokemonAssetUrls(pokemon.id));
+    assetUrls.push(
+      animatedPokemonSpriteUrl('272', true),
+      `${process.env.PUBLIC_URL}/media/sounds/shiny.mp3`
+    );
+
+    setIsPreloading(true);
+    const failedUrls = await preloadAssets(assetUrls, setPreloadProgress);
+    if (failedUrls.length > 0) {
+      console.warn(`Could not preload ${failedUrls.length} assets; the game will load them on demand.`);
+    }
+    setIsPreloading(false);
+
     setSelectedGenerations(generationsToUse);
     setGameStarted(true);
   };
@@ -295,14 +315,16 @@ function StartScreen() {
       <button 
         className={startButtonClass}
         onClick={handleStartGame}
-        disabled={isStartButtonDisabled()}
+        disabled={isStartButtonDisabled() || isPreloading}
       >
-        Start Game
-        <img 
-          src={gifSrc} 
-          alt={hardcoreMode ? "Darkrai" : "Chatot"} 
-          className={gifClass}
-        />
+        {isPreloading ? `Loading assets... ${preloadProgress}%` : 'Start Game'}
+        {!isPreloading && (
+          <img
+            src={gifSrc}
+            alt={hardcoreMode ? "Darkrai" : "Chatot"}
+            className={gifClass}
+          />
+        )}
       </button>
       {error && <p className="error-message">{error}</p>}
       <footer className="start-screen-footer">
@@ -310,6 +332,7 @@ function StartScreen() {
           Made with ❤️ by <strong>David Sarrat González</strong>
         </a>
       </footer>
+      <LegalNotice />
     </div>
   );
 }

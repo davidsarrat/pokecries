@@ -3,7 +3,7 @@ import React from 'react';
 function LegalNotice() {
   return (
     <details className="legal-notice">
-      <summary>Legal<span className="legal-summary-extra"> &amp; credits</span></summary>
+      <summary>Legal information</summary>
       <div className="legal-notice-content">
         <p><strong>Unofficial, non-commercial fan project.</strong></p>
         <p>
@@ -21,6 +21,13 @@ function LegalNotice() {
           Pokémon data references, sprites, and cries are provided by{' '}
           <a href="https://pokeapi.co/" target="_blank" rel="noopener noreferrer">PokéAPI</a>.
           {' '}Pokémon and Pokémon character names are trademarks of Nintendo.
+        </p>
+        <p>
+          Generation menu icons are hosted by{' '}
+          <a href="https://www.wikidex.net/" target="_blank" rel="noopener noreferrer">WikiDex</a>.
+          {' '}The Pocket Monk typeface is by{' '}
+          <a href="https://chequered.ink/" target="_blank" rel="noopener noreferrer">Chequered Ink</a>
+          {' '}and is used under its non-commercial terms.
         </p>
         <p>
           <a href="https://github.com/davidsarrat/pokecries" target="_blank" rel="noopener noreferrer">Source code</a>

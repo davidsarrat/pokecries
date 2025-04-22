@@ -71,7 +71,6 @@ function GameOverScreen({ stats, failedPokemon, onPlayAgain, selectedGameMode, s
                 key={pokemon.id}
                 pokemon={pokemon}
                 onClick={() => playPokemonCry(pokemon.id)}
-                isVisible={true}
                 isAnimating={playingPokemonId === pokemon.id}
                 isGameOver={true}
               />

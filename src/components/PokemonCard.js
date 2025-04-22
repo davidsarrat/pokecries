@@ -7,12 +7,8 @@ const PokemonCard = React.memo(function PokemonCard({
   onClick, 
   isAnimating, 
   isCorrect, 
-  isVisible, 
   isGameOver, 
-  totalAvailablePokemon, 
-  allShiny,
-  limitedAnswers,
-  numberOfAnswers
+  allShiny
 }) {
   const [isShaking, setIsShaking] = useState(false);
   const [isTapping, setIsTapping] = useState(false);
@@ -30,7 +26,6 @@ const PokemonCard = React.memo(function PokemonCard({
 
   const cardClassName = `
     pokemon-card 
-    ${isVisible ? '' : 'hidden'} 
     ${isShaking ? 'shake-animation' : ''}
     ${isTapping ? 'tap-animation' : ''}
   `;
@@ -40,7 +35,7 @@ const PokemonCard = React.memo(function PokemonCard({
   return (
     <div 
       className={cardClassName}
-      onClick={isVisible || isGameOver ? handleClick : undefined}
+      onClick={handleClick}
     >
       <img 
         src={spritePath} 

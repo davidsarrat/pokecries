@@ -51,10 +51,6 @@
   }
 }
 
-.pokemon-card.hidden {
-  display: none;
-}
-
 @media (max-width: 576px) {
   .pokemon-card {
     height: 110px;

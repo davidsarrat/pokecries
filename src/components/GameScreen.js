@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import PokemonGrid from './PokemonGrid';
 import Navbar from './Navbar';
 import GameOverScreen from './GameOverScreen';
@@ -54,8 +54,6 @@ function GameScreen({
   const [timeLeftMs, setTimeLeftMs] = useState((timedRunSettings.minutes * 60 + timedRunSettings.seconds) * 1000);
   const [timeGained, setTimeGained] = useState(0);
   const [timeLost, setTimeLost] = useState(0);
-  const [navbarHeight, setNavbarHeight] = useState(0);
-  
   const [gameStartTime, setGameStartTime] = useState(null);
   const [endTime, setEndTime] = useState(null);
   const [gameDuration, setGameDuration] = useState(0);
@@ -75,8 +73,6 @@ function GameScreen({
   const updateInProgress = useRef(false);
   const [isGameReady, setIsGameReady] = useState(true);
 
-  const memoizedPokemonList = useMemo(() => pokemonList, [pokemonList]);
-
   const resetSearch = useCallback(() => {
     if (navbarRef.current && navbarRef.current.getSearchTerm() !== '') {
       navbarRef.current.resetSearch();
@@ -84,7 +80,7 @@ function GameScreen({
     }
   }, [pokemonList]);
 
-  const showToast = (content, type) => {
+  const showToast = useCallback((content, type) => {
     const existingToasts = document.getElementsByClassName('Toastify__toast');
     for (let i = 0; i < existingToasts.length; i++) {
       existingToasts[i].style.display = 'none';
@@ -103,7 +99,7 @@ function GameScreen({
       onMouseEnter: toast.dismiss,
       className: `custom-toast ${type === 'success' ? 'correct-toast' : 'incorrect-toast'}`,
     });
-  };
+  }, []);
 
   const endGame = useCallback((addCurrentToFailed = false) => {
     if (addCurrentToFailed && gameState.currentPokemon) {
@@ -117,7 +113,6 @@ function GameScreen({
     if (gameStartTime) {
       const duration = currentEndTime - gameStartTime;
       setGameDuration(duration);
-      console.log(`Game ended. Duration: ${Math.floor(duration / 1000)} seconds`);
     }
     
     if (audioRef.current) {
@@ -137,17 +132,10 @@ function GameScreen({
     
     if (!pokemonToPlay || isGameFinished) return;
     
-    console.log("Playing cry for:", pokemonToPlay.name, "isPlaying:", isPlaying, "isAudioPlaying:", isAudioPlaying.current);
-    
     if (audioRef.current) {
-      console.log("Stopping existing audio");
       audioRef.current.pause();
       audioRef.current.src = '';
       audioRef.current = null;
-    }
-    
-    if (isAudioPlaying.current) {
-      console.log("Already playing audio, clearing flags first");
     }
     
     isAudioPlaying.current = false;
@@ -161,13 +149,11 @@ function GameScreen({
       }
       
       const audioPath = pokemonCryUrl(pokemonToPlay.id);
-      console.log("Playing audio:", audioPath);
       
       const audio = new Audio(audioPath);
       audioRef.current = audio;
       
       const handleEnded = () => {
-        console.log("Audio ended");
         setIsPlaying(false);
         isAudioPlaying.current = false;
         if (isAutoplay) {
@@ -192,7 +178,7 @@ function GameScreen({
     };
     
     setTimeout(playAudio, 50);
-  }, [gameState.currentPokemon, isGameFinished, isPlaying]);
+  }, [gameState.currentPokemon, isGameFinished]);
 
   const getRandomPokemon = useCallback(() => {
     if (selectedGameMode === 'dontRepeatPokemon') {
@@ -243,8 +229,6 @@ function GameScreen({
 
   const initializeGame = useCallback(() => {
     if (isGameInitialized) return;
-
-    console.log("Initializing game");
     
     setIsGameInitialized(true);
     
@@ -292,7 +276,6 @@ function GameScreen({
         setFilteredPokemonList(initialVisiblePokemon);
         
         if (audioRef.current) {
-          console.log("Stopping existing audio");
           audioRef.current.pause();
           audioRef.current.src = '';
           audioRef.current = null;
@@ -300,7 +283,6 @@ function GameScreen({
         isAudioPlaying.current = false;
         
         audioTriggered = true;
-        console.log("Playing first Pokémon cry:", firstPokemon.name);
         
         setIsAutoPlaying(true);
         
@@ -308,7 +290,6 @@ function GameScreen({
         
         audio.addEventListener('canplaythrough', () => {
           playCurrentCry(firstPokemon, true);
-          console.log("Game fully loaded, starting timer");
           setIsGameFullyLoaded(true);
         });
         
@@ -320,13 +301,10 @@ function GameScreen({
         audio.load();
       }
     });
-  }, [selectedGenerations, selectedGameMode, selectVisiblePokemon, playCurrentCry]);
+  }, [isGameInitialized, selectedGenerations, selectedGameMode, selectVisiblePokemon, playCurrentCry]);
 
   useEffect(() => {
     if (!didInitialize.current) {
-      console.log("Mounting component, starting game initialization");
-      console.log("Selected generations on mount:", selectedGenerations);
-      
       if (!selectedGenerations || selectedGenerations.length === 0) {
         console.error("No generations selected! Using gen1 as fallback");
         const generationsToUse = ['gen1'];
@@ -339,7 +317,7 @@ function GameScreen({
       
       initializeGame();
     }
-  }, []);
+  }, [initializeGame, selectedGenerations, setSelectedGenerations]);
 
   const updateVisiblePokemon = useCallback((nextPokemon) => {
     if (updateInProgress.current) return;
@@ -407,7 +385,6 @@ function GameScreen({
 
   // Add timestamp references to track time more precisely
   const startTimeRef = useRef(null);
-  const endTimeRef = useRef(null);
   const lastTickRef = useRef(null);
   const remainingTimeRef = useRef(null);
 
@@ -420,8 +397,6 @@ function GameScreen({
     }
     
     if (isGameFullyLoaded && timedRun && !isGameFinished) {
-      console.log("Starting timed run timer with precise timing");
-      
       // Initialize the timer only once at the beginning
       if (!gameStartTime) {
         const now = Date.now();
@@ -436,7 +411,6 @@ function GameScreen({
         // Set the visible time display
         setTimeLeftMs(totalTimeMs);
         
-        console.log(`Game started at: ${new Date(now).toISOString()}, Initial time: ${totalTimeMs/1000}s`);
       }
       
       // Use a more precise timer that calculates actual elapsed time
@@ -461,7 +435,6 @@ function GameScreen({
             // Make sure we only end the game once
             setTimeout(() => {
               if (!isGameFinished) {
-                console.log("Time's up! Ending game.");
                 endGame(true);
               }
             }, 0);
@@ -481,20 +454,17 @@ function GameScreen({
   // Create functions to adjust time with precise control
   const addTime = useCallback((milliseconds) => {
     if (remainingTimeRef.current !== null) {
-      const oldTime = remainingTimeRef.current;
       remainingTimeRef.current = remainingTimeRef.current + milliseconds;
       
       // Update the visible time immediately
       const displayTime = Math.ceil(remainingTimeRef.current / 1000) * 1000;
       setTimeLeftMs(displayTime);
       
-      console.log(`Added ${milliseconds/1000}s: ${oldTime/1000}s → ${remainingTimeRef.current/1000}s (display: ${displayTime/1000}s)`);
     }
   }, []);
 
   const subtractTime = useCallback((milliseconds) => {
     if (remainingTimeRef.current !== null) {
-      const oldTime = remainingTimeRef.current;
       remainingTimeRef.current = Math.max(0, remainingTimeRef.current - milliseconds);
       
       // Update the visible time immediately
@@ -502,7 +472,6 @@ function GameScreen({
       setTimeLeftMs(displayTime);
       
       const willEndGame = remainingTimeRef.current <= 0;
-      console.log(`Subtracted ${milliseconds/1000}s: ${oldTime/1000}s → ${remainingTimeRef.current/1000}s (display: ${displayTime/1000}s), Will end: ${willEndGame}`);
       
       return willEndGame;
     }
@@ -523,7 +492,7 @@ function GameScreen({
 
     setAnimatingCards(new Map([[clickedPokemon.id, { isCorrect }]]));
     
-    const animationTimer = setTimeout(() => {
+    setTimeout(() => {
       setAnimatingCards(new Map());
     }, 500);
 
@@ -535,7 +504,7 @@ function GameScreen({
         addTime(gainTimeMs);
         setTimeGained(gainTimeMs);
         
-        const gainTimeTimer = setTimeout(() => setTimeGained(0), 500);
+        setTimeout(() => setTimeGained(0), 500);
       }
       
       toast.dismiss();
@@ -588,7 +557,7 @@ function GameScreen({
         const willEndGame = subtractTime(loseTimeMs);
         setTimeLost(loseTimeMs);
         
-        const loseTimeTimer = setTimeout(() => setTimeLost(0), 500);
+        setTimeout(() => setTimeLost(0), 500);
         
         // End the game if time ran out
         if (willEndGame) {
@@ -738,20 +707,12 @@ function GameScreen({
   };
 
   useEffect(() => {
-    if (isGameInitialized && gameState.currentPokemon) {
-      console.log("EFFECT SKIP - Evitando reproducción duplicada en el useEffect");
-    }
-  }, [isGameInitialized, gameState.currentPokemon, playCurrentCry]);
-
-  useEffect(() => {
     if (isGameFullyLoaded && !timedRun && !isGameFinished) {
-      console.log("Starting normal timer");
       setTimer(0);
       
       if (!gameStartTime) {
         const startTime = Date.now();
         setGameStartTime(startTime);
-        console.log(`Game started at: ${new Date(startTime).toISOString()}`);
       }
       
       const intervalId = setInterval(() => {
@@ -777,12 +738,6 @@ function GameScreen({
   }, [handleKeyPress]);
 
   useEffect(() => {
-    if (navbarRef.current) {
-      setNavbarHeight(navbarRef.current.offsetHeight);
-    }
-  }, [navbarRef]);
-
-  useEffect(() => {
     scrollToTop();
   }, []);
 
@@ -805,58 +760,6 @@ function GameScreen({
         shinyAudioRef.current.src = '';
         shinyAudioRef.current = null;
       }
-    };
-  }, []);
-
-  useEffect(() => {
-    const cleanupTimers = [];
-    
-    return () => {
-      cleanupTimers.forEach(timer => clearTimeout(timer));
-    };
-  }, []);
-
-  useEffect(() => {
-    const styleSheet = document.createElement('style');
-    styleSheet.type = 'text/css';
-    styleSheet.innerHTML = `
-      .loading-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: rgba(0, 0, 0, 0.7);
-        z-index: 1000;
-      }
-      .loading-content {
-        text-align: center;
-        padding: 20px 30px;
-        background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-      }
-      .loading-spinner {
-        width: 50px;
-        height: 50px;
-        margin: 0 auto 20px;
-        border: 5px solid #f3f3f3;
-        border-top: 5px solid #3498db;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    `;
-    document.head.appendChild(styleSheet);
-    
-    return () => {
-      document.head.removeChild(styleSheet);
     };
   }, []);
 
@@ -902,11 +805,10 @@ function GameScreen({
   }
 
   return (
-    <div className="game-container" style={{ paddingTop: `${navbarHeight}px` }}>
+    <div className="game-container">
       <Navbar 
         ref={navbarRef}
         onPlayCry={() => {
-          console.log("Play cry button clicked");
           if (isAudioPlaying.current || isPlaying) {
             if (audioRef.current) {
               audioRef.current.pause();
@@ -942,16 +844,12 @@ function GameScreen({
       <div className="game-content">
         <div className="game-screen">
           <PokemonGrid 
-            pokemonList={memoizedPokemonList}
+            pokemonList={pokemonList}
             visiblePokemonIds={filteredPokemonList.map(p => p.id)}
             onPokemonClick={handlePokemonClick}
-            currentPokemon={gameState.currentPokemon}
             animatingCards={animatingCards}
             isGameOver={false}
-            totalAvailablePokemon={memoizedPokemonList.length}
             allShiny={allShiny}
-            limitedAnswers={limitedAnswers}
-            numberOfAnswers={numberOfAnswers}
           />
         </div>
       </div>

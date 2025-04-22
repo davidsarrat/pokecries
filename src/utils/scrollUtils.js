@@ -3,7 +3,7 @@ export const scrollToTop = () => {
     window.scrollTo({
       top: 0,
       left: 0,
-      behavior: 'instant'
+      behavior: 'auto'
     });
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
